@@ -1,0 +1,46 @@
+{
+	"data": [
+		{
+			"id": "672a8c70-a1cf-4dea-b4f5-f49fa3048cdb",
+			"name": "parent",
+			"value": 100,
+			"root": true
+		},
+		{
+			"id": "68671021-89bf-4332-945e-521f9919a5f8",
+			"name": "child 1",
+			"value": 40,
+			"parent": "672a8c70-a1cf-4dea-b4f5-f49fa3048cdb"
+		},
+		{
+			"id": "6013414c-68a0-454a-848f-ddce305859ec",
+			"name": "child 2",
+			"value": 60,
+			"parent": "672a8c70-a1cf-4dea-b4f5-f49fa3048cdb"
+		},
+		{
+			"id": "68dc17b2-2e63-47e1-a0d6-e2b0bcd1b362",
+			"name": "child 3",
+			"value": 80,
+			"parent": "672a8c70-a1cf-4dea-b4f5-f49fa3048cdb"
+		},
+		{
+			"id": "58dc17b2-2e63-47e1-a0d6-e2b0bcd1b364",
+			"name": "child 3",
+			"value": 250,
+			"parent": "672a8c70-a1cf-4dea-b4f5-f49fa3048cdb"
+		},
+		{
+			"id": "0de16138-56c6-41a9-90d2-d50d81cb719b",
+			"name": "child 3",
+			"value": 20,
+			"parent": "58dc17b2-2e63-47e1-a0d6-e2b0bcd1b364"
+		},
+		{
+			"id": "877793fe-ca7a-43c3-8c2a-8aa0ecf265a3",
+			"name": "child 3",
+			"value": 40,
+			"parent": "58dc17b2-2e63-47e1-a0d6-e2b0bcd1b364"
+		}
+	]
+}
