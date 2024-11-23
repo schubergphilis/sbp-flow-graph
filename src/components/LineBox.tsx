@@ -1,25 +1,73 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
+import { getNodeOffset, getParentNodePosition } from '../helpers/AutoPosition'
+import { useDidMountEffect } from '../hooks/UseDidMountEffect'
+import LineModel from '../models/LineModel'
 import Line from './Line'
+import { GlobalState } from './Provider'
 
 const LineBox = () => {
-	const [lines, setLines] = useState<SVGElement[]>([])
+	const { state } = useContext(GlobalState)
+
+	const [lines, setLines] = useState<LineModel[]>([])
+	const [draggedLines, setDraggedLines] = useState<LineModel[]>([])
+
 	const timerRef = useRef<NodeJS.Timeout>()
+	const updateRef = useRef<NodeJS.Timeout>()
+
+	const getLineData = useCallback((nodes: SVGElement[]): LineModel[] => {
+		return nodes
+			.filter((node) => node.getAttribute('data-node-root') !== 'true')
+			.map<LineModel>((node) => ({
+				start: getNodeOffset(node),
+				end: getParentNodePosition(node),
+				id: node.getAttribute('data-node-id') as string,
+				parentId: node.getAttribute('data-node-parent') as string,
+				text: `${node.getAttribute('data-node-id') as string}`
+			}))
+	}, [])
 
 	const getLines = useCallback((): void => {
 		const nodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
-		const lines = nodes.filter((node) => node.getAttribute('data-node-root') !== 'true')
+		const lines = getLineData(nodes)
 		setLines(lines)
-	}, [])
+	}, [getLineData])
+
+	const updateLines = useCallback(() => {
+		console.log('-----Interval', draggedLines.length)
+		const allBoxes = [...new Set(draggedLines.flatMap(({ id, parentId }) => [id, parentId]))]
+
+		const query = allBoxes.map((id) => `[data-node-id=${id}]`).join(', ')
+		const boxList = [...(document.querySelectorAll<SVGElement>(query) ?? [])]
+
+		const list = getLineData(boxList)
+
+		const items = lines.map((line) => ({ ...line, ...list.find(({ id }) => id === line.id) }))
+
+		setLines(items)
+	}, [draggedLines, getLineData, lines])
+
+	useDidMountEffect(() => {
+		const items = lines.filter(({ id, parentId }) => id === state.dragElement || parentId === state.dragElement)
+
+		setDraggedLines(items)
+	}, [state.dragElement])
 
 	useEffect(() => {
-		timerRef.current = setTimeout(getLines, 1)
+		timerRef.current = setTimeout(getLines, 2)
 	}, [getLines])
+
+	useEffect(() => {
+		if (draggedLines.length > 0) {
+			updateRef.current = setInterval(updateLines, 20)
+		}
+		return () => clearInterval(updateRef.current)
+	}, [draggedLines, updateLines])
 
 	return (
 		<Container>
-			{lines.map((node, index) => (
-				<Line key={index} node={node} />
+			{lines.map((data, index) => (
+				<Line key={index} data={data} />
 			))}
 		</Container>
 	)

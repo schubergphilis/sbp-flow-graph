@@ -1,18 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { getNodeOffset } from '../helpers/AutoPosition'
+import { GlobalState } from './Provider'
 
 interface Props {
 	isDebug?: boolean
 }
 
 const Debug = ({ isDebug = false }: Props) => {
-	const timerRef = useRef<NodeJS.Timeout>()
-	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
+	const { state } = useContext(GlobalState)
 
-	const testData = useCallback(() => {
-		const nodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
-		const list = nodes.map((node, index) => {
+	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
+	const [selectedNode, setSelectedNode] = useState<JSX.Element>()
+
+	const timerRef = useRef<NodeJS.Timeout>()
+	const updateRef = useRef<NodeJS.Timeout>()
+
+	const testData = useCallback((nodes: SVGElement[]): JSX.Element[] => {
+		return nodes.map((node, index) => {
 			const offset = getNodeOffset(node)
 
 			return (
@@ -52,17 +57,66 @@ const Debug = ({ isDebug = false }: Props) => {
 				</g>
 			)
 		})
-		setTestNodes(list)
 	}, [])
+
+	const getTestData = useCallback((): void => {
+		const allNodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
+		const list = testData(allNodes)
+		setTestNodes(list)
+	}, [testData])
+
+	const updateSelectedLines = useCallback(() => {
+		console.log('-----Interval')
+
+		const selectedNode = document.querySelector<SVGElement>(`[data-node-id=${state.dragElement}]`)
+
+		if (!selectedNode) return
+		const selected = testData([selectedNode])
+
+		setSelectedNode(selected[0])
+	}, [state.dragElement, testData])
+
+	const updateAllLines = useCallback(() => {
+		const allNodes = [
+			...(document.querySelectorAll<SVGElement>(`[data-node]:not([data-node-id=${state.dragElement}])`) ?? [])
+		]
+
+		const all = testData(allNodes)
+
+		setTestNodes(all)
+	}, [state.dragElement, testData])
 
 	useEffect(() => {
 		if (!isDebug) return
-		timerRef.current = setTimeout(testData, 2)
-	}, [isDebug, testData])
+		timerRef.current = setTimeout(getTestData, 2)
+	}, [getTestData, isDebug, testData])
 
-	return isDebug && <Container>{testNodes}</Container>
+	useEffect(() => {
+		if (state.dragElement) {
+			updateAllLines()
+			updateRef.current = setInterval(updateSelectedLines, 20)
+		}
+		return () => clearInterval(updateRef.current)
+	}, [state.dragElement, updateAllLines, updateSelectedLines])
+
+	useEffect(() => {
+		if (state.dragElement) return
+		updateAllLines()
+	}, [state.dragElement, updateAllLines])
+
+	return (
+		isDebug && (
+			<Container>
+				{selectedNode}
+				{testNodes}
+			</Container>
+		)
+	)
 }
 
-const Container = styled.g``
+const Container = styled.g`
+	user-select: none;
+	pointer-events: none;
+`
 
 export default Debug

@@ -14,7 +14,7 @@ const FlowNode = ({ data: { id, value, root, parent, type } }: Props) => {
 				data-node
 				data-node-root={root}
 				data-node-id={`X${id}`}
-				data-node-parent={`X${parent}`}
+				data-node-parent={parent ? `X${parent}` : undefined}
 				data-node-type={type}
 				cx="-1000"
 				cy="-1000"

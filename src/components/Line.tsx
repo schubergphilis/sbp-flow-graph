@@ -1,15 +1,13 @@
 import styled from 'styled-components'
-import { getNodeOffset, getParentNodePosition } from '../helpers/AutoPosition'
+import LineModel from '../models/LineModel'
 
 interface Props {
-	node: SVGElement
+	data: LineModel
 }
 
-const Line = ({ node }: Props) => {
-	const offset = getNodeOffset(node)
-	const parent = getParentNodePosition(node)
-	const angle = (Math.atan2(offset.x - parent.x, offset.y - parent.y) * 180) / Math.PI
-	// const textAngle = angle >= 0 && angle <= 45 ? angle : angle > 45 && angle <= 255 ? angle - 45 : 0
+const Line = ({ data: { start, end, text } }: Props) => {
+	const angle = (Math.atan2(start.x - end.x, start.y - end.y) * 180) / Math.PI
+
 	const textAngle =
 		angle < 0 && angle <= -135
 			? angle - 180
@@ -20,21 +18,21 @@ const Line = ({ node }: Props) => {
 					: angle > 0 && angle <= 45
 						? angle
 						: 0
-	// console.log(angle)
+
 	return (
 		<Container>
 			<text
-				x={offset.x}
-				y={offset.y}
+				x={start.x}
+				y={start.y}
 				textAnchor="middle"
 				dominantBaseline="central"
-				transform={`rotate(${textAngle}, ${offset.x}, ${offset.y})`}
+				transform={`rotate(${textAngle}, ${start.x}, ${start.y})`}
 				fillOpacity={0}>
-				Welcome
+				{text}
 			</text>
 
 			<path
-				d={`M${parent.x} ${parent.y} L${offset.x} ${offset.y}`}
+				d={`M${end.x} ${end.y} L${start.x} ${start.y}`}
 				stroke={`hsl(${Math.random() * 360}, 50%, 50%)`}
 				strokeWidth={1}
 				strokeDasharray={4}
@@ -45,6 +43,7 @@ const Line = ({ node }: Props) => {
 }
 
 const Container = styled.g`
+	pointer-events: none;
 	& > text {
 		user-select: none;
 	}

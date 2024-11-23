@@ -3,8 +3,11 @@ import styled from 'styled-components'
 import { AutoPosition } from '../helpers/AutoPosition'
 import { ProcessModel } from '../models/ProcessModel'
 import Debug from './Debug'
+import Drag from './Drag'
 import FlowNode from './FlowNode'
 import LineBox from './LineBox'
+import Pan from './Pan'
+import Provider from './Provider'
 import Zoom from './Zoom'
 
 interface Props {
@@ -18,29 +21,28 @@ const Flow = ({ data }: Props) => {
 	}, [])
 
 	return (
-		<Container>
-			<Zoom>
-				<SvgCanvast>
-					{data
-						//.slice(0, 2)
-						//.reverse()
-						.map((node, index) => (
-							<FlowNode key={index} data={node} />
-						))}
+		<Provider>
+			<Pan>
+				<Zoom>
+					<Drag>
+						<SvgCanvast>
+							{data
+								//.slice(0, 2)
+								//.reverse()
+								.map((node, index) => (
+									<FlowNode key={index} data={node} />
+								))}
 
-					<LineBox />
-					<Debug isDebug={false} />
-				</SvgCanvast>
-			</Zoom>
-		</Container>
+							<LineBox />
+							<Debug isDebug={true} />
+						</SvgCanvast>
+					</Drag>
+				</Zoom>
+			</Pan>
+		</Provider>
 	)
 }
 
-const Container = styled.div`
-	width: 100%;
-	height: 100%;
-	overflow: visible;
-`
 const SvgCanvast = styled.svg`
 	width: 100%;
 	height: 100%;
