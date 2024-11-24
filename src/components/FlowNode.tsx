@@ -28,6 +28,7 @@ const Container = styled.g`
 	& > circle {
 		transform-origin: top left;
 		transition: fill-opacity 0.5s ease-in-out;
+		pointer-events: auto !important;
 	}
 `
 

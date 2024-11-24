@@ -36,9 +36,6 @@ const Drag = ({ children }: Props) => {
 			// If command is pressed, underlying FlowDrag will take over
 			if (ev.metaKey) return
 
-			ev.stopPropagation()
-			ev.preventDefault()
-
 			if (ev.button !== 0) return
 
 			if (selectedElement !== '' && selectedElement !== undefined) return
@@ -46,6 +43,9 @@ const Drag = ({ children }: Props) => {
 			const target = ev.target as SVGElement
 
 			if (!target.hasAttribute('data-node')) return
+
+			ev.stopPropagation()
+			ev.preventDefault()
 
 			setTarget(target)
 

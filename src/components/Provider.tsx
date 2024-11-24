@@ -15,7 +15,7 @@ export const Provider = ({ children }: Props) => {
 
 	return (
 		<GlobalState.Provider value={{ state, setState }}>
-			<Container>{children}</Container>
+			<Container data-container>{children}</Container>
 		</GlobalState.Provider>
 	)
 }
@@ -25,6 +25,10 @@ const Container = styled.div`
 	height: 100%;
 	overflow: hidden;
 	cursor: grab;
+
+	& * {
+		pointer-events: none !important;
+	}
 `
 
 export default Provider

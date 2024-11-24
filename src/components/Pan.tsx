@@ -10,7 +10,7 @@ const Pan = ({ children }: Props) => {
 	//const position =  useAppSelector<BoxPositionModel | undefined>((state) => getPositionState(state, 'root'))
 	const selectedElement = undefined //useAppSelector<string>(getSelectedElementState)
 
-	const [isDragging, setIsDragging] = useState<boolean>(false)
+	const [isPanning, setIsPanning] = useState<boolean>(false)
 	const [pageOffset, setPageOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [boxOffset, setBoxOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
@@ -24,7 +24,7 @@ const Pan = ({ children }: Props) => {
 			posRef.current = data
 			_setPos(data)
 		},
-		[posRef, pos]
+		[posRef]
 	)
 
 	const handleMouseDown = useCallback((ev: MouseEvent) => {
@@ -33,13 +33,11 @@ const Pan = ({ children }: Props) => {
 
 		if (ev.button !== 0) return
 
-		setIsDragging(true)
+		setIsPanning(true)
 
-		const bounding = panRef.current?.getBoundingClientRect()
-		const offsetX = bounding?.x ?? 0
-		const offsetY = bounding?.y ?? 0
+		const offset = panRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
 
-		setBoxOffset({ x: offsetX, y: offsetY })
+		setBoxOffset({ x: offset.x, y: offset.y })
 		setMouseOffset({ x: ev.offsetX, y: ev.offsetY })
 	}, [])
 
@@ -48,7 +46,11 @@ const Pan = ({ children }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
-			panRef.current?.style.removeProperty('transform-origin')
+			// panRef.current?.style.removeProperty('transform-origin')
+
+			const target = ev.target as HTMLDivElement
+
+			if (!target.hasAttribute('data-container')) return
 
 			setPos({
 				y: boxOffset.y + (ev.offsetY - mouseOffset.y) - pageOffset.y,
@@ -59,7 +61,7 @@ const Pan = ({ children }: Props) => {
 	)
 
 	const handleMoveEnd = useCallback(() => {
-		setIsDragging(false)
+		setIsPanning(false)
 
 		panRef.current?.removeEventListener('mousemove', handleMove)
 		panRef.current?.removeEventListener('mouseup', handleMoveEnd)
@@ -90,7 +92,7 @@ const Pan = ({ children }: Props) => {
 	}, [handleMouseDown])
 
 	useLayoutEffect(() => {
-		if (!isDragging) return
+		if (!isPanning) return
 		document.addEventListener('mousemove', handleMove)
 		document.addEventListener('mouseup', handleMoveEnd)
 
@@ -98,11 +100,10 @@ const Pan = ({ children }: Props) => {
 			document.removeEventListener('mousemove', handleMove)
 			document.removeEventListener('mouseup', handleMoveEnd)
 		}
-	}, [isDragging, handleMove, handleMoveEnd])
+	}, [isPanning, handleMove, handleMoveEnd])
 
 	return (
 		<Container
-			data-container
 			ref={panRef}
 			style={{
 				transform: `translate(${pos.x}px, ${pos.y}px)`
