@@ -25,21 +25,21 @@ export const AutoPosition = (spacing: number = 25): void => {
 	})
 }
 
-export const getParentNodePosition = (node: SVGElement): OffsetModel => {
+export const getParentNodePosition = (node: SVGElement, offset: PositionModel = { x: 0, y: 0 }): OffsetModel => {
 	const parentId = node.getAttribute('data-node-parent') as string
 	const parent = document.querySelector<SVGElement>(`[data-node-id=${parentId}]`)
 
-	return getNodeOffset(parent)
+	return getNodePosition(parent, offset)
 }
 
-export const getNodeOffset = (node: SVGElement | null): OffsetModel => {
-	const offset = node?.getBoundingClientRect() ?? { width: 0, height: 0, x: 0, y: 0 }
+export const getNodePosition = (node: SVGElement | null, offset: PositionModel = { x: 0, y: 0 }): OffsetModel => {
+	const pos = node?.getBoundingClientRect() ?? { width: 0, height: 0, x: 0, y: 0 }
 
 	return {
-		width: offset.width,
-		height: offset.height,
-		x: offset.x + offset.width / 2,
-		y: offset.y + offset.height / 2
+		width: pos.width,
+		height: pos.height,
+		x: pos.x + pos.width / 2 - offset.x,
+		y: pos.y + pos.height / 2 - offset.y
 	}
 }
 
@@ -62,14 +62,14 @@ const getParentChildList = (node: SVGElement): OffsetModel[] => {
 		...(document.querySelectorAll<SVGElement>(`[data-node-parent=${parentId}]:not([data-node-id=${nodeId}])`) ?? [])
 	]
 
-	return childList.map((child) => getNodeOffset(child))
+	return childList.map((child) => getNodePosition(child))
 }
 
 const getNodeChildList = (node: SVGElement): OffsetModel[] => {
 	const nodeId = node.getAttribute('data-node-id') as string
 	const childList = [...(document.querySelectorAll<SVGElement>(`[data-node-parent=${nodeId}]`) ?? [])]
 
-	return childList.map((child) => getNodeOffset(child))
+	return childList.map((child) => getNodePosition(child))
 }
 
 const calculatePosition = (node: SVGElement, spacing: number, viewport: OffsetModel): OffsetModel => {
@@ -119,7 +119,7 @@ const randomCirclePosition = (node: OffsetModel, parent: OffsetModel, spacing: n
 }
 
 const positionNode = (node: SVGElement, spacing: number): OffsetModel => {
-	const nodeOffset = getNodeOffset(node)
+	const nodeOffset = getNodePosition(node)
 	const parentOffset = getParentNodePosition(node)
 	const type = (node.getAttribute('data-node-type') ?? 'circle') as string
 

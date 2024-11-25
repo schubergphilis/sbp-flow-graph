@@ -1,8 +1,9 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { getNodeOffset, getParentNodePosition } from '../helpers/AutoPosition'
+import { getNodePosition, getParentNodePosition } from '../helpers/AutoPosition'
 import { useDidMountEffect } from '../hooks/UseDidMountEffect'
 import LineModel from '../models/LineModel'
+import PositionModel from '../models/PositionModel'
 import Line from './Line'
 import { GlobalState } from './Provider'
 
@@ -11,21 +12,32 @@ const LineBox = () => {
 
 	const [lines, setLines] = useState<LineModel[]>([])
 	const [draggedLines, setDraggedLines] = useState<LineModel[]>([])
+	const [offset, setOffset] = useState<PositionModel>({ x: 0, y: 0 })
 
 	const timerRef = useRef<NodeJS.Timeout>()
 	const updateRef = useRef<NodeJS.Timeout>()
 
-	const getLineData = useCallback((nodes: SVGElement[]): LineModel[] => {
-		return nodes
-			.filter((node) => node.getAttribute('data-node-root') !== 'true')
-			.map<LineModel>((node) => ({
-				start: getNodeOffset(node),
-				end: getParentNodePosition(node),
-				id: node.getAttribute('data-node-id') as string,
-				parentId: node.getAttribute('data-node-parent') as string,
-				text: `${node.getAttribute('data-node-id') as string}`
-			}))
+	const getPanOffset = useCallback(() => {
+		const offsetTarget = document?.querySelector<HTMLDivElement>('[data-pan]')
+
+		const offset = offsetTarget?.getBoundingClientRect() ?? { x: 0, y: 0 }
+		setOffset(offset)
 	}, [])
+
+	const getLineData = useCallback(
+		(nodes: SVGElement[]): LineModel[] => {
+			return nodes
+				.filter((node) => node.getAttribute('data-node-root') !== 'true')
+				.map<LineModel>((node) => ({
+					start: getNodePosition(node, offset),
+					end: getParentNodePosition(node, offset),
+					id: node.getAttribute('data-node-id') as string,
+					parentId: node.getAttribute('data-node-parent') as string,
+					text: `${node.getAttribute('data-node-id') as string}`
+				}))
+		},
+		[offset]
+	)
 
 	const getLines = useCallback((): void => {
 		const nodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
@@ -48,6 +60,8 @@ const LineBox = () => {
 	}, [draggedLines, getLineData, lines])
 
 	useDidMountEffect(() => {
+		getPanOffset()
+
 		const items = lines.filter(({ id, parentId }) => id === state.dragElement || parentId === state.dragElement)
 
 		setDraggedLines(items)

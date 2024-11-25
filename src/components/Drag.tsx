@@ -1,6 +1,6 @@
 import { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { getNodeOffset } from '../helpers/AutoPosition'
+import { getNodePosition } from '../helpers/AutoPosition'
 import PositionModel from '../models/PositionModel'
 import { GlobalState } from './Provider'
 
@@ -52,12 +52,12 @@ const Drag = ({ children }: Props) => {
 			const id = target?.getAttribute('data-node-id') ?? ''
 			console.log('--- Drag Start ---', id)
 
-			const boxOffset = getNodeOffset(target)
+			const boxOffset = getNodePosition(target)
 
 			setBoxOffset(boxOffset)
 			setMouseOffset({ x: ev.nativeEvent.offsetX, y: ev.nativeEvent.offsetY })
 
-			const offsetTarget = target?.closest<HTMLDivElement>('[data-container]')
+			const offsetTarget = target?.closest<HTMLDivElement>('[data-pan]')
 
 			const offset = offsetTarget?.getBoundingClientRect() ?? { x: 0, y: 0 }
 
@@ -74,8 +74,8 @@ const Drag = ({ children }: Props) => {
 			ev.preventDefault()
 
 			const pos: PositionModel = {
-				x: Math.round((boxOffset.x - offset.x + ev.clientX) / zoomLevel - mouseOffset.x),
-				y: Math.round((boxOffset.y - offset.y + ev.clientY) / zoomLevel - mouseOffset.y)
+				x: Math.round((boxOffset.x - offset.x + (ev.clientX - offset.x)) / zoomLevel - mouseOffset.x),
+				y: Math.round((boxOffset.y - offset.y + (ev.clientY - offset.y)) / zoomLevel - mouseOffset.y)
 			}
 
 			setPos(pos)

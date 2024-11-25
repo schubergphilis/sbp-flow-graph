@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { getNodeOffset } from '../helpers/AutoPosition'
+import { getNodePosition } from '../helpers/AutoPosition'
+import PositionModel from '../models/PositionModel'
 import { GlobalState } from './Provider'
 
 interface Props {
@@ -12,61 +13,67 @@ const Debug = ({ isDebug = false }: Props) => {
 
 	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
 	const [selectedNode, setSelectedNode] = useState<JSX.Element>()
+	const [offset, setOffset] = useState<PositionModel>({ x: 0, y: 0 })
+	const [isDragging, setIsDragging] = useState<boolean>(false)
 
 	const timerRef = useRef<NodeJS.Timeout>()
 	const updateRef = useRef<NodeJS.Timeout>()
 
-	const testData = useCallback((nodes: SVGElement[]): JSX.Element[] => {
-		return nodes.map((node, index) => {
-			const offset = getNodeOffset(node)
+	const getPanOffset = useCallback(() => {
+		const offsetTarget = document?.querySelector<HTMLDivElement>('[data-pan]')
 
-			return (
-				<g key={index}>
-					<text x={offset.x} y={offset.y - offset.height / 1.75} textAnchor="middle" dominantBaseline="central">
-						{offset.x} x {offset.y} / {offset.width}
-					</text>
-					<rect
-						width={offset.width}
-						height={offset.height}
-						x={offset.x - offset.width / 2}
-						y={offset.y - offset.height / 2}
-						stroke={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
-						fill="transparent"
-					/>
-					<path
-						d={`M${offset.x - offset.width / 2} ${offset.y - offset.height / 2} L${offset.x + offset.width / 2} ${offset.y + offset.height / 2}`}
-						stroke={`hsla(${Math.random() * 360}, 70%, 50%, 90%)`}
-						strokeWidth={1}
-						strokeDasharray={4}
-						fill="none"
-					/>
-					<path
-						d={`M${offset.x - offset.width / 2} ${offset.y} L${offset.x + offset.width / 2} ${offset.y}`}
-						stroke={`hsl(${Math.random() * 360}, 0%, 0%)`}
-						strokeWidth={1}
-						strokeDasharray={4}
-						fill="none"
-					/>
-					<path
-						d={`M${offset.x} ${offset.y - offset.height / 2} L${offset.x} ${offset.y + offset.height / 2}`}
-						stroke={`hsl(${Math.random() * 360}, 0%, 0%)`}
-						strokeWidth={1}
-						strokeDasharray={4}
-						fill="none"
-					/>
-				</g>
-			)
-		})
+		const offset = offsetTarget?.getBoundingClientRect() ?? { x: 0, y: 0 }
+		setOffset(offset)
 	}, [])
 
-	const getTestData = useCallback((): void => {
-		const allNodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
-		const list = testData(allNodes)
-		setTestNodes(list)
-	}, [testData])
+	const testData = useCallback(
+		(nodes: SVGElement[]): JSX.Element[] => {
+			return nodes.map((node, index) => {
+				const pos = getNodePosition(node, offset)
+
+				return (
+					<g key={index}>
+						<text x={pos.x} y={pos.y - pos.height / 1.75} textAnchor="middle" dominantBaseline="central">
+							{pos.x} x {pos.y} / {pos.width}
+						</text>
+						<rect
+							width={pos.width}
+							height={pos.height}
+							x={pos.x - pos.width / 2}
+							y={pos.y - pos.height / 2}
+							stroke={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
+							fill="transparent"
+						/>
+						<path
+							d={`M${pos.x - pos.width / 2} ${pos.y - pos.height / 2} L${pos.x + pos.width / 2} ${pos.y + pos.height / 2}`}
+							stroke={`hsla(${Math.random() * 360}, 70%, 50%, 90%)`}
+							strokeWidth={1}
+							strokeDasharray={4}
+							fill="none"
+						/>
+						<path
+							d={`M${pos.x - pos.width / 2} ${pos.y} L${pos.x + pos.width / 2} ${pos.y}`}
+							stroke={`hsl(${Math.random() * 360}, 0%, 0%)`}
+							strokeWidth={1}
+							strokeDasharray={4}
+							fill="none"
+						/>
+						<path
+							d={`M${pos.x} ${pos.y - pos.height / 2} L${pos.x} ${pos.y + pos.height / 2}`}
+							stroke={`hsl(${Math.random() * 360}, 0%, 0%)`}
+							strokeWidth={1}
+							strokeDasharray={4}
+							fill="none"
+						/>
+					</g>
+				)
+			})
+		},
+		[offset]
+	)
 
 	const updateSelectedLines = useCallback(() => {
-		console.log('-----Interval')
+		// console.log('-----Interval')
 
 		const selectedNode = document.querySelector<SVGElement>(`[data-node-id=${state.dragElement}]`)
 
@@ -84,25 +91,31 @@ const Debug = ({ isDebug = false }: Props) => {
 		const all = testData(allNodes)
 
 		setTestNodes(all)
-	}, [state.dragElement, testData])
+	}, [state.dragElement, testData, setTestNodes])
 
 	useEffect(() => {
 		if (!isDebug) return
-		timerRef.current = setTimeout(getTestData, 2)
-	}, [getTestData, isDebug, testData])
+		timerRef.current = setTimeout(updateAllLines, 2)
+	}, [updateAllLines, isDebug, testData])
 
 	useEffect(() => {
-		if (state.dragElement) {
+		getPanOffset()
+		setIsDragging(state.dragElement !== undefined)
+	}, [getPanOffset, state.dragElement])
+
+	useEffect(() => {
+		if (isDragging) {
 			updateAllLines()
 			updateRef.current = setInterval(updateSelectedLines, 20)
 		}
 		return () => clearInterval(updateRef.current)
-	}, [state.dragElement, updateAllLines, updateSelectedLines])
+	}, [isDragging, updateAllLines, updateSelectedLines, getPanOffset])
 
 	useEffect(() => {
-		if (state.dragElement) return
+		if (isDragging) return
 		updateAllLines()
-	}, [state.dragElement, updateAllLines])
+		setSelectedNode(undefined)
+	}, [isDragging, updateAllLines])
 
 	return (
 		isDebug && (

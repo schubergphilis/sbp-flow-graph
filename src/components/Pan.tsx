@@ -104,6 +104,7 @@ const Pan = ({ children }: Props) => {
 
 	return (
 		<Container
+			data-pan
 			ref={panRef}
 			style={{
 				transform: `translate(${pos.x}px, ${pos.y}px)`
