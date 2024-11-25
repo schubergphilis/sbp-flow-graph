@@ -49,28 +49,29 @@ const LineBox = () => {
 
 	const updateSelectedLines = useCallback(() => {
 		// console.log('-----Interval')
-		const selectedNodes = [
-			...(document.querySelectorAll<SVGElement>(
-				`[data-node-id=${state.dragElement}],[data-node-parent=${state.dragElement}]`
-			) ?? [])
-		]
+
+		const regex = state.isClusterDrag
+			? '[data-node]'
+			: `[data-node-id=${state.dragElement}],[data-node-parent=${state.dragElement}]`
+
+		const selectedNodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		if (!selectedNodes) return
 		const selected = getLineData(selectedNodes)
 		setDraggedLines(selected)
-	}, [state.dragElement, getLineData])
+	}, [state.isClusterDrag, state.dragElement, getLineData])
 
 	const updateAllLines = useCallback(() => {
-		const nodes = [
-			...(document.querySelectorAll<SVGElement>(
-				`[data-node]:not([data-node-id=${state.dragElement}],[data-node-parent=${state.dragElement}])`
-			) ?? [])
-		]
+		const regex = state.isClusterDrag
+			? '[dummy-nothing]'
+			: `[data-node]:not([data-node-id=${state.dragElement}],[data-node-parent=${state.dragElement}])`
+
+		const nodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		const allNodes = getLineData(nodes)
 
 		setLines(allNodes)
-	}, [state.dragElement, getLineData])
+	}, [state.isClusterDrag, state.dragElement, getLineData])
 
 	useEffect(() => {
 		timerRef.current = setTimeout(updateAllLines, 2)

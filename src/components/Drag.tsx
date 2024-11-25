@@ -1,4 +1,4 @@
-import { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useLayoutEffect, useState } from 'react'
 import styled from 'styled-components'
 import { getNodePosition } from '../helpers/AutoPosition'
 import PositionModel from '../models/PositionModel'
@@ -14,28 +14,13 @@ const Drag = ({ children }: Props) => {
 	const zoomLevel = 1
 	const selectedElement = undefined
 
-	const [pos, _setPos] = useState<PositionModel>({ x: 0, y: 0 })
 	const [offset, setOffset] = useState<PositionModel>({ x: 0, y: 0 })
-	const [boxOffset, setBoxOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
 
-	const [target, setTarget] = useState<SVGElement>()
-
-	const posRef = useRef<PositionModel>(pos)
-
-	const setPos = useCallback(
-		(data: PositionModel) => {
-			posRef.current = data
-			_setPos(data)
-		},
-		[posRef, _setPos]
-	)
+	const [targetList, setTargetList] = useState<SVGElement[]>()
 
 	const handleMouseDown = useCallback(
 		(ev: React.MouseEvent<HTMLDivElement>) => {
-			// If command is pressed, underlying FlowDrag will take over
-			if (ev.metaKey) return
-
 			if (ev.button !== 0) return
 
 			if (selectedElement !== '' && selectedElement !== undefined) return
@@ -47,14 +32,27 @@ const Drag = ({ children }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
-			setTarget(target)
-
 			const id = target?.getAttribute('data-node-id') ?? ''
-			console.log('--- Drag Start ---', id)
 
-			const boxOffset = getNodePosition(target)
+			let targets: SVGElement[] = []
 
-			setBoxOffset(boxOffset)
+			if (ev.metaKey) {
+				targets = [...document.querySelectorAll<SVGElement>(`[data-node-parent=${id}],[data-node-id=${id}]`)]
+
+				console.log('--- Drag Start ---', id)
+			} else {
+				targets = [target]
+
+				console.log('--- Drag Cluster Start ---', id)
+			}
+
+			setTargetList(targets)
+
+			targets.forEach((target) => {
+				const pos = getNodePosition(target)
+				target.setAttribute('data-pos', `${pos.x},${pos.y}`)
+			})
+
 			setMouseOffset({ x: ev.nativeEvent.offsetX, y: ev.nativeEvent.offsetY })
 
 			const offsetTarget = target?.closest<HTMLDivElement>('[data-pan]')
@@ -63,36 +61,55 @@ const Drag = ({ children }: Props) => {
 
 			setOffset({ x: offset.x, y: offset.y })
 
-			setState({ ...state, ...{ dragElement: id } })
+			setState({ ...state, ...{ dragElement: id, isClusterDrag: ev.metaKey } })
 		},
-		[state, setState, setTarget, selectedElement]
+		[state, setState, selectedElement]
 	)
+
+	const getTargetPos = useCallback((target: SVGElement): PositionModel => {
+		const pos = target.getAttribute('data-pos')?.split(',') ?? ['0', '0']
+		return { x: Number(pos[0]), y: Number(pos[1]) }
+	}, [])
 
 	const handleMove = useCallback(
 		(ev: MouseEvent) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
-			const pos: PositionModel = {
-				x: Math.round((boxOffset.x - offset.x + (ev.clientX - offset.x)) / zoomLevel - mouseOffset.x),
-				y: Math.round((boxOffset.y - offset.y + (ev.clientY - offset.y)) / zoomLevel - mouseOffset.y)
-			}
+			// console.table([
+			// 	{
+			// 		boxOffset: boxOffset.x,
+			// 		offset: offset.x,
+			// 		client: ev.clientX,
+			// 		mouseOffset: mouseOffset.x,
+			// 		pos: pos.x,
+			// 		mouseX: ev.clientX - mouseOffset.x - offset.x
+			// 	}
+			// ])
 
-			setPos(pos)
+			targetList?.forEach((target) => {
+				const boxOffset = getTargetPos(target)
 
-			target?.setAttribute('cx', `${pos.x}`)
-			target?.setAttribute('cy', `${pos.y}`)
+				const pos: PositionModel = {
+					x: Math.round((boxOffset.x - offset.x + (ev.clientX - offset.x)) / zoomLevel - mouseOffset.x),
+					y: Math.round((boxOffset.y - offset.y + (ev.clientY - offset.y)) / zoomLevel - mouseOffset.y)
+				}
+
+				//TODO: Circle specific! should not be specific to an element
+				target.setAttribute('cx', `${pos.x}`)
+				target.setAttribute('cy', `${pos.y}`)
+			})
 		},
-		[offset, boxOffset, mouseOffset, zoomLevel, setPos, target]
+		[targetList, getTargetPos, offset, mouseOffset]
 	)
 
 	const handleMoveEnd = useCallback(() => {
-		const { dragElement: _, ...newState } = state
-		console.log('--- Drag End ---', _)
+		const { dragElement: _, isClusterDrag: __, ...newState } = state
+		console.log('--- Drag End ---', _, __)
 
 		setState(newState)
 
-		setTarget(undefined)
+		setTargetList(undefined)
 
 		window.removeEventListener('mousemove', handleMove)
 		window.removeEventListener('mouseup', handleMoveEnd)

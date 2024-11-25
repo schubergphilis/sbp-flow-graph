@@ -19,13 +19,10 @@ const Pan = ({ children }: Props) => {
 	const panRef = useRef<HTMLDivElement>(null)
 	const posRef = useRef<PositionModel>({ x: 0, y: 0 })
 
-	const setPos = useCallback(
-		(data: PositionModel) => {
-			posRef.current = data
-			_setPos(data)
-		},
-		[posRef]
-	)
+	const setPos = useCallback((data: PositionModel) => {
+		posRef.current = data
+		_setPos(data)
+	}, [])
 
 	const handleMouseDown = useCallback((ev: MouseEvent) => {
 		ev.stopPropagation()

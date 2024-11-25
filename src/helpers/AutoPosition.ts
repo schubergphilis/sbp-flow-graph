@@ -11,11 +11,13 @@ export const AutoPosition = (spacing: number = 25): void => {
 
 		const pos: OffsetModel = calculatePosition(node, spacing, viewport)
 
+		node.setAttribute('fill-opacity', '1')
+		node.setAttribute('data-pos', `${pos.x}, ${pos.y}`)
+
 		switch (type) {
 			case 'circle':
 				node.setAttribute('cx', `${pos.x}`)
 				node.setAttribute('cy', `${pos.y}`)
-				node.setAttribute('fill-opacity', '1')
 				break
 			default:
 				node.setAttribute('x', `${pos.x}`)
@@ -134,35 +136,3 @@ const positionNode = (node: SVGElement, spacing: number): OffsetModel => {
 
 	return { ...position, width: nodeOffset.width, height: nodeOffset.height }
 }
-/*
-// DEPRECATED
-export const positionCircle = (node: SVGElement, spacing: number): OffsetModel => {
-	const parentOffset = getParentNodePosition(node)
-	const nodeOffset = getNodeOffset(node)
-
-	const randomX = random()
-	const randomY = random()
-
-	// console.log(parentOffset)
-
-	const parentAngle = Math.atan2(parentOffset.height, parentOffset.width) //radians instead of degrees
-
-	const nodeAngle = Math.atan2(nodeOffset.height, nodeOffset.width) //radians instead of degrees
-
-	const posX = parentOffset.x + randomX * Math.round((parentOffset.width / 2) * Math.cos(parentAngle)) //+ randomX * spacing
-	const posY = parentOffset.y + randomY * Math.round((parentOffset.height / 2) * Math.sin(parentAngle)) //+ randomY * spacing
-
-	const nodeX = Math.round((nodeOffset.width / 2) * Math.cos(nodeAngle)) //+ inverseRandomX * spacing
-	const nodeY = Math.round((nodeOffset.height / 2) * Math.sin(nodeAngle)) //+ inverseRandomY * spacing
-
-	//console.log(posX, posY, nodeX, nodeY)
-	// node.setAttribute('cx', `${posX}`)
-	// node.setAttribute('cy', `${posY}`)
-	return {
-		x: posX + randomX * (nodeX + spacing),
-		y: posY + randomY * (nodeY + spacing),
-		width: nodeOffset.width,
-		height: nodeOffset.height
-	}
-}
-*/

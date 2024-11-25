@@ -26,14 +26,13 @@ const Flow = ({ data }: Props) => {
 				<Zoom>
 					<Drag>
 						<SvgCanvast>
+							<LineBox />
 							{data
 								//.slice(0, 2)
 								//.reverse()
 								.map((node, index) => (
 									<FlowNode key={index} data={node} />
 								))}
-
-							<LineBox />
 							<Debug isDebug={true} />
 						</SvgCanvast>
 					</Drag>
