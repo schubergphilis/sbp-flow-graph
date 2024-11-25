@@ -84,19 +84,19 @@ const Debug = ({ isDebug = false }: Props) => {
 	}, [state.dragElement, testData])
 
 	const updateAllLines = useCallback(() => {
-		const allNodes = [
+		const nodes = [
 			...(document.querySelectorAll<SVGElement>(`[data-node]:not([data-node-id=${state.dragElement}])`) ?? [])
 		]
 
-		const all = testData(allNodes)
+		const allNodes = testData(nodes)
 
-		setTestNodes(all)
+		setTestNodes(allNodes)
 	}, [state.dragElement, testData, setTestNodes])
 
 	useEffect(() => {
 		if (!isDebug) return
 		timerRef.current = setTimeout(updateAllLines, 2)
-	}, [updateAllLines, isDebug, testData])
+	}, [updateAllLines, isDebug])
 
 	useEffect(() => {
 		getPanOffset()
