@@ -57,7 +57,9 @@ const LineBox = () => {
 		const selectedNodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		if (!selectedNodes) return
+
 		const selected = getLineData(selectedNodes)
+
 		setDraggedLines(selected)
 	}, [state.isClusterDrag, state.dragElement, getLineData])
 

@@ -12,7 +12,7 @@ const Debug = ({ isDebug = false }: Props) => {
 	const { state } = useContext(GlobalState)
 
 	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
-	const [selectedNode, setSelectedNode] = useState<JSX.Element>()
+	const [selectedNodes, setSelectedNodes] = useState<JSX.Element[]>()
 	const [offset, setOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 
@@ -75,23 +75,26 @@ const Debug = ({ isDebug = false }: Props) => {
 	const updateSelectedLines = useCallback(() => {
 		// console.log('-----Interval')
 
-		const selectedNode = document.querySelector<SVGElement>(`[data-node-id=${state.dragElement}]`)
+		const regex = state.isClusterDrag ? '[data-node]' : `[data-node-id=${state.dragElement}]`
 
-		if (!selectedNode) return
-		const selected = testData([selectedNode])
+		const selectedNodes = [...document.querySelectorAll<SVGElement>(regex)]
 
-		setSelectedNode(selected[0])
-	}, [state.dragElement, testData])
+		if (!selectedNodes) return
+
+		const selected = testData(selectedNodes)
+
+		setSelectedNodes(selected)
+	}, [state.dragElement, state.isClusterDrag, testData])
 
 	const updateAllLines = useCallback(() => {
-		const nodes = [
-			...(document.querySelectorAll<SVGElement>(`[data-node]:not([data-node-id=${state.dragElement}])`) ?? [])
-		]
+		const regex = state.isClusterDrag ? '[dummy-nothing]' : `[data-node]:not([data-node-id=${state.dragElement}])`
+
+		const nodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		const allNodes = testData(nodes)
 
 		setTestNodes(allNodes)
-	}, [state.dragElement, testData, setTestNodes])
+	}, [state.isClusterDrag, state.dragElement, testData])
 
 	useEffect(() => {
 		if (!isDebug) return
@@ -114,13 +117,13 @@ const Debug = ({ isDebug = false }: Props) => {
 	useEffect(() => {
 		if (isDragging) return
 		updateAllLines()
-		setSelectedNode(undefined)
+		setSelectedNodes(undefined)
 	}, [isDragging, updateAllLines])
 
 	return (
 		isDebug && (
 			<Container>
-				{selectedNode}
+				{selectedNodes}
 				{testNodes}
 			</Container>
 		)
