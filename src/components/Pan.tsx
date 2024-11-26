@@ -1,12 +1,15 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import PositionModel from '../models/PositionModel'
+import { GlobalState } from './Provider'
 
 interface Props {
 	children: JSX.Element
 }
 
 const Pan = ({ children }: Props) => {
+	const { state } = useContext(GlobalState)
+
 	//const position =  useAppSelector<BoxPositionModel | undefined>((state) => getPositionState(state, 'root'))
 	const selectedElement = undefined //useAppSelector<string>(getSelectedElementState)
 
@@ -104,7 +107,7 @@ const Pan = ({ children }: Props) => {
 			data-pan
 			ref={panRef}
 			style={{
-				transform: `translate(${pos.x}px, ${pos.y}px)`
+				transform: `translate(${pos.x}px, ${pos.y}px) scale(${state.zoomLevel ?? 1})`
 			}}>
 			{children}
 		</Container>

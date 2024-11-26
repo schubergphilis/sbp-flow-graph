@@ -29,14 +29,14 @@ const LineBox = () => {
 			return nodes
 				.filter((node) => node.getAttribute('data-node-root') !== 'true')
 				.map<LineModel>((node) => ({
-					start: getNodePosition(node, offset),
-					end: getParentNodePosition(node, offset),
+					start: getNodePosition(node, offset, state.zoomLevel ?? 1),
+					end: getParentNodePosition(node, offset, state.zoomLevel ?? 1),
 					id: node.getAttribute('data-node-id') as string,
 					parentId: node.getAttribute('data-node-parent') as string,
 					text: `${node.getAttribute('data-node-id') as string}`
 				}))
 		},
-		[offset]
+		[offset, state.zoomLevel]
 	)
 
 	const handleLines = useMemo((): JSX.Element[] => {
@@ -76,8 +76,12 @@ const LineBox = () => {
 	}, [state.isClusterDrag, state.dragElement, getLineData])
 
 	useEffect(() => {
+		getPanOffset()
+	}, [getPanOffset, state.zoomLevel])
+
+	useEffect(() => {
 		timerRef.current = setTimeout(updateAllLines, 2)
-	}, [updateAllLines])
+	}, [updateAllLines, state.zoomLevel, getPanOffset])
 
 	useEffect(() => {
 		getPanOffset()

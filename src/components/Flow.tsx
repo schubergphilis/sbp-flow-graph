@@ -8,6 +8,7 @@ import FlowNode from './FlowNode'
 import LineBox from './LineBox'
 import Pan from './Pan'
 import Provider from './Provider'
+import Tools from './Tools'
 import Zoom from './Zoom'
 
 interface Props {
@@ -38,6 +39,7 @@ const Flow = ({ data }: Props) => {
 					</Drag>
 				</Zoom>
 			</Pan>
+			<Tools />
 		</Provider>
 	)
 }

@@ -29,10 +29,10 @@ const Debug = ({ isDebug = false }: Props) => {
 	const testData = useCallback(
 		(nodes: SVGElement[]): JSX.Element[] => {
 			return nodes.map((node, index) => {
-				const pos = getNodePosition(node, offset)
+				const pos = getNodePosition(node, offset, state.zoomLevel ?? 1)
 
 				return (
-					<g key={index}>
+					<g key={`debug_${index}`}>
 						<text x={pos.x} y={pos.y - pos.height / 1.75} textAnchor="middle" dominantBaseline="central">
 							{pos.x} x {pos.y} / {pos.width}
 						</text>
@@ -69,7 +69,7 @@ const Debug = ({ isDebug = false }: Props) => {
 				)
 			})
 		},
-		[offset]
+		[offset, state.zoomLevel]
 	)
 
 	const updateSelectedLines = useCallback(() => {
@@ -95,6 +95,10 @@ const Debug = ({ isDebug = false }: Props) => {
 
 		setTestNodes(allNodes)
 	}, [state.isClusterDrag, state.dragElement, testData])
+
+	useEffect(() => {
+		getPanOffset()
+	}, [getPanOffset, state.zoomLevel])
 
 	useEffect(() => {
 		if (!isDebug) return

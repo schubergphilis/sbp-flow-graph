@@ -27,21 +27,29 @@ export const AutoPosition = (spacing: number = 25): void => {
 	})
 }
 
-export const getParentNodePosition = (node: SVGElement, offset: PositionModel = { x: 0, y: 0 }): OffsetModel => {
+export const getParentNodePosition = (
+	node: SVGElement,
+	offset: PositionModel = { x: 0, y: 0 },
+	zoomLevel: number = 1
+): OffsetModel => {
 	const parentId = node.getAttribute('data-node-parent') as string
 	const parent = document.querySelector<SVGElement>(`[data-node-id=${parentId}]`)
 
-	return getNodePosition(parent, offset)
+	return getNodePosition(parent, offset, zoomLevel)
 }
 
-export const getNodePosition = (node: SVGElement | null, offset: PositionModel = { x: 0, y: 0 }): OffsetModel => {
+export const getNodePosition = (
+	node: SVGElement | null,
+	offset: PositionModel = { x: 0, y: 0 },
+	zoomLevel: number = 1
+): OffsetModel => {
 	const pos = node?.getBoundingClientRect() ?? { width: 0, height: 0, x: 0, y: 0 }
 
 	return {
-		width: pos.width,
-		height: pos.height,
-		x: pos.x + pos.width / 2 - offset.x,
-		y: pos.y + pos.height / 2 - offset.y
+		width: Math.round(pos.width / zoomLevel),
+		height: Math.round(pos.height / zoomLevel),
+		x: Math.round((pos.x + pos.width / 2 - offset.x) / zoomLevel),
+		y: Math.round((pos.y + pos.height / 2 - offset.y) / zoomLevel)
 	}
 }
 

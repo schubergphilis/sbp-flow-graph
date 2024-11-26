@@ -4,7 +4,7 @@ import GlobalStateModel from '../models/GlobalStateModel'
 import StateModel from '../models/StateModel'
 
 interface Props {
-	children: JSX.Element
+	children: JSX.Element | JSX.Element[]
 }
 
 // Create the Context

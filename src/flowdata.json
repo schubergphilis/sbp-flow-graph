@@ -45,13 +45,13 @@
 		{
 			"id": "437793fe-ca7a-43c3-8c2a-8aa0ecf265a3",
 			"name": "child 3",
-			"value": 40,
+			"value": 60,
 			"parent": "877793fe-ca7a-43c3-8c2a-8aa0ecf265a3"
 		},
 		{
 			"id": "967793fe-ca7a-43c3-8c2a-8aa0ecf265a3",
 			"name": "child 3",
-			"value": 40,
+			"value": 140,
 			"parent": "877793fe-ca7a-43c3-8c2a-8aa0ecf265a3"
 		}
 	]
