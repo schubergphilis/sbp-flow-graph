@@ -8,8 +8,7 @@ import FlowNode from './FlowNode'
 import LineBox from './LineBox'
 import Pan from './Pan'
 import Provider from './Provider'
-import Tools from './Tools'
-import Zoom from './Zoom'
+import ZoomTools from './ZoomTools'
 
 interface Props {
 	data: ProcessModel[]
@@ -24,22 +23,20 @@ const Flow = ({ data }: Props) => {
 	return (
 		<Provider>
 			<Pan>
-				<Zoom>
-					<Drag>
-						<SvgCanvast>
-							<LineBox />
-							{data
-								//.slice(0, 2)
-								//.reverse()
-								.map((node, index) => (
-									<FlowNode key={index} data={node} />
-								))}
-							<Debug isDebug={true} />
-						</SvgCanvast>
-					</Drag>
-				</Zoom>
+				<Drag>
+					<SvgCanvast>
+						<LineBox />
+						{data
+							//.slice(0, 2)
+							//.reverse()
+							.map((node, index) => (
+								<FlowNode key={index} data={node} />
+							))}
+						<Debug isDebug={true} />
+					</SvgCanvast>
+				</Drag>
 			</Pan>
-			<Tools />
+			<ZoomTools />
 		</Provider>
 	)
 }

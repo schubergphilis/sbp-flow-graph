@@ -1,11 +1,11 @@
-import { useCallback, useContext } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
 import styled from 'styled-components'
 import { closestNumber, generateSteps } from '../helpers/Helpers'
 import AddIcon from './icons/AddIcon'
 import RemoveIcon from './icons/RemoveIcon'
 import { GlobalState } from './Provider'
 
-const Tools = () => {
+const ZoomTools = () => {
 	const minZoom: number = 0.25
 	const maxZoom: number = 3
 	const step: number = 0.25
@@ -23,35 +23,52 @@ const Tools = () => {
 		[setState, state]
 	)
 
-	const setMinZoom = useCallback(
-		(ev: React.MouseEvent<HTMLButtonElement>) => {
+	const setZoom = useCallback(
+		(ev: React.MouseEvent<HTMLButtonElement>, delta: number) => {
 			ev.preventDefault()
 			ev.stopPropagation()
-			const level = (state.zoomLevel ?? 1) - step
+			const zoomLevel = state.zoomLevel ?? 1
+			const level = zoomLevel + step * delta
 			const closest = closestNumber(zoomLevels, level)
-			handleZoomLevel(closest, -1)
+			handleZoomLevel(closest, delta)
 		},
 		[handleZoomLevel, state.zoomLevel, zoomLevels]
 	)
 
-	const setMaxZoom = useCallback(
-		(ev: React.MouseEvent<HTMLButtonElement>) => {
-			ev.preventDefault()
-			ev.stopPropagation()
-			const level = (state.zoomLevel ?? 1) + step
-			const closest = closestNumber(zoomLevels, level)
-			handleZoomLevel(closest, 1)
+	const handleScroll = useCallback(
+		(ev: WheelEvent) => {
+			if (!ev.metaKey) return
+
+			const zoomLevel = state.zoomLevel ?? 1
+			const delta = ev.deltaY
+			const level = zoomLevel + delta / 100
+			const newLevel = delta < 0 ? Math.max(minZoom, level) : Math.min(maxZoom, level)
+			handleZoomLevel(newLevel, delta)
 		},
-		[handleZoomLevel, state.zoomLevel, zoomLevels]
+		[handleZoomLevel, state.zoomLevel]
 	)
+
+	useEffect(() => {
+		document.addEventListener('wheel', handleScroll)
+
+		return () => {
+			document?.removeEventListener('wheel', handleScroll)
+		}
+	}, [handleScroll])
 
 	return (
 		<Container>
-			<ActionButton disabled={maxZoom === state.zoomLevel || selectedElement !== ''} type="button" onClick={setMaxZoom}>
+			<ActionButton
+				disabled={maxZoom === state.zoomLevel || selectedElement !== ''}
+				type="button"
+				onClick={(ev) => setZoom(ev, 1)}>
 				<AddIcon />
 			</ActionButton>
 			<Level>level: {Math.round((state.zoomLevel ?? 1) * 100) / 100}</Level>
-			<ActionButton disabled={minZoom === state.zoomLevel || selectedElement !== ''} type="button" onClick={setMinZoom}>
+			<ActionButton
+				disabled={minZoom === state.zoomLevel || selectedElement !== ''}
+				type="button"
+				onClick={(ev) => setZoom(ev, -1)}>
 				<RemoveIcon />
 			</ActionButton>
 		</Container>
@@ -83,4 +100,4 @@ const ActionButton = styled.button`
 	cursor: pointer;
 	pointer-events: all !important;
 `
-export default Tools
+export default ZoomTools
