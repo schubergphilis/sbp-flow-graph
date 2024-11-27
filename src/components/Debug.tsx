@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { getNodePosition } from '../helpers/AutoPosition'
+import OffsetModel from '../models/OffsetModel'
 import PositionModel from '../models/PositionModel'
 import { GlobalState } from './Provider'
 
@@ -15,6 +16,7 @@ const Debug = ({ isDebug = false }: Props) => {
 	const [selectedNodes, setSelectedNodes] = useState<JSX.Element[]>()
 	const [offset, setOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [isDragging, setIsDragging] = useState<boolean>(false)
+	const [center, setCenter] = useState<OffsetModel | undefined>()
 
 	const timerRef = useRef<NodeJS.Timeout>()
 	const updateRef = useRef<NodeJS.Timeout>()
@@ -96,6 +98,22 @@ const Debug = ({ isDebug = false }: Props) => {
 		setTestNodes(allNodes)
 	}, [state.isClusterDrag, state.dragElement, testData])
 
+	const calculateCenter = useCallback(() => {
+		const target = document.querySelector<SVGElement>('[data-node-group]')
+		const pos = getNodePosition(target, offset, state.zoomLevel)
+
+		const posWidth = Math.round(pos.width)
+		const posHeight = Math.round(pos.height)
+		const posX = Math.round(pos.x - posWidth / 2)
+		const posY = Math.round(pos.y - posHeight / 2)
+		setCenter({ x: posX + posWidth / 2, y: posY + posHeight / 2, width: posWidth, height: posHeight })
+	}, [offset, state.zoomLevel])
+
+	useEffect(() => {
+		if (testNodes.length === 0) return
+		setTimeout(calculateCenter, 20)
+	}, [calculateCenter, testNodes])
+
 	useEffect(() => {
 		getPanOffset()
 	}, [getPanOffset, state.zoomLevel])
@@ -126,9 +144,22 @@ const Debug = ({ isDebug = false }: Props) => {
 
 	return (
 		isDebug && (
-			<Container>
+			<Container data-debug-group>
 				{selectedNodes}
 				{testNodes}
+				{center && (
+					<g>
+						<circle r="4" fill="blue" fillOpacity={0.5} cx={center.x} cy={center.y} />
+						<rect
+							width={center.width}
+							height={center.height}
+							x={center.x - center.width / 2}
+							y={center.y - center.height / 2}
+							stroke="blue"
+							fill="none"
+						/>
+					</g>
+				)}
 			</Container>
 		)
 	)

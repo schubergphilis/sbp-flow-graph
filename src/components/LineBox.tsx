@@ -103,7 +103,7 @@ const LineBox = () => {
 	}, [isDragging, updateAllLines])
 
 	return (
-		<Container>
+		<Container data-line-group>
 			{handleLines}
 			{handleDraggedLines}
 		</Container>

@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect } from 'react'
 import styled from 'styled-components'
 import { closestNumber, generateSteps } from '../helpers/Helpers'
+import CenterTool from './CenterTool'
 import AddIcon from './icons/AddIcon'
 import RemoveIcon from './icons/RemoveIcon'
 import { GlobalState } from './Provider'
@@ -58,13 +59,14 @@ const ZoomTools = () => {
 
 	return (
 		<Container>
+			<Level>level: {Math.round((state.zoomLevel ?? 1) * 100) / 100}</Level>
 			<ActionButton
 				disabled={maxZoom === state.zoomLevel || selectedElement !== ''}
 				type="button"
 				onClick={(ev) => setZoom(ev, 1)}>
 				<AddIcon />
 			</ActionButton>
-			<Level>level: {Math.round((state.zoomLevel ?? 1) * 100) / 100}</Level>
+			<CenterTool />
 			<ActionButton
 				disabled={minZoom === state.zoomLevel || selectedElement !== ''}
 				type="button"
@@ -91,7 +93,7 @@ const Container = styled.div`
 const Level = styled.div`
 	font-size: 0.75em;
 `
-const ActionButton = styled.button`
+export const ActionButton = styled.button`
 	border-radius: 0.5em;
 	background-color: rgba(255, 255, 255, 0.75);
 	height: 3em;
@@ -99,5 +101,13 @@ const ActionButton = styled.button`
 	border: 1px solid black;
 	cursor: pointer;
 	pointer-events: all !important;
+
+	&:hover {
+		background-color: rgba(233, 233, 233, 0.75);
+	}
+
+	&:active {
+		background-color: rgba(200, 200, 200, 0.75);
+	}
 `
 export default ZoomTools

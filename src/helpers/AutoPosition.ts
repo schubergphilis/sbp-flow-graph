@@ -39,7 +39,7 @@ export const getParentNodePosition = (
 }
 
 export const getNodePosition = (
-	node: SVGElement | null,
+	node: SVGElement | HTMLDivElement | null,
 	offset: PositionModel = { x: 0, y: 0 },
 	zoomLevel: number = 1
 ): OffsetModel => {

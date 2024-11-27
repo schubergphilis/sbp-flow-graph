@@ -4,8 +4,8 @@ import { AutoPosition } from '../helpers/AutoPosition'
 import { ProcessModel } from '../models/ProcessModel'
 import Debug from './Debug'
 import Drag from './Drag'
-import FlowNode from './FlowNode'
 import LineBox from './LineBox'
+import NodeBox from './NodeBox'
 import Pan from './Pan'
 import Provider from './Provider'
 import ZoomTools from './ZoomTools'
@@ -26,12 +26,7 @@ const Flow = ({ data }: Props) => {
 				<Drag>
 					<SvgCanvast>
 						<LineBox />
-						{data
-							//.slice(0, 2)
-							//.reverse()
-							.map((node, index) => (
-								<FlowNode key={index} data={node} />
-							))}
+						<NodeBox data={data} />
 						<Debug isDebug={true} />
 					</SvgCanvast>
 				</Drag>
