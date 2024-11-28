@@ -1,42 +1,39 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { getNodePosition, getParentNodePosition } from '../helpers/AutoPosition'
+import { useAppSelector } from '../hooks/ReduxStore'
 import LineModel from '../models/LineModel'
 import PositionModel from '../models/PositionModel'
+import { getDragElementState, getPanPositionState, getZoomLevelState, isClusterDragState } from '../store/SettingsSlice'
 import Line from './Line'
-import { GlobalState } from './Provider'
 
 const LineBox = () => {
-	const { state } = useContext(GlobalState)
+	const dragElement = useAppSelector<string | undefined>(getDragElementState)
+	const isClusterDrag = useAppSelector<boolean>(isClusterDragState)
+	const zoomLevel = useAppSelector<number>(getZoomLevelState)
+	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 
 	const [lines, setLines] = useState<LineModel[]>([])
 	const [draggedLines, setDraggedLines] = useState<LineModel[]>([])
-	const [offset, setOffset] = useState<PositionModel>({ x: 0, y: 0 })
+
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 
 	const timerRef = useRef<NodeJS.Timeout>()
 	const updateRef = useRef<NodeJS.Timeout>()
-
-	const getPanOffset = useCallback(() => {
-		const offsetTarget = document?.querySelector<HTMLDivElement>('[data-pan]')
-
-		const offset = offsetTarget?.getBoundingClientRect() ?? { x: 0, y: 0 }
-		setOffset(offset)
-	}, [])
 
 	const getLineData = useCallback(
 		(nodes: SVGElement[]): LineModel[] => {
 			return nodes
 				.filter((node) => node.getAttribute('data-node-root') !== 'true')
 				.map<LineModel>((node) => ({
-					start: getNodePosition(node, offset, state.zoomLevel ?? 1),
-					end: getParentNodePosition(node, offset, state.zoomLevel ?? 1),
+					start: getNodePosition(node, panPosition, zoomLevel),
+					end: getParentNodePosition(node, panPosition, zoomLevel),
 					id: node.getAttribute('data-node-id') as string,
 					parentId: node.getAttribute('data-node-parent') as string,
 					text: `${node.getAttribute('data-node-id') as string}`
 				}))
 		},
-		[offset, state.zoomLevel]
+		[panPosition, zoomLevel]
 	)
 
 	const handleLines = useMemo((): JSX.Element[] => {
@@ -50,9 +47,7 @@ const LineBox = () => {
 	const updateSelectedLines = useCallback(() => {
 		// console.log('-----Interval')
 
-		const regex = state.isClusterDrag
-			? '[data-node]'
-			: `[data-node-id=${state.dragElement}],[data-node-parent=${state.dragElement}]`
+		const regex = isClusterDrag ? '[data-node]' : `[data-node-id=${dragElement}],[data-node-parent=${dragElement}]`
 
 		const selectedNodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
 
@@ -61,32 +56,27 @@ const LineBox = () => {
 		const selected = getLineData(selectedNodes)
 
 		setDraggedLines(selected)
-	}, [state.isClusterDrag, state.dragElement, getLineData])
+	}, [isClusterDrag, dragElement, getLineData])
 
 	const updateAllLines = useCallback(() => {
-		const regex = state.isClusterDrag
+		const regex = isClusterDrag
 			? '[dummy-nothing]'
-			: `[data-node]:not([data-node-id=${state.dragElement}],[data-node-parent=${state.dragElement}])`
+			: `[data-node]:not([data-node-id=${dragElement}],[data-node-parent=${dragElement}])`
 
 		const nodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		const allNodes = getLineData(nodes)
 
 		setLines(allNodes)
-	}, [state.isClusterDrag, state.dragElement, getLineData])
-
-	useEffect(() => {
-		getPanOffset()
-	}, [getPanOffset, state.zoomLevel])
+	}, [isClusterDrag, dragElement, getLineData])
 
 	useEffect(() => {
 		timerRef.current = setTimeout(updateAllLines, 2)
-	}, [updateAllLines, state.zoomLevel, getPanOffset])
+	}, [updateAllLines, zoomLevel])
 
 	useEffect(() => {
-		getPanOffset()
-		setIsDragging(state.dragElement !== undefined)
-	}, [getPanOffset, state.dragElement])
+		setIsDragging(dragElement !== undefined)
+	}, [dragElement])
 
 	useEffect(() => {
 		if (isDragging) {
@@ -94,7 +84,7 @@ const LineBox = () => {
 			updateRef.current = setInterval(updateSelectedLines, 20)
 		}
 		return () => clearInterval(updateRef.current)
-	}, [isDragging, updateAllLines, getPanOffset, updateSelectedLines])
+	}, [isDragging, updateAllLines, updateSelectedLines])
 
 	useEffect(() => {
 		if (isDragging) return

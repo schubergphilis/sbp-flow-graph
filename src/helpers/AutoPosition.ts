@@ -1,7 +1,11 @@
 import OffsetModel from '../models/OffsetModel'
 import PositionModel from '../models/PositionModel'
 
-export const AutoPosition = (spacing: number = 25): void => {
+export const AutoPosition = (
+	offset: PositionModel = { x: 0, y: 0 },
+	zoomLevel: number = 1,
+	spacing: number = 25
+): void => {
 	const viewport = getWindowDimensions() as unknown as OffsetModel
 
 	const nodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
@@ -9,7 +13,7 @@ export const AutoPosition = (spacing: number = 25): void => {
 	nodes.forEach((node) => {
 		const type = (node.getAttribute('data-node-type') ?? 'circle') as string
 
-		const pos: OffsetModel = calculatePosition(node, spacing, viewport)
+		const pos: OffsetModel = calculatePosition(node, spacing, viewport, offset, zoomLevel)
 
 		node.setAttribute('fill-opacity', '1')
 		node.setAttribute('data-pos', `${pos.x}, ${pos.y}`)
@@ -65,35 +69,41 @@ const getWindowDimensions = (): { width: number; height: number } => {
 	}
 }
 
-const getParentChildList = (node: SVGElement): OffsetModel[] => {
+const getParentChildList = (node: SVGElement, offset: PositionModel, zoomLevel: number): OffsetModel[] => {
 	const nodeId = node.getAttribute('data-node-id') as string
 	const parentId = node.getAttribute('data-node-parent') as string
 	const childList = [
 		...(document.querySelectorAll<SVGElement>(`[data-node-parent=${parentId}]:not([data-node-id=${nodeId}])`) ?? [])
 	]
 
-	return childList.map((child) => getNodePosition(child))
+	return childList.map((child) => getNodePosition(child, offset, zoomLevel))
 }
 
-const getNodeChildList = (node: SVGElement): OffsetModel[] => {
+const getNodeChildList = (node: SVGElement, offset: PositionModel, zoomLevel: number): OffsetModel[] => {
 	const nodeId = node.getAttribute('data-node-id') as string
 	const childList = [...(document.querySelectorAll<SVGElement>(`[data-node-parent=${nodeId}]`) ?? [])]
 
-	return childList.map((child) => getNodePosition(child))
+	return childList.map((child) => getNodePosition(child, offset, zoomLevel))
 }
 
-const calculatePosition = (node: SVGElement, spacing: number, viewport: OffsetModel): OffsetModel => {
+const calculatePosition = (
+	node: SVGElement,
+	spacing: number,
+	viewport: OffsetModel,
+	offset: PositionModel,
+	zoomLevel: number
+): OffsetModel => {
 	const isRoot = (node.getAttribute('data-node-root') ?? false) as boolean
 
-	const parentChildList = getParentChildList(node)
-	const nodeChildList = getNodeChildList(node)
+	const parentChildList = getParentChildList(node, offset, zoomLevel)
+	const nodeChildList = getNodeChildList(node, offset, zoomLevel)
 
 	let freeSpace = 0
 	let pos = { x: 0, y: 0 } as OffsetModel
 	let i = 0
 
 	do {
-		pos = positionNode(node, nodeChildList.length > 0 ? spacing * 4 : spacing)
+		pos = positionNode(node, nodeChildList.length > 0 ? spacing * 4 : spacing, offset, zoomLevel)
 		freeSpace = parentChildList.find((child) => isCircleColliding(child, pos) && child) === undefined ? 1 : 0
 		i++
 	} while (freeSpace < 1 || (freeSpace == 0 && i < 20))
@@ -128,9 +138,9 @@ const randomCirclePosition = (node: OffsetModel, parent: OffsetModel, spacing: n
 	return { x: posX, y: posY }
 }
 
-const positionNode = (node: SVGElement, spacing: number): OffsetModel => {
-	const nodeOffset = getNodePosition(node)
-	const parentOffset = getParentNodePosition(node)
+const positionNode = (node: SVGElement, spacing: number, offset: PositionModel, zoomLevel: number): OffsetModel => {
+	const nodeOffset = getNodePosition(node, offset, zoomLevel)
+	const parentOffset = getParentNodePosition(node, offset, zoomLevel)
 	const type = (node.getAttribute('data-node-type') ?? 'circle') as string
 
 	let position = { x: 0, y: 0 } as PositionModel

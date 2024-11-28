@@ -1,37 +1,33 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { getNodePosition } from '../helpers/AutoPosition'
+import { useAppSelector } from '../hooks/ReduxStore'
 import OffsetModel from '../models/OffsetModel'
 import PositionModel from '../models/PositionModel'
-import { GlobalState } from './Provider'
+import { getDragElementState, getPanPositionState, getZoomLevelState, isClusterDragState } from '../store/SettingsSlice'
 
 interface Props {
 	isDebug?: boolean
 }
 
 const Debug = ({ isDebug = false }: Props) => {
-	const { state } = useContext(GlobalState)
+	const dragElement = useAppSelector<string | undefined>(getDragElementState)
+	const isClusterDrag = useAppSelector<boolean>(isClusterDragState)
+	const zoomLevel = useAppSelector<number>(getZoomLevelState)
+	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 
 	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
 	const [selectedNodes, setSelectedNodes] = useState<JSX.Element[]>()
-	const [offset, setOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 	const [center, setCenter] = useState<OffsetModel | undefined>()
 
 	const timerRef = useRef<NodeJS.Timeout>()
 	const updateRef = useRef<NodeJS.Timeout>()
 
-	const getPanOffset = useCallback(() => {
-		const offsetTarget = document?.querySelector<HTMLDivElement>('[data-pan]')
-
-		const offset = offsetTarget?.getBoundingClientRect() ?? { x: 0, y: 0 }
-		setOffset(offset)
-	}, [])
-
 	const testData = useCallback(
 		(nodes: SVGElement[]): JSX.Element[] => {
 			return nodes.map((node, index) => {
-				const pos = getNodePosition(node, offset, state.zoomLevel ?? 1)
+				const pos = getNodePosition(node, panPosition, zoomLevel)
 
 				return (
 					<g key={`debug_${index}`}>
@@ -71,13 +67,13 @@ const Debug = ({ isDebug = false }: Props) => {
 				)
 			})
 		},
-		[offset, state.zoomLevel]
+		[panPosition, zoomLevel]
 	)
 
 	const updateSelectedLines = useCallback(() => {
 		// console.log('-----Interval')
 
-		const regex = state.isClusterDrag ? '[data-node]' : `[data-node-id=${state.dragElement}]`
+		const regex = isClusterDrag ? '[data-node]' : `[data-node-id=${dragElement}]`
 
 		const selectedNodes = [...document.querySelectorAll<SVGElement>(regex)]
 
@@ -86,28 +82,28 @@ const Debug = ({ isDebug = false }: Props) => {
 		const selected = testData(selectedNodes)
 
 		setSelectedNodes(selected)
-	}, [state.dragElement, state.isClusterDrag, testData])
+	}, [dragElement, isClusterDrag, testData])
 
 	const updateAllLines = useCallback(() => {
-		const regex = state.isClusterDrag ? '[dummy-nothing]' : `[data-node]:not([data-node-id=${state.dragElement}])`
+		const regex = isClusterDrag ? '[dummy-nothing]' : `[data-node]:not([data-node-id=${dragElement}])`
 
 		const nodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		const allNodes = testData(nodes)
 
 		setTestNodes(allNodes)
-	}, [state.isClusterDrag, state.dragElement, testData])
+	}, [isClusterDrag, dragElement, testData])
 
 	const calculateCenter = useCallback(() => {
 		const target = document.querySelector<SVGElement>('[data-node-group]')
-		const pos = getNodePosition(target, offset, state.zoomLevel)
+		const pos = getNodePosition(target, panPosition, zoomLevel)
 
 		const posWidth = Math.round(pos.width)
 		const posHeight = Math.round(pos.height)
 		const posX = Math.round(pos.x - posWidth / 2)
 		const posY = Math.round(pos.y - posHeight / 2)
 		setCenter({ x: posX + posWidth / 2, y: posY + posHeight / 2, width: posWidth, height: posHeight })
-	}, [offset, state.zoomLevel])
+	}, [panPosition, zoomLevel])
 
 	useEffect(() => {
 		if (testNodes.length === 0) return
@@ -115,18 +111,13 @@ const Debug = ({ isDebug = false }: Props) => {
 	}, [calculateCenter, testNodes])
 
 	useEffect(() => {
-		getPanOffset()
-	}, [getPanOffset, state.zoomLevel])
-
-	useEffect(() => {
 		if (!isDebug) return
 		timerRef.current = setTimeout(updateAllLines, 2)
 	}, [updateAllLines, isDebug])
 
 	useEffect(() => {
-		getPanOffset()
-		setIsDragging(state.dragElement !== undefined)
-	}, [getPanOffset, state.dragElement])
+		setIsDragging(dragElement !== undefined)
+	}, [dragElement])
 
 	useEffect(() => {
 		if (isDragging) {
@@ -134,7 +125,7 @@ const Debug = ({ isDebug = false }: Props) => {
 			updateRef.current = setInterval(updateSelectedLines, 20)
 		}
 		return () => clearInterval(updateRef.current)
-	}, [isDragging, updateAllLines, updateSelectedLines, getPanOffset])
+	}, [isDragging, updateAllLines, updateSelectedLines])
 
 	useEffect(() => {
 		if (isDragging) return

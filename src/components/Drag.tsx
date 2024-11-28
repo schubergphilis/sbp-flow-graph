@@ -1,15 +1,23 @@
-import { useCallback, useContext, useLayoutEffect, useState } from 'react'
+import { useCallback, useLayoutEffect, useState } from 'react'
 import styled from 'styled-components'
 import { getNodePosition } from '../helpers/AutoPosition'
+import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
 import PositionModel from '../models/PositionModel'
-import { GlobalState } from './Provider'
+import {
+	getDragElementState,
+	getZoomLevelState,
+	setClusterDragState,
+	setDragElementState
+} from '../store/SettingsSlice'
 
 interface Props {
 	children: JSX.Element
 }
 
 const Drag = ({ children }: Props) => {
-	const { state, setState } = useContext(GlobalState)
+	const dispatch = useAppDispatch()
+	const dragElement = useAppSelector<string | undefined>(getDragElementState)
+	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 
 	const selectedElement = undefined
 
@@ -60,9 +68,10 @@ const Drag = ({ children }: Props) => {
 
 			setOffset({ x: offset.x, y: offset.y })
 
-			setState({ ...state, ...{ dragElement: id, isClusterDrag: ev.metaKey } })
+			dispatch(setDragElementState(id))
+			dispatch(setClusterDragState(ev.metaKey))
 		},
-		[state, setState, selectedElement]
+		[selectedElement, dispatch]
 	)
 
 	const getTargetPos = useCallback((target: SVGElement): PositionModel => {
@@ -89,35 +98,31 @@ const Drag = ({ children }: Props) => {
 			targetList?.forEach((target) => {
 				const boxOffset = getTargetPos(target)
 
-				const zoomLevel = state.zoomLevel ?? 1
-
 				const pos: PositionModel = {
 					x: Math.round((boxOffset.x - offset.x + (ev.clientX - offset.x)) / zoomLevel - mouseOffset.x),
 					y: Math.round((boxOffset.y - offset.y + (ev.clientY - offset.y)) / zoomLevel - mouseOffset.y)
 				}
 
-				//TODO: Circle specific! should not be specific to an element
+				// TODO: Circle specific! should not be specific to an element
 				target.setAttribute('cx', `${pos.x}`)
 				target.setAttribute('cy', `${pos.y}`)
 			})
 		},
-		[targetList, getTargetPos, state.zoomLevel, offset, mouseOffset]
+		[targetList, getTargetPos, zoomLevel, offset, mouseOffset]
 	)
 
 	const handleMoveEnd = useCallback(() => {
-		const { dragElement: _, isClusterDrag: __, ...newState } = state
-		console.log('--- Drag End ---', _, __)
-
-		setState(newState)
+		dispatch(setDragElementState(undefined))
+		dispatch(setClusterDragState(false))
 
 		setTargetList(undefined)
 
 		window.removeEventListener('mousemove', handleMove)
 		window.removeEventListener('mouseup', handleMoveEnd)
-	}, [state, setState, handleMove])
+	}, [dispatch, handleMove])
 
 	useLayoutEffect(() => {
-		if (!state.dragElement) return
+		if (!dragElement) return
 
 		document.addEventListener('mousemove', handleMove)
 		document.addEventListener('mouseup', handleMoveEnd)
@@ -126,7 +131,7 @@ const Drag = ({ children }: Props) => {
 			document.removeEventListener('mousemove', handleMove)
 			document.removeEventListener('mouseup', handleMoveEnd)
 		}
-	}, [state.dragElement, handleMove, handleMoveEnd])
+	}, [dragElement, handleMove, handleMoveEnd])
 
 	return <Container onMouseDown={handleMouseDown}>{children}</Container>
 }

@@ -1,14 +1,14 @@
-import { useCallback, useContext } from 'react'
+import { useCallback } from 'react'
+import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
+import { getZoomLevelState, setPanPositionState } from '../store/SettingsSlice'
 import CenterIcon from './icons/CenterIcon'
-import { GlobalState } from './Provider'
 import { ActionButton } from './ZoomTools'
 
 const CenterTool = () => {
-	const { state } = useContext(GlobalState)
+	const dispatch = useAppDispatch()
+	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 
 	const handleClick = useCallback(() => {
-		const zoomLevel = state.zoomLevel ?? 1
-
 		const group = document.querySelector<SVGElement>('[data-node-group]')
 		const target = document.querySelector<HTMLDivElement>('[data-pan]')
 
@@ -30,9 +30,10 @@ const CenterTool = () => {
 		// 	{ type: 'pos', x: posX, y: posY, width: pos.width, height: pos.height },
 		// 	{ type: 'tar', x: tarX, y: tarY, width: tar.width, height: tar.height }
 		// ])
+		dispatch(setPanPositionState({ x: centerX, y: centerY }))
 
 		target?.setAttribute('style', `transform: translate(${centerX}px, ${centerY}px) scale(${zoomLevel})`)
-	}, [state.zoomLevel])
+	}, [zoomLevel])
 
 	return (
 		<ActionButton onClick={handleClick}>

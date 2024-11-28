@@ -1,10 +1,11 @@
-import { useCallback, useContext, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import styled from 'styled-components'
 import { closestNumber, generateSteps } from '../helpers/Helpers'
+import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
+import { getZoomLevelState, setZoomLevelState } from '../store/SettingsSlice'
 import CenterTool from './CenterTool'
 import AddIcon from './icons/AddIcon'
 import RemoveIcon from './icons/RemoveIcon'
-import { GlobalState } from './Provider'
 
 const ZoomTools = () => {
 	const minZoom: number = 0.25
@@ -13,40 +14,40 @@ const ZoomTools = () => {
 	const zoomLevels: number[] = generateSteps(minZoom, maxZoom, step)
 	const selectedElement = ''
 
-	const { state, setState } = useContext(GlobalState)
+	const dispatch = useAppDispatch()
+	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 
 	const handleZoomLevel = useCallback(
 		(level: number, delta: number) => {
 			const newLevel = delta < 0 ? Math.max(minZoom, level) : Math.min(maxZoom, level)
 
-			setState({ ...state, ...{ zoomLevel: Math.round(newLevel * 100) / 100 } })
+			dispatch(setZoomLevelState(Math.round(newLevel * 100) / 100))
 		},
-		[setState, state]
+		[dispatch]
 	)
 
 	const setZoom = useCallback(
 		(ev: React.MouseEvent<HTMLButtonElement>, delta: number) => {
 			ev.preventDefault()
 			ev.stopPropagation()
-			const zoomLevel = state.zoomLevel ?? 1
+
 			const level = zoomLevel + step * delta
 			const closest = closestNumber(zoomLevels, level)
 			handleZoomLevel(closest, delta)
 		},
-		[handleZoomLevel, state.zoomLevel, zoomLevels]
+		[handleZoomLevel, zoomLevel, zoomLevels]
 	)
 
 	const handleScroll = useCallback(
 		(ev: WheelEvent) => {
 			if (!ev.metaKey) return
 
-			const zoomLevel = state.zoomLevel ?? 1
 			const delta = ev.deltaY
 			const level = zoomLevel + delta / 100
 			const newLevel = delta < 0 ? Math.max(minZoom, level) : Math.min(maxZoom, level)
 			handleZoomLevel(newLevel, delta)
 		},
-		[handleZoomLevel, state.zoomLevel]
+		[handleZoomLevel, zoomLevel]
 	)
 
 	useEffect(() => {
@@ -59,16 +60,16 @@ const ZoomTools = () => {
 
 	return (
 		<Container>
-			<Level>level: {Math.round((state.zoomLevel ?? 1) * 100) / 100}</Level>
+			<Level>level: {Math.round(zoomLevel * 100) / 100}</Level>
 			<ActionButton
-				disabled={maxZoom === state.zoomLevel || selectedElement !== ''}
+				disabled={maxZoom === zoomLevel || selectedElement !== ''}
 				type="button"
 				onClick={(ev) => setZoom(ev, 1)}>
 				<AddIcon />
 			</ActionButton>
 			<CenterTool />
 			<ActionButton
-				disabled={minZoom === state.zoomLevel || selectedElement !== ''}
+				disabled={minZoom === zoomLevel || selectedElement !== ''}
 				type="button"
 				onClick={(ev) => setZoom(ev, -1)}>
 				<RemoveIcon />

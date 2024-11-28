@@ -1,17 +1,19 @@
-import { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
+import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
 import PositionModel from '../models/PositionModel'
-import { GlobalState } from './Provider'
+import { getPanPositionState, getZoomLevelState, setPanPositionState } from '../store/SettingsSlice'
 
 interface Props {
 	children: JSX.Element
 }
 
 const Pan = ({ children }: Props) => {
-	const { state } = useContext(GlobalState)
+	const dispatch = useAppDispatch()
+	const zoomLevel = useAppSelector<number>(getZoomLevelState)
+	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 
-	//const position =  useAppSelector<BoxPositionModel | undefined>((state) => getPositionState(state, 'root'))
-	const selectedElement = undefined //useAppSelector<string>(getSelectedElementState)
+	const selectedElement = undefined // useAppSelector<string>(getSelectedElementState)
 
 	const [isPanning, setIsPanning] = useState<boolean>(false)
 	const [pageOffset, setPageOffset] = useState<PositionModel>({ x: 0, y: 0 })
@@ -33,6 +35,10 @@ const Pan = ({ children }: Props) => {
 
 		if (ev.button !== 0) return
 
+		const target = ev.target as HTMLElement
+
+		if (!target.hasAttribute('data-container')) return
+
 		setIsPanning(true)
 
 		const offset = panRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
@@ -52,9 +58,12 @@ const Pan = ({ children }: Props) => {
 
 			if (!target.hasAttribute('data-container')) return
 
+			const posX = boxOffset.y + (ev.offsetY - mouseOffset.y) - pageOffset.y
+			const posY = boxOffset.x + (ev.offsetX - mouseOffset.x) - pageOffset.x
+
 			setPos({
-				y: boxOffset.y + (ev.offsetY - mouseOffset.y) - pageOffset.y,
-				x: boxOffset.x + (ev.offsetX - mouseOffset.x) - pageOffset.x
+				y: posX,
+				x: posY
 			})
 		},
 		[boxOffset, pageOffset, mouseOffset, setPos]
@@ -69,15 +78,13 @@ const Pan = ({ children }: Props) => {
 		// Dont save position when dragging when you are dragging when a bubble is selected
 		if (selectedElement !== '' && selectedElement !== undefined) return
 
-		/*
-        TODO: Save position in LocalStorage
-		dispatch(
-			setPositionState({
-				position: posRef.current,
-				id: 'root'
-			})
-		)*/
-	}, [handleMove, selectedElement])
+		dispatch(setPanPositionState(pos))
+	}, [dispatch, handleMove, pos, selectedElement])
+
+	useLayoutEffect(() => {
+		if (!panPosition) return
+		setPos(panPosition)
+	}, [setPos, panPosition])
 
 	useLayoutEffect(() => {
 		const container = document.querySelector<HTMLDivElement>('[data-container]')
@@ -107,7 +114,7 @@ const Pan = ({ children }: Props) => {
 			data-pan
 			ref={panRef}
 			style={{
-				transform: `translate(${pos.x}px, ${pos.y}px) scale(${state.zoomLevel ?? 1})`
+				transform: `translate(${pos.x}px, ${pos.y}px) scale(${zoomLevel})`
 			}}>
 			{children}
 		</Container>
