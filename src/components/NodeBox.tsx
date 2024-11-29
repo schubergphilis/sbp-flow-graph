@@ -28,8 +28,6 @@ const NodeBox = ({ data }: Props) => {
 
 	const timerRef = useRef<NodeJS.Timeout>()
 
-	console.log(positionList)
-
 	useEffect(() => {
 		if (isTriggered) return
 		timerRef.current = setTimeout(() => {

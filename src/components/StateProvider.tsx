@@ -21,7 +21,7 @@ const Container = styled.div`
 	cursor: grab;
 
 	& * {
-		pointer-events: none !important;
+		pointer-events: none;
 	}
 `
 
