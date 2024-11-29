@@ -1,19 +1,30 @@
+import NodeModel from '../models/NodeModel'
 import OffsetModel from '../models/OffsetModel'
 import PositionModel from '../models/PositionModel'
 
 export const AutoPosition = (
+	positionList: NodeModel[] = [],
 	offset: PositionModel = { x: 0, y: 0 },
 	zoomLevel: number = 1,
 	spacing: number = 25
-): void => {
+): NodeModel[] => {
 	const viewport = getWindowDimensions() as unknown as OffsetModel
 
 	const nodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
 
-	nodes.forEach((node) => {
+	const posList = nodes.map((node) => {
 		const type = (node.getAttribute('data-node-type') ?? 'circle') as string
+		const id = node.getAttribute('data-node-id') as string
 
-		const pos: OffsetModel = calculatePosition(node, spacing, viewport, offset, zoomLevel)
+		const savedPos = positionList.find((item) => item.id === id)
+
+		let pos: PositionModel = { x: 0, y: 0 }
+		if (savedPos) {
+			pos = { x: savedPos.x, y: savedPos.y }
+		} else {
+			const randomPos = calculatePosition(node, spacing, viewport, offset, zoomLevel)
+			pos = { x: randomPos.x, y: randomPos.y }
+		}
 
 		node.setAttribute('fill-opacity', '1')
 		node.setAttribute('data-pos', `${pos.x}, ${pos.y}`)
@@ -28,7 +39,11 @@ export const AutoPosition = (
 				node.setAttribute('y', `${pos.y}`)
 				break
 		}
+
+		return { id: id, x: pos.x, y: pos.y }
 	})
+
+	return posList
 }
 
 export const getParentNodePosition = (

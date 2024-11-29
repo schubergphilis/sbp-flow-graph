@@ -1,5 +1,3 @@
-//import { UserDataModel } from './UserDataModel'
-
 import { ProcessType } from '../datatypes/ProcessType'
 
 export interface ProcessModel {
@@ -11,5 +9,4 @@ export interface ProcessModel {
 	clickable?: boolean
 	children?: ProcessModel[]
 	parent?: string // used when flatmapping this tree
-	//userData: UserDataModel
 }

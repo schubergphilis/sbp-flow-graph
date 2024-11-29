@@ -43,6 +43,12 @@
 			"parent": "58dc17b2-2e63-47e1-a0d6-e2b0bcd1b364"
 		},
 		{
+			"id": "fe4017d0-29ce-4f2a-8460-70ddf7c30530",
+			"name": "child 3",
+			"value": 30,
+			"parent": "58dc17b2-2e63-47e1-a0d6-e2b0bcd1b364"
+		},
+		{
 			"id": "437793fe-ca7a-43c3-8c2a-8aa0ecf265a3",
 			"name": "child 3",
 			"value": 60,

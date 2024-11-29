@@ -5,9 +5,11 @@ import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
 import PositionModel from '../models/PositionModel'
 import {
 	getDragElementState,
+	getPanPositionState,
 	getZoomLevelState,
 	setClusterDragState,
-	setDragElementState
+	setDragElementState,
+	setPositionState
 } from '../store/SettingsSlice'
 
 interface Props {
@@ -18,12 +20,11 @@ const Drag = ({ children }: Props) => {
 	const dispatch = useAppDispatch()
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
+	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 
 	const selectedElement = undefined
 
-	const [offset, setOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
-
 	const [targetList, setTargetList] = useState<SVGElement[]>()
 
 	const handleMouseDown = useCallback(
@@ -57,16 +58,10 @@ const Drag = ({ children }: Props) => {
 
 			setMouseOffset({ x: ev.nativeEvent.offsetX, y: ev.nativeEvent.offsetY })
 
-			const offsetTarget = target?.closest<HTMLDivElement>('[data-pan]')
-
-			const offset = offsetTarget?.getBoundingClientRect() ?? { x: 0, y: 0 }
-
 			targets.forEach((target) => {
 				const pos = getNodePosition(target)
 				target.setAttribute('data-pos', `${pos.x},${pos.y}`)
 			})
-
-			setOffset({ x: offset.x, y: offset.y })
 
 			dispatch(setDragElementState(id))
 			dispatch(setClusterDragState(ev.metaKey))
@@ -95,6 +90,8 @@ const Drag = ({ children }: Props) => {
 			// 	}
 			// ])
 
+			const offset = panPosition ?? { x: 0, y: 0 }
+
 			targetList?.forEach((target) => {
 				const boxOffset = getTargetPos(target)
 
@@ -108,18 +105,24 @@ const Drag = ({ children }: Props) => {
 				target.setAttribute('cy', `${pos.y}`)
 			})
 		},
-		[targetList, getTargetPos, zoomLevel, offset, mouseOffset]
+		[targetList, getTargetPos, zoomLevel, panPosition, mouseOffset]
 	)
 
 	const handleMoveEnd = useCallback(() => {
 		dispatch(setDragElementState(undefined))
 		dispatch(setClusterDragState(false))
 
+		targetList?.forEach((target) => {
+			const id = target?.getAttribute('data-node-id') ?? ''
+			const pos = getNodePosition(target, panPosition, zoomLevel)
+			dispatch(setPositionState({ id: id, x: pos.x, y: pos.y }))
+		})
+
 		setTargetList(undefined)
 
 		window.removeEventListener('mousemove', handleMove)
 		window.removeEventListener('mouseup', handleMoveEnd)
-	}, [dispatch, handleMove])
+	}, [dispatch, handleMove, panPosition, targetList, zoomLevel])
 
 	useLayoutEffect(() => {
 		if (!dragElement) return
