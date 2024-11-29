@@ -93,7 +93,9 @@ const Drag = ({ children }: Props) => {
 			const offset = panPosition ?? { x: 0, y: 0 }
 
 			targetList?.forEach((target) => {
+				const box = getNodePosition(target, offset, zoomLevel)
 				const boxOffset = getTargetPos(target)
+				const type = target.getAttribute('data-node-type') ?? 'circle'
 
 				const pos: PositionModel = {
 					x: Math.round((boxOffset.x - offset.x + (ev.clientX - offset.x)) / zoomLevel - mouseOffset.x),
@@ -101,8 +103,15 @@ const Drag = ({ children }: Props) => {
 				}
 
 				// TODO: Circle specific! should not be specific to an element
-				target.setAttribute('cx', `${pos.x}`)
-				target.setAttribute('cy', `${pos.y}`)
+				switch (type) {
+					case 'circle':
+						target.setAttribute('cx', `${pos.x}`)
+						target.setAttribute('cy', `${pos.y}`)
+						break
+					default:
+						target.setAttribute('x', `${pos.x - box.width / 2}`)
+						target.setAttribute('y', `${pos.y - box.height / 2}`)
+				}
 			})
 		},
 		[targetList, getTargetPos, zoomLevel, panPosition, mouseOffset]
@@ -144,7 +153,6 @@ const Container = styled.div`
 	overflow: visible;
 	width: 100%;
 	height: 100%;
-	pointer-events: auto;
 `
 
 export default Drag

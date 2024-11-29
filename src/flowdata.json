@@ -59,6 +59,13 @@
 			"name": "child 3",
 			"value": 140,
 			"parent": "877793fe-ca7a-43c3-8c2a-8aa0ecf265a3"
+		},
+		{
+			"id": "e9c24c94-5175-4f8b-8cb3-b83a25f3ce8f",
+			"name": "child 3",
+			"value": 140,
+			"type": "rect",
+			"parent": "877793fe-ca7a-43c3-8c2a-8aa0ecf265a3"
 		}
 	]
 }

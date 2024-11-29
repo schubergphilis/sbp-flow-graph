@@ -19,10 +19,12 @@ export const AutoPosition = (
 		const savedPos = positionList.find((item) => item.id === id)
 
 		let pos: PositionModel = { x: 0, y: 0 }
+		let randomPos: OffsetModel = { x: 0, y: 0, width: 0, height: 0 }
+
 		if (savedPos) {
 			pos = { x: savedPos.x, y: savedPos.y }
 		} else {
-			const randomPos = calculatePosition(node, spacing, viewport, offset, zoomLevel)
+			randomPos = calculatePosition(node, spacing, viewport, offset, zoomLevel)
 			pos = { x: randomPos.x, y: randomPos.y }
 		}
 
@@ -35,8 +37,8 @@ export const AutoPosition = (
 				node.setAttribute('cy', `${pos.y}`)
 				break
 			default:
-				node.setAttribute('x', `${pos.x}`)
-				node.setAttribute('y', `${pos.y}`)
+				node.setAttribute('x', `${pos.x + randomPos?.width / 2}`)
+				node.setAttribute('y', `${pos.y + randomPos?.height / 2}`)
 				break
 		}
 
@@ -140,7 +142,7 @@ const isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean 
 	return distance <= circle1.width / 2 + circle2.width / 2 // Collision check
 }
 
-const randomCirclePosition = (node: OffsetModel, parent: OffsetModel, spacing: number): PositionModel => {
+const randomPosition = (node: OffsetModel, parent: OffsetModel, spacing: number): PositionModel => {
 	const radius = parent.width / 2 + node.width / 2 + spacing
 
 	const angle = Math.random() * Math.PI * 2
@@ -156,16 +158,8 @@ const randomCirclePosition = (node: OffsetModel, parent: OffsetModel, spacing: n
 const positionNode = (node: SVGElement, spacing: number, offset: PositionModel, zoomLevel: number): OffsetModel => {
 	const nodeOffset = getNodePosition(node, offset, zoomLevel)
 	const parentOffset = getParentNodePosition(node, offset, zoomLevel)
-	const type = (node.getAttribute('data-node-type') ?? 'circle') as string
 
-	let position = { x: 0, y: 0 } as PositionModel
-
-	switch (type) {
-		case 'circle':
-			position = randomCirclePosition(nodeOffset, parentOffset, spacing)
-			break
-		default:
-	}
+	const position = randomPosition(nodeOffset, parentOffset, spacing)
 
 	return { ...position, width: nodeOffset.width, height: nodeOffset.height }
 }
