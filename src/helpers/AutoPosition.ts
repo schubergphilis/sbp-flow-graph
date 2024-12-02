@@ -37,8 +37,8 @@ export const AutoPosition = (
 				node.setAttribute('cy', `${pos.y}`)
 				break
 			default:
-				node.setAttribute('x', `${pos.x + randomPos?.width / 2}`)
-				node.setAttribute('y', `${pos.y + randomPos?.height / 2}`)
+				node.setAttribute('x', `${pos.x - randomPos?.width / 2}`)
+				node.setAttribute('y', `${pos.y - randomPos?.height / 2}`)
 				break
 		}
 
