@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { getNodePosition, getParentNodePosition } from '../helpers/AutoPosition'
+import { getNodePosition, getParentNode, getParentNodePosition } from '../helpers/AutoPosition'
 import { useAppSelector } from '../hooks/ReduxStore'
 import LineModel from '../models/LineModel'
 import PositionModel from '../models/PositionModel'
@@ -30,7 +30,9 @@ const LineBox = () => {
 					end: getParentNodePosition(node, panPosition, zoomLevel),
 					id: node.getAttribute('data-node-id') as string,
 					parentId: node.getAttribute('data-node-parent') as string,
-					text: `${node.getAttribute('data-node-id') as string}`
+					text: `${node.getAttribute('data-node-id') as string}`,
+					startSize: Number(node.getAttribute('data-node-size') ?? 0),
+					endSize: Number(getParentNode(node)?.getAttribute('data-node-size') ?? 0)
 				}))
 		},
 		[panPosition, zoomLevel]

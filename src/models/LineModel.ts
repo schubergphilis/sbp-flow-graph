@@ -6,4 +6,6 @@ export default interface LineModel {
 	id: string
 	parentId: string
 	text?: string
+	startSize: number
+	endSize: number
 }

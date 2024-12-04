@@ -18,15 +18,8 @@ export const AutoPosition = (
 
 		const savedPos = positionList.find((item) => item.id === id)
 
-		let pos: PositionModel = { x: 0, y: 0 }
-		let randomPos: OffsetModel = { x: 0, y: 0, width: 0, height: 0 }
-
-		if (savedPos) {
-			pos = { x: savedPos.x, y: savedPos.y }
-		} else {
-			randomPos = calculatePosition(node, spacing, viewport, offset, zoomLevel)
-			pos = { x: randomPos.x, y: randomPos.y }
-		}
+		const randomPos: OffsetModel = calculatePosition(node, spacing, viewport, offset, zoomLevel)
+		const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : { x: randomPos.x, y: randomPos.y }
 
 		node.setAttribute('fill-opacity', '1')
 		node.setAttribute('data-pos', `${pos.x}, ${pos.y}`)
@@ -48,13 +41,17 @@ export const AutoPosition = (
 	return posList
 }
 
+export const getParentNode = (node: SVGElement): SVGElement | HTMLDivElement | null => {
+	const parentId = node.getAttribute('data-node-parent') as string
+	return document.querySelector<SVGElement>(`[data-node-id=${parentId}]`)
+}
+
 export const getParentNodePosition = (
 	node: SVGElement,
 	offset: PositionModel = { x: 0, y: 0 },
 	zoomLevel: number = 1
 ): OffsetModel => {
-	const parentId = node.getAttribute('data-node-parent') as string
-	const parent = document.querySelector<SVGElement>(`[data-node-id=${parentId}]`)
+	const parent = getParentNode(node)
 
 	return getNodePosition(parent, offset, zoomLevel)
 }

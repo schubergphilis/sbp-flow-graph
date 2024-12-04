@@ -17,6 +17,7 @@ const FlowNode = ({ data: { id, value, root, parent, type = 'circle' } }: Props)
 					data-node-id={`X${id}`}
 					data-node-parent={parent ? `X${parent}` : undefined}
 					data-node-type={type}
+					data-node-size={value / 2}
 					cx="-1000"
 					cy="-1000"
 					fillOpacity={0}
@@ -31,6 +32,7 @@ const FlowNode = ({ data: { id, value, root, parent, type = 'circle' } }: Props)
 					data-node-id={`X${id}`}
 					data-node-parent={parent ? `X${parent}` : undefined}
 					data-node-type={type}
+					data-node-size={value / 2}
 					x="-1000"
 					y="-1000"
 					fillOpacity={0}

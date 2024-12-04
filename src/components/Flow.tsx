@@ -3,6 +3,7 @@ import { ProcessModel } from '../models/ProcessModel'
 import Debug from './Debug'
 import Drag from './Drag'
 import LineBox from './LineBox'
+import Marker from './Marker'
 import NodeBox from './NodeBox'
 import Pan from './Pan'
 import StateProvider from './StateProvider'
@@ -17,6 +18,7 @@ const Flow = ({ data }: Props) => {
 			<Pan>
 				<Drag>
 					<SvgCanvast>
+						<Marker />
 						<LineBox />
 						<NodeBox data={data} />
 						<Debug isDebug={true} />
