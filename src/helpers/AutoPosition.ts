@@ -13,27 +13,22 @@ export const AutoPosition = (
 	const nodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
 
 	const posList = nodes.map((node) => {
-		const type = (node.getAttribute('data-node-type') ?? 'circle') as string
 		const id = node.getAttribute('data-node-id') as string
 
 		const savedPos = positionList.find((item) => item.id === id)
 
-		const randomPos: OffsetModel = calculatePosition(node, spacing, viewport, offset, zoomLevel)
-		const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : { x: randomPos.x, y: randomPos.y }
+		const box: OffsetModel = calculatePosition(node, spacing, viewport, offset, zoomLevel)
+		const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : { x: box.x, y: box.y }
 
-		node.setAttribute('fill-opacity', '1')
 		node.setAttribute('data-pos', `${pos.x}, ${pos.y}`)
 
-		switch (type) {
-			case 'circle':
-				node.setAttribute('cx', `${pos.x}`)
-				node.setAttribute('cy', `${pos.y}`)
-				break
-			default:
-				node.setAttribute('x', `${pos.x - randomPos?.width / 2}`)
-				node.setAttribute('y', `${pos.y - randomPos?.height / 2}`)
-				break
-		}
+		const group = node.closest('g[data-node]')
+
+		if (!group) return { id: id, x: pos.x, y: pos.y }
+
+		group.setAttribute('fill-opacity', '1')
+
+		group?.setAttribute('transform', `translate(${pos.x - box.width / 2}, ${pos.y - box.height / 2})`)
 
 		return { id: id, x: pos.x, y: pos.y }
 	})
@@ -43,7 +38,7 @@ export const AutoPosition = (
 
 export const getParentNode = (node: SVGElement): SVGElement | HTMLDivElement | null => {
 	const parentId = node.getAttribute('data-node-parent') as string
-	return document.querySelector<SVGElement>(`[data-node-id=${parentId}]`)
+	return document.querySelector<SVGElement>(`[data-node-id=${parentId}] circle, [data-node-id=${parentId}] rect`)
 }
 
 export const getParentNodePosition = (

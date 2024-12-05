@@ -25,15 +25,18 @@ const LineBox = () => {
 		(nodes: SVGElement[]): LineModel[] => {
 			return nodes
 				.filter((node) => node.getAttribute('data-node-root') !== 'true')
-				.map<LineModel>((node) => ({
-					start: getNodePosition(node, panPosition, zoomLevel),
-					end: getParentNodePosition(node, panPosition, zoomLevel),
-					id: node.getAttribute('data-node-id') as string,
-					parentId: node.getAttribute('data-node-parent') as string,
-					text: `${node.getAttribute('data-node-id') as string}`,
-					startSize: Number(node.getAttribute('data-node-size') ?? 0),
-					endSize: Number(getParentNode(node)?.getAttribute('data-node-size') ?? 0)
-				}))
+				.map<LineModel>((node) => {
+					const element = node.querySelector('circle, rect') as SVGElement
+					return {
+						start: getNodePosition(element, panPosition, zoomLevel),
+						end: getParentNodePosition(node, panPosition, zoomLevel),
+						id: node.getAttribute('data-node-id') as string,
+						parentId: node.getAttribute('data-node-parent') as string,
+						text: `${node.getAttribute('data-node-id') as string}`,
+						startSize: Number(node.getAttribute('data-node-size') ?? 0),
+						endSize: Number(getParentNode(node)?.getAttribute('data-node-size') ?? 0)
+					}
+				})
 		},
 		[panPosition, zoomLevel]
 	)

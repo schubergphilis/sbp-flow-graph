@@ -1,4 +1,4 @@
-const Marker = () => {
+const SVGMarker = () => {
 	return (
 		<defs>
 			<marker id="arrow" orient="auto" markerWidth="8" markerHeight="16" refX="0.1" refY="8">
@@ -8,4 +8,4 @@ const Marker = () => {
 	)
 }
 
-export default Marker
+export default SVGMarker

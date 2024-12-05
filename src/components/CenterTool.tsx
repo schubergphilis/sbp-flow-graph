@@ -33,7 +33,7 @@ const CenterTool = () => {
 		dispatch(setPanPositionState({ x: centerX, y: centerY }))
 
 		target?.setAttribute('style', `transform: translate(${centerX}px, ${centerY}px) scale(${zoomLevel})`)
-	}, [zoomLevel])
+	}, [dispatch, zoomLevel])
 
 	return (
 		<ActionButton onClick={handleClick}>

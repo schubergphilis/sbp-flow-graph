@@ -33,9 +33,11 @@ const Drag = ({ children }: Props) => {
 
 			if (selectedElement !== '' && selectedElement !== undefined) return
 
-			const target = ev.target as SVGElement
+			const element = ev.target as SVGElement
 
-			if (!target.hasAttribute('data-node')) return
+			const target = element.closest('g[data-node]') as SVGElement
+
+			if (!target || !target?.hasAttribute('data-node')) return
 
 			ev.stopPropagation()
 			ev.preventDefault()
@@ -95,23 +97,17 @@ const Drag = ({ children }: Props) => {
 			targetList?.forEach((target) => {
 				const box = getNodePosition(target, offset, zoomLevel)
 				const boxOffset = getTargetPos(target)
-				const type = target.getAttribute('data-node-type') ?? 'circle'
 
 				const pos: PositionModel = {
 					x: Math.round((boxOffset.x - offset.x + (ev.clientX - offset.x)) / zoomLevel - mouseOffset.x),
 					y: Math.round((boxOffset.y - offset.y + (ev.clientY - offset.y)) / zoomLevel - mouseOffset.y)
 				}
 
-				// TODO: Circle specific! should not be specific to an element
-				switch (type) {
-					case 'circle':
-						target.setAttribute('cx', `${pos.x}`)
-						target.setAttribute('cy', `${pos.y}`)
-						break
-					default:
-						target.setAttribute('x', `${pos.x - box.width / 2}`)
-						target.setAttribute('y', `${pos.y - box.height / 2}`)
-				}
+				const group = target.closest('g[data-node]')
+
+				if (!group) return
+
+				group?.setAttribute('transform', `translate(${pos.x - box.width / 2}, ${pos.y - box.height / 2})`)
 			})
 		},
 		[targetList, getTargetPos, zoomLevel, panPosition, mouseOffset]

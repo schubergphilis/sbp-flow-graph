@@ -1,49 +1,49 @@
 import styled from 'styled-components'
 import { ProcessModel } from '../models/ProcessModel'
+import FlowNodeName from './FlowNodeName'
 
 interface Props {
 	data: ProcessModel
 }
 
-const FlowNode = ({ data: { id, value, root, parent, type = 'circle' } }: Props) => {
+const FlowNode = ({ data: { id, value, root, parent, type = 'circle', name } }: Props) => {
 	return (
-		<Container>
+		<Container
+			data-node-id={`X${id}`}
+			data-node
+			data-node-root={root}
+			data-node-parent={parent ? `X${parent}` : undefined}
+			data-node-type={type}
+			data-node-size={value / 2}
+			fillOpacity={0}
+			transform={'translate(-10000, -10000)'}>
 			{type === 'circle' ? (
-				<circle
-					r={value / 2}
-					fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
-					data-node
-					data-node-root={root}
-					data-node-id={`X${id}`}
-					data-node-parent={parent ? `X${parent}` : undefined}
-					data-node-type={type}
-					data-node-size={value / 2}
-					cx="-1000"
-					cy="-1000"
-					fillOpacity={0}
-				/>
+				<g data-something transform={`translate(${value / 2}, ${value / 2})`}>
+					<circle
+						r={value / 2}
+						fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
+						cx="0"
+						cy="0"
+						style={{ filter: 'url(#dropshadow)' }}
+					/>
+				</g>
 			) : (
 				<rect
 					fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
 					width={value}
 					height={value}
-					data-node
-					data-node-root={root}
-					data-node-id={`X${id}`}
-					data-node-parent={parent ? `X${parent}` : undefined}
-					data-node-type={type}
-					data-node-size={value / 2}
-					x="-1000"
-					y="-1000"
-					fillOpacity={0}
+					x="0"
+					y="0"
+					style={{ filter: 'url(#dropshadow)' }}
 				/>
 			)}
+			<FlowNodeName name={name} value={value} />
 		</Container>
 	)
 }
 
 const Container = styled.g`
-	& > circle,
+	& > g > circle,
 	& > rect {
 		transform-origin: top left;
 		transition: fill-opacity 0.5s ease-in-out;

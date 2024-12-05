@@ -3,10 +3,11 @@ import { ProcessModel } from '../models/ProcessModel'
 import Debug from './Debug'
 import Drag from './Drag'
 import LineBox from './LineBox'
-import Marker from './Marker'
 import NodeBox from './NodeBox'
 import Pan from './Pan'
 import StateProvider from './StateProvider'
+import SVGMarker from './SVGMarker'
+import SVGShadow from './SVGShadow'
 import ZoomTools from './ZoomTools'
 
 interface Props {
@@ -18,10 +19,11 @@ const Flow = ({ data }: Props) => {
 			<Pan>
 				<Drag>
 					<SvgCanvast>
-						<Marker />
+						<SVGShadow />
+						<SVGMarker />
 						<LineBox />
 						<NodeBox data={data} />
-						<Debug isDebug={true} />
+						<Debug isDebug={false} />
 					</SvgCanvast>
 				</Drag>
 			</Pan>
