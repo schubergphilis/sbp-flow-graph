@@ -38,7 +38,7 @@ export const AutoPosition = (
 
 export const getParentNode = (node: SVGElement): SVGElement | HTMLDivElement | null => {
 	const parentId = node.getAttribute('data-node-parent') as string
-	return document.querySelector<SVGElement>(`[data-node-id=${parentId}] circle, [data-node-id=${parentId}] rect`)
+	return document.querySelector<SVGElement>(`[data-node-id=${parentId}]`)
 }
 
 export const getParentNodePosition = (
@@ -46,7 +46,7 @@ export const getParentNodePosition = (
 	offset: PositionModel = { x: 0, y: 0 },
 	zoomLevel: number = 1
 ): OffsetModel => {
-	const parent = getParentNode(node)
+	const parent = getParentNode(node)?.querySelector<SVGElement>('circle, rect') ?? null
 
 	return getNodePosition(parent, offset, zoomLevel)
 }
