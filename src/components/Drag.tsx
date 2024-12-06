@@ -61,7 +61,8 @@ const Drag = ({ children }: Props) => {
 			setMouseOffset({ x: ev.nativeEvent.offsetX, y: ev.nativeEvent.offsetY })
 
 			targets.forEach((target) => {
-				const pos = getNodePosition(target)
+				const node = target.querySelector<SVGElement>('circle, rect') ?? null
+				const pos = getNodePosition(node)
 				target.setAttribute('data-pos', `${pos.x},${pos.y}`)
 			})
 
@@ -95,7 +96,8 @@ const Drag = ({ children }: Props) => {
 			const offset = panPosition ?? { x: 0, y: 0 }
 
 			targetList?.forEach((target) => {
-				const box = getNodePosition(target, offset, zoomLevel)
+				const node = target.querySelector<SVGElement>('circle, rect') ?? null
+				const box = getNodePosition(node, offset, zoomLevel)
 				const boxOffset = getTargetPos(target)
 
 				const pos: PositionModel = {
