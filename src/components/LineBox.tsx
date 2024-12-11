@@ -4,7 +4,15 @@ import { getNodePosition, getParentNode, getParentNodePosition } from '../helper
 import { useAppSelector } from '../hooks/ReduxStore'
 import LineModel from '../models/LineModel'
 import PositionModel from '../models/PositionModel'
-import { getDragElementState, getPanPositionState, getZoomLevelState, isClusterDragState } from '../store/SettingsSlice'
+import { ProcessModel } from '../models/ProcessModel'
+import {
+	getDataListState,
+	getDragElementState,
+	getPanPositionState,
+	getUpdateState,
+	getZoomLevelState,
+	isClusterDragState
+} from '../store/SettingsSlice'
 import Line from './Line'
 
 const LineBox = () => {
@@ -12,6 +20,8 @@ const LineBox = () => {
 	const isClusterDrag = useAppSelector<boolean>(isClusterDragState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
+	const openDataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
+	const update = useAppSelector<number>(getUpdateState)
 
 	const [lines, setLines] = useState<LineModel[]>([])
 	const [draggedLines, setDraggedLines] = useState<LineModel[]>([])
@@ -76,8 +86,8 @@ const LineBox = () => {
 	}, [isClusterDrag, dragElement, getLineData])
 
 	useEffect(() => {
-		timerRef.current = setTimeout(updateAllLines, 2)
-	}, [updateAllLines, zoomLevel])
+		timerRef.current = setTimeout(updateAllLines, 20)
+	}, [updateAllLines, zoomLevel, update, openDataList])
 
 	useEffect(() => {
 		setIsDragging(dragElement !== undefined)

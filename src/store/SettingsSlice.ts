@@ -1,6 +1,7 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { PayloadAction, createSlice, current } from '@reduxjs/toolkit'
 import NodeModel from '../models/NodeModel'
 import PositionModel from '../models/PositionModel'
+import { ProcessModel } from '../models/ProcessModel'
 import { AppState } from '../store/Store'
 
 // Type for our state
@@ -10,11 +11,14 @@ export interface SettingsState {
 	zoomLevel: number
 	panPosition?: PositionModel
 	positionList?: NodeModel[]
+	dataList?: ProcessModel[]
+	update: number
 }
 
 // Initial state
 const initialState: SettingsState = {
-	zoomLevel: 1
+	zoomLevel: 1,
+	update: 1
 }
 
 // Actual Slice
@@ -22,6 +26,9 @@ export const settingsSlice = createSlice({
 	name: 'settings',
 	initialState,
 	reducers: {
+		setUpdateState(state) {
+			state.update = (state.update || 0) + 1
+		},
 		setDragElementState(state, { payload }: PayloadAction<string | undefined>) {
 			state.dragElement = payload
 		},
@@ -35,16 +42,70 @@ export const settingsSlice = createSlice({
 			state.panPosition = payload
 		},
 		setPositionListState(state, { payload }: PayloadAction<NodeModel[]>) {
-			state.positionList = payload
+			const positionList: NodeModel[] = [...(state.positionList ?? [])]
+
+			const list = positionList.map((item) => {
+				const changedItem = payload.find(({ id }) => id === item.id)
+				return changedItem ? changedItem : { ...item, isVisible: false }
+			})
+
+			state.positionList = list.length > 0 ? list : payload
 		},
 		setPositionState(state, { payload }: PayloadAction<NodeModel>) {
-			const list = [...(state.positionList ?? [])]
-			const index = list.findIndex((item) => item.id === payload.id)
+			const positionList: NodeModel[] = [...current(state.positionList ?? [])]
+			const dataList: ProcessModel[] = [...(state.dataList ?? [])]
+
+			// List To Remove
+			const items = dataList
+				.filter(({ parent }) => parent === payload.id)
+				.map<NodeModel>(({ id }) => ({ id: id, isVisible: true, x: 0, y: 0 }))
+
+			// List of found positions
+			const removeList = items
+				.flatMap(({ id }) => positionList.find((item) => item.id === id && item.isVisible === false))
+				.filter((item) => item !== undefined)
+
+			const newPositionList = positionList.filter((item) => {
+				const index = removeList.findIndex(({ id }) => item.id === id)
+				return index >= 0 ? false : true
+			})
+
+			const index = newPositionList.findIndex(({ id }) => id === payload.id)
 
 			// Remove position when found
-			if (index >= 0) list.splice(index, 1)
+			if (index >= 0) newPositionList.splice(index, 1)
 
-			state.positionList = [...list, payload]
+			state.positionList = [...newPositionList, payload]
+		},
+		setVisibleState(state, { payload }: PayloadAction<string>) {
+			const id = payload.replace(/^X/gim, '')
+			let positionList: NodeModel[] = [...current(state.positionList ?? [])]
+			const dataList: ProcessModel[] = [...(state.dataList ?? [])]
+
+			// List To Add
+			let items = dataList
+				.filter(({ parent }) => parent === id)
+				.map<NodeModel>(({ id }) => ({ id: id, isVisible: true, x: 0, y: 0 }))
+
+			// List of found positions
+			const visibleList = items
+				.flatMap(({ id }) => positionList.find((item) => item.id === id))
+				.filter((item) => item !== undefined)
+
+			// Change Visibility on found positions
+			if (visibleList.length > 0) {
+				positionList = positionList.map<NodeModel>((item) => {
+					const index = visibleList.findIndex(({ id }) => item.id === id && item.isVisible === true)
+					return { ...item, isVisible: index >= 0 ? false : true }
+				})
+				items = []
+			}
+
+			state.positionList = [...positionList, ...items]
+			state.update = (state.update || 0) + 1
+		},
+		setDataListState(state, { payload }: PayloadAction<ProcessModel[]>) {
+			state.dataList = payload
 		}
 	}
 })
@@ -59,13 +120,20 @@ export const getPanPositionState = (state: AppState): PositionModel | undefined 
 
 export const getPositionListState = (state: AppState): NodeModel[] | undefined => state.settings.positionList
 
+export const getDataListState = (state: AppState): ProcessModel[] | undefined => state.settings.dataList
+
+export const getUpdateState = (state: AppState): number => state.settings.update
+
 export const {
 	setDragElementState,
 	setClusterDragState,
 	setZoomLevelState,
 	setPanPositionState,
 	setPositionListState,
-	setPositionState
+	setPositionState,
+	setDataListState,
+	setVisibleState,
+	setUpdateState
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

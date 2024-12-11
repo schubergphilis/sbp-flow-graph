@@ -1,8 +1,10 @@
 import NodeModel from '../models/NodeModel'
 import OffsetModel from '../models/OffsetModel'
 import PositionModel from '../models/PositionModel'
+import { ProcessModel } from '../models/ProcessModel'
 
 export const AutoPosition = (
+	nodeList: ProcessModel[] = [],
 	positionList: NodeModel[] = [],
 	offset: PositionModel = { x: 0, y: 0 },
 	zoomLevel: number = 1,
@@ -10,12 +12,10 @@ export const AutoPosition = (
 ): NodeModel[] => {
 	const viewport = getWindowDimensions() as unknown as OffsetModel
 
-	const nodes = [...(document.querySelectorAll<SVGElement>('[data-node]') ?? [])]
+	const posList = nodeList.map(({ id }) => {
+		const node = document.querySelector<SVGElement>(`[data-node-id=X${id}]`)!
 
-	const posList = nodes.map((node) => {
-		const id = node.getAttribute('data-node-id') as string
-
-		const savedPos = positionList.find((item) => item.id === id)
+		const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
 
 		const box: OffsetModel = calculatePosition(node, spacing, viewport, offset, zoomLevel)
 		const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : { x: box.x, y: box.y }
@@ -24,13 +24,13 @@ export const AutoPosition = (
 
 		const group = node.closest('g[data-node]')
 
-		if (!group) return { id: id, x: pos.x, y: pos.y }
+		if (!group) return { id: id, x: pos.x, y: pos.y, isVisible: false }
 
 		group.setAttribute('fill-opacity', '1')
 
 		group?.setAttribute('transform', `translate(${pos.x - box.width / 2}, ${pos.y - box.height / 2})`)
 
-		return { id: id, x: pos.x, y: pos.y }
+		return { id: id, x: pos.x, y: pos.y, isVisible: true }
 	})
 
 	return posList
@@ -148,7 +148,8 @@ const randomPosition = (node: OffsetModel, parent: OffsetModel, spacing: number)
 }
 
 const positionNode = (node: SVGElement, spacing: number, offset: PositionModel, zoomLevel: number): OffsetModel => {
-	const nodeOffset = getNodePosition(node, offset, zoomLevel)
+	const target = node.querySelector<SVGElement>('circle, rect')!
+	const nodeOffset = getNodePosition(target, offset, zoomLevel)
 	const parentOffset = getParentNodePosition(node, offset, zoomLevel)
 
 	const position = randomPosition(nodeOffset, parentOffset, spacing)

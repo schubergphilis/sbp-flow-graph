@@ -6,7 +6,7 @@ export const reducers = combineReducers({
 	[settingsSlice.name]: settingsSlice.reducer
 })
 
-const blockList = ['settings/dragElement', 'settings/isClusterDrag']
+const blockList = ['settings/dragElement', 'settings/isClusterDrag', 'settings/dataList', 'settings/update']
 
 export const store = configureStore({
 	reducer: reducers,

@@ -6,7 +6,7 @@ interface Props {
 	data: ProcessModel
 }
 
-const FlowNode = ({ data: { id, value, root, parent, type = 'circle', name } }: Props) => {
+const FlowNode = ({ data: { id, value, root, parent, type = 'circle', name, hasChildren } }: Props) => {
 	return (
 		<Container
 			data-node-id={`X${id}`}
@@ -15,10 +15,11 @@ const FlowNode = ({ data: { id, value, root, parent, type = 'circle', name } }: 
 			data-node-parent={parent ? `X${parent}` : undefined}
 			data-node-type={type}
 			data-node-size={value / 2}
+			data-node-children={hasChildren}
 			fillOpacity={0}
 			transform={'translate(-10000, -10000)'}>
 			{type === 'circle' ? (
-				<g data-something transform={`translate(${value / 2}, ${value / 2})`}>
+				<g transform={`translate(${value / 2}, ${value / 2})`}>
 					<circle
 						r={value / 2}
 						fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
@@ -48,6 +49,11 @@ const Container = styled.g`
 		transform-origin: top left;
 		transition: fill-opacity 0.5s ease-in-out;
 		pointer-events: auto !important;
+	}
+	cursor: default;
+
+	&[data-node-children]:not([data-node-root]) {
+		cursor: pointer;
 	}
 `
 

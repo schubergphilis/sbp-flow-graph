@@ -1,14 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { AutoPosition } from '../helpers/AutoPosition'
 import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
+import { useDidMountEffect } from '../hooks/UseDidMountEffect'
 import NodeModel from '../models/NodeModel'
 import PositionModel from '../models/PositionModel'
 import { ProcessModel } from '../models/ProcessModel'
 import {
+	getDataListState,
 	getPanPositionState,
 	getPositionListState,
+	getUpdateState,
 	getZoomLevelState,
+	setDataListState,
 	setPositionListState
 } from '../store/SettingsSlice'
 import FlowNode from './FlowNode'
@@ -22,35 +26,69 @@ const NodeBox = ({ data }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
+	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
+	const update = useAppSelector<number>(getUpdateState)
 
 	const [isTriggered, setIsTriggered] = useState<boolean>(false)
-	const [nodeList, setNodeList] = useState<NodeModel[]>([])
+	const [isPositioned, setIsPositioned] = useState<boolean>(false)
 
 	const timerRef = useRef<NodeJS.Timeout>()
 
-	useEffect(() => {
-		if (isTriggered) return
-		timerRef.current = setTimeout(() => {
-			const list = AutoPosition(positionList, panPosition, zoomLevel, 50)
-			setNodeList(list)
-		}, 1)
+	const getDataList = useMemo(() => {
+		return dataList?.filter((item) => positionList?.find(({ id, isVisible }) => id === item.id && isVisible))
+	}, [dataList, positionList])
+
+	const getInitialPositionList = useCallback(() => {
+		const root = data.find(({ root }) => root)
+		return data
+			.filter(({ id, parent }) => id === root?.id || parent === root?.id)
+			.map<NodeModel>(({ id }) => ({ id: id, isVisible: true, x: 0, y: 0 }))
+	}, [data])
+
+	const createDataList = useCallback((data: ProcessModel[]) => {
+		return data.map((item) => {
+			const hasChildren = data.find(({ parent }) => parent === item.id) ? true : undefined
+			return { ...item, hasChildren: hasChildren }
+		})
+	}, [])
+
+	useDidMountEffect(() => {
+		if (isTriggered || positionList) return
+		console.log('--- first time positions ---')
 		setIsTriggered(true)
-	}, [isTriggered, panPosition, positionList, zoomLevel])
+		const list = getInitialPositionList()
+
+		dispatch(setPositionListState(list))
+	}, [dispatch, getInitialPositionList, isTriggered, positionList])
 
 	useEffect(() => {
-		if (nodeList.length === 0) return
-		dispatch(setPositionListState(nodeList))
-	}, [dispatch, nodeList])
+		const list = createDataList(data)
+
+		dispatch(setDataListState(list))
+	}, [dispatch, createDataList, data])
+
+	useEffect(() => {
+		const dataList = getDataList
+
+		if (isPositioned || !dataList) return
+
+		timerRef.current = setTimeout(() => {
+			const list = AutoPosition(dataList, positionList, panPosition, zoomLevel, 50)
+
+			if (list.length > 0) {
+				dispatch(setPositionListState(list))
+				console.log('--- auto position ---')
+			}
+			setIsPositioned(true)
+		}, 1)
+	}, [dispatch, getDataList, isPositioned, panPosition, positionList, zoomLevel])
+
+	useDidMountEffect(() => {
+		setIsPositioned(false)
+	}, [update])
 
 	return (
-		<Container data-node-group>
-			{data
-				// .slice(0, 2)
-				// .reverse()
-				.map((node, index) => (
-					<FlowNode key={index} data={node} />
-				))}
-		</Container>
+		<Container data-node-group>{getDataList?.map((node, index) => <FlowNode key={index} data={node} />)}</Container>
 	)
 }
 

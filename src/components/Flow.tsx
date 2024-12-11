@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import { ProcessModel } from '../models/ProcessModel'
+import Click from './Click'
 import Debug from './Debug'
 import Drag from './Drag'
 import LineBox from './LineBox'
@@ -18,13 +19,15 @@ const Flow = ({ data }: Props) => {
 		<StateProvider>
 			<Pan>
 				<Drag>
-					<SvgCanvast>
-						<SVGShadow />
-						<SVGMarker />
-						<LineBox />
-						<NodeBox data={data} />
-						<Debug isDebug={false} />
-					</SvgCanvast>
+					<Click>
+						<SvgCanvast>
+							<SVGShadow />
+							<SVGMarker />
+							<LineBox />
+							<NodeBox data={data} />
+							<Debug isDebug={false} />
+						</SvgCanvast>
+					</Click>
 				</Drag>
 			</Pan>
 			<ZoomTools />
@@ -36,5 +39,6 @@ const SvgCanvast = styled.svg`
 	width: 100%;
 	height: 100%;
 	overflow: visible;
+	border: 1px solid red;
 `
 export default Flow

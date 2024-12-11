@@ -5,8 +5,7 @@ export interface ProcessModel {
 	name?: string
 	value: number
 	root?: boolean
-	type: ProcessType
-	clickable?: boolean
-	children?: ProcessModel[]
-	parent?: string // used when flatmapping this tree
+	type?: ProcessType
+	hasChildren?: boolean
+	parent?: string
 }

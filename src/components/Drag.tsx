@@ -4,7 +4,6 @@ import { getNodePosition } from '../helpers/AutoPosition'
 import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
 import PositionModel from '../models/PositionModel'
 import {
-	getDragElementState,
 	getPanPositionState,
 	getZoomLevelState,
 	setClusterDragState,
@@ -18,7 +17,6 @@ interface Props {
 
 const Drag = ({ children }: Props) => {
 	const dispatch = useAppDispatch()
-	const dragElement = useAppSelector<string | undefined>(getDragElementState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 
@@ -26,6 +24,8 @@ const Drag = ({ children }: Props) => {
 
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [targetList, setTargetList] = useState<SVGElement[]>()
+	const [startDragging, setStartDragging] = useState<boolean>(false)
+	const [isDragging, setIsDragging] = useState<boolean>(false)
 
 	const handleMouseDown = useCallback(
 		(ev: React.MouseEvent<HTMLDivElement>) => {
@@ -48,12 +48,8 @@ const Drag = ({ children }: Props) => {
 
 			if (ev.metaKey) {
 				targets = [...document.querySelectorAll<SVGElement>(`[data-node-parent=${id}],[data-node-id=${id}]`)]
-
-				console.log('--- Drag Start ---', id)
 			} else {
 				targets = [target]
-
-				console.log('--- Drag Cluster Start ---', id)
 			}
 
 			setTargetList(targets)
@@ -66,7 +62,8 @@ const Drag = ({ children }: Props) => {
 				target.setAttribute('data-pos', `${pos.x},${pos.y}`)
 			})
 
-			dispatch(setDragElementState(id))
+			setStartDragging(true)
+
 			dispatch(setClusterDragState(ev.metaKey))
 		},
 		[selectedElement, dispatch]
@@ -81,6 +78,17 @@ const Drag = ({ children }: Props) => {
 		(ev: MouseEvent) => {
 			ev.stopPropagation()
 			ev.preventDefault()
+
+			if (!isDragging) {
+				const element = ev.target as SVGElement
+
+				const target = element.closest('g[data-node]') as SVGElement
+				const id = target?.getAttribute('data-node-id') ?? ''
+				dispatch(setDragElementState(id))
+				setIsDragging(true)
+
+				console.log(`--- Drag ${(targetList?.length ?? 0) > 1 ? 'Cluster ' : ''}Start ---`, id)
+			}
 
 			// console.table([
 			// 	{
@@ -112,27 +120,35 @@ const Drag = ({ children }: Props) => {
 				group?.setAttribute('transform', `translate(${pos.x - box.width / 2}, ${pos.y - box.height / 2})`)
 			})
 		},
-		[targetList, getTargetPos, zoomLevel, panPosition, mouseOffset]
+		[isDragging, panPosition, targetList, dispatch, zoomLevel, getTargetPos, mouseOffset.x, mouseOffset.y]
 	)
 
 	const handleMoveEnd = useCallback(() => {
 		dispatch(setDragElementState(undefined))
 		dispatch(setClusterDragState(false))
 
+		setStartDragging(false)
+
+		if (!isDragging) return
+
+		setIsDragging(false)
+
 		targetList?.forEach((target) => {
-			const id = target?.getAttribute('data-node-id') ?? ''
-			const pos = getNodePosition(target, panPosition, zoomLevel)
-			dispatch(setPositionState({ id: id, x: pos.x, y: pos.y }))
+			const node = target.querySelector<SVGElement>('circle, rect') ?? null
+			const id = (target?.getAttribute('data-node-id') ?? '').replace(/^X/gim, '')
+			const pos = getNodePosition(node, panPosition, zoomLevel)
+			target.setAttribute('data-pos', `${pos.x},${pos.y}`)
+			dispatch(setPositionState({ id: id, x: pos.x, y: pos.y, isVisible: true }))
 		})
 
 		setTargetList(undefined)
 
 		window.removeEventListener('mousemove', handleMove)
 		window.removeEventListener('mouseup', handleMoveEnd)
-	}, [dispatch, handleMove, panPosition, targetList, zoomLevel])
+	}, [dispatch, handleMove, isDragging, panPosition, targetList, zoomLevel])
 
 	useLayoutEffect(() => {
-		if (!dragElement) return
+		if (!startDragging) return
 
 		document.addEventListener('mousemove', handleMove)
 		document.addEventListener('mouseup', handleMoveEnd)
@@ -141,7 +157,7 @@ const Drag = ({ children }: Props) => {
 			document.removeEventListener('mousemove', handleMove)
 			document.removeEventListener('mouseup', handleMoveEnd)
 		}
-	}, [dragElement, handleMove, handleMoveEnd])
+	}, [startDragging, handleMove, handleMoveEnd])
 
 	return <Container onMouseDown={handleMouseDown}>{children}</Container>
 }
