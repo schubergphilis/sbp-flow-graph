@@ -52,21 +52,20 @@ export const settingsSlice = createSlice({
 			state.positionList = list.length > 0 ? list : payload
 		},
 		setPositionState(state, { payload }: PayloadAction<NodeModel>) {
+			const id = payload.id
 			const positionList: NodeModel[] = [...current(state.positionList ?? [])]
 			const dataList: ProcessModel[] = [...(state.dataList ?? [])]
 
-			// List To Remove
-			const items = dataList
-				.filter(({ parent }) => parent === payload.id)
-				.map<NodeModel>(({ id }) => ({ id: id, isVisible: true, x: 0, y: 0 }))
+			// List To Affected Nodes
+			const items = getVisibilityNodes(dataList, false, id)
 
 			// List of found positions
-			const removeList = items
+			const foundList = items
 				.flatMap(({ id }) => positionList.find((item) => item.id === id && item.isVisible === false))
 				.filter((item) => item !== undefined)
 
 			const newPositionList = positionList.filter((item) => {
-				const index = removeList.findIndex(({ id }) => item.id === id)
+				const index = foundList.findIndex(({ id }) => item.id === id)
 				return index >= 0 ? false : true
 			})
 
@@ -94,16 +93,16 @@ export const settingsSlice = createSlice({
 			console.log(showNodes, items)
 
 			// List of found positions
-			const visibleList = items
+			const foundList = items
 				.map(({ id }) => positionList.find((item) => item.id === id))
 				.filter((item) => item !== undefined)
 
 			// Change Visibility on found positions
-			if (!showNodes) {
+			if (foundList.length > 0) {
 				positionList = positionList.map<NodeModel>((item) => {
-					const index = visibleList.findIndex(({ id }) => item.id === id && item.isVisible === !showNodes)
+					const index = foundList.findIndex(({ id }) => item.id === id && item.isVisible === !showNodes)
 
-					return { ...item, isVisible: index >= 0 ? false : item.isVisible }
+					return { ...item, isVisible: index >= 0 ? (showNodes ? true : false) : item.isVisible }
 				})
 				items = []
 			}
