@@ -79,7 +79,13 @@ const Drag = ({ children }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
-			if (!isDragging) {
+			const offset = panPosition ?? { x: 0, y: 0 }
+
+			const threshold = 10
+			const thresholdX = Math.abs(ev.clientX - mouseOffset.x - offset.x) > threshold
+			const thresholdY = Math.abs(ev.clientY - mouseOffset.y - offset.y) > threshold
+
+			if (!isDragging && (thresholdX || thresholdY)) {
 				const element = ev.target as SVGElement
 
 				const target = element.closest('g[data-node]') as SVGElement
@@ -89,19 +95,6 @@ const Drag = ({ children }: Props) => {
 
 				console.log(`--- Drag ${(targetList?.length ?? 0) > 1 ? 'Cluster ' : ''}Start ---`, id)
 			}
-
-			// console.table([
-			// 	{
-			// 		boxOffset: boxOffset.x,
-			// 		offset: offset.x,
-			// 		client: ev.clientX,
-			// 		mouseOffset: mouseOffset.x,
-			// 		pos: pos.x,
-			// 		mouseX: ev.clientX - mouseOffset.x - offset.x
-			// 	}
-			// ])
-
-			const offset = panPosition ?? { x: 0, y: 0 }
 
 			targetList?.forEach((target) => {
 				const node = target.querySelector<SVGElement>('circle, rect') ?? null
