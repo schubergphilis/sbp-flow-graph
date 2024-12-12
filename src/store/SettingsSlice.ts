@@ -82,21 +82,28 @@ export const settingsSlice = createSlice({
 			let positionList: NodeModel[] = [...current(state.positionList ?? [])]
 			const dataList: ProcessModel[] = [...(state.dataList ?? [])]
 
-			// List To Add
-			let items = dataList
-				.filter(({ parent }) => parent === id)
-				.map<NodeModel>(({ id }) => ({ id: id, isVisible: true, x: 0, y: 0 }))
+			const child = dataList.find(({ parent }) => parent === id)
+
+			if (!child) return
+
+			const showNodes = !(positionList.find(({ id }) => id === child.id)?.isVisible ?? false)
+
+			// List To Affected Nodes
+			let items = getVisibilityNodes(dataList, showNodes, id)
+
+			console.log(showNodes, items)
 
 			// List of found positions
 			const visibleList = items
-				.flatMap(({ id }) => positionList.find((item) => item.id === id))
+				.map(({ id }) => positionList.find((item) => item.id === id))
 				.filter((item) => item !== undefined)
 
 			// Change Visibility on found positions
-			if (visibleList.length > 0) {
+			if (!showNodes) {
 				positionList = positionList.map<NodeModel>((item) => {
-					const index = visibleList.findIndex(({ id }) => item.id === id && item.isVisible === true)
-					return { ...item, isVisible: index >= 0 ? false : true }
+					const index = visibleList.findIndex(({ id }) => item.id === id && item.isVisible === !showNodes)
+
+					return { ...item, isVisible: index >= 0 ? false : item.isVisible }
 				})
 				items = []
 			}
@@ -109,6 +116,22 @@ export const settingsSlice = createSlice({
 		}
 	}
 })
+
+const getVisibilityNodes = (list: ProcessModel[], showNodes: boolean, id: string): NodeModel[] => {
+	const items = list
+		.filter(({ parent }) => parent === id)
+		.flatMap<NodeModel>(({ id, hasChildren }) => {
+			let childList: NodeModel[] = []
+			if (hasChildren && !showNodes) {
+				const nodes = getVisibilityNodes(list, showNodes, id)
+				childList = [...childList, ...nodes]
+			}
+			childList.push({ id: id, isVisible: true, x: 0, y: 0 })
+			return childList
+		})
+
+	return items
+}
 
 export const getDragElementState = (state: AppState): string | undefined => state.settings.dragElement
 

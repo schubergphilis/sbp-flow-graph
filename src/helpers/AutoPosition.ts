@@ -12,12 +12,12 @@ export const AutoPosition = (
 ): NodeModel[] => {
 	const viewport = getWindowDimensions() as unknown as OffsetModel
 
-	const posList = nodeList.map(({ id }) => {
+	const posList = nodeList.map(({ id, hasChildren }) => {
 		const node = document.querySelector<SVGElement>(`[data-node-id=X${id}]`)!
 
 		const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
 
-		const box: OffsetModel = calculatePosition(node, spacing, viewport, offset, zoomLevel)
+		const box: OffsetModel = calculatePosition(node, hasChildren ?? false, spacing, viewport, offset, zoomLevel)
 		const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : { x: box.x, y: box.y }
 
 		node.setAttribute('data-pos', `${pos.x}, ${pos.y}`)
@@ -88,15 +88,9 @@ const getParentChildList = (node: SVGElement, offset: PositionModel, zoomLevel: 
 	return childList.map((child) => getNodePosition(child, offset, zoomLevel))
 }
 
-const getNodeChildList = (node: SVGElement, offset: PositionModel, zoomLevel: number): OffsetModel[] => {
-	const nodeId = node.getAttribute('data-node-id') as string
-	const childList = [...(document.querySelectorAll<SVGElement>(`[data-node-parent=${nodeId}]`) ?? [])]
-
-	return childList.map((child) => getNodePosition(child, offset, zoomLevel))
-}
-
 const calculatePosition = (
 	node: SVGElement,
+	hasChildren: boolean,
 	spacing: number,
 	viewport: OffsetModel,
 	offset: PositionModel,
@@ -105,14 +99,13 @@ const calculatePosition = (
 	const isRoot = (node.getAttribute('data-node-root') ?? false) as boolean
 
 	const parentChildList = getParentChildList(node, offset, zoomLevel)
-	const nodeChildList = getNodeChildList(node, offset, zoomLevel)
 
 	let freeSpace = 0
 	let pos = { x: 0, y: 0 } as OffsetModel
 	let i = 0
 
 	do {
-		pos = positionNode(node, nodeChildList.length > 0 ? spacing * 4 : spacing, offset, zoomLevel)
+		pos = positionNode(node, hasChildren ? spacing * 3 : spacing, offset, zoomLevel)
 		freeSpace = parentChildList.find((child) => isCircleColliding(child, pos) && child) === undefined ? 1 : 0
 		i++
 	} while (freeSpace < 1 || (freeSpace == 0 && i < 20))
