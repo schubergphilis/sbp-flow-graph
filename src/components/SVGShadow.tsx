@@ -1,6 +1,6 @@
 const SVGShadow = () => {
 	return (
-		<filter id="dropshadow" height="130%">
+		<filter id="dropshadow" height="150%" width="150%">
 			<feGaussianBlur in="SourceAlpha" stdDeviation="4" />
 			<feOffset dx="0" dy="1.5" result="offsetblur" />
 			<feComponentTransfer>

@@ -1,12 +1,15 @@
 import styled from 'styled-components'
 import { ProcessModel } from '../models/ProcessModel'
+import FlowNodeIcon from './FlowNodeIcon'
 import FlowNodeName from './FlowNodeName'
 
 interface Props {
 	data: ProcessModel
 }
 
-const FlowNode = ({ data: { id, value, root, parent, type = 'circle', name, hasChildren } }: Props) => {
+const FlowNode = ({
+	data: { id, value, root, parent, type = 'circle', name, icon, hasChildren, status, childStatus }
+}: Props) => {
 	return (
 		<Container
 			data-node-id={`X${id}`}
@@ -21,23 +24,46 @@ const FlowNode = ({ data: { id, value, root, parent, type = 'circle', name, hasC
 			{type === 'circle' ? (
 				<g transform={`translate(${value / 2}, ${value / 2})`}>
 					<circle
-						r={value / 2}
+						data-node-status={status}
 						fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
+						r={value / 2}
 						cx="0"
 						cy="0"
 						style={{ filter: 'url(#dropshadow)' }}
 					/>
+					<circle
+						data-child-status={childStatus}
+						strokeWidth={value / 10}
+						fill="transparent"
+						r={value / 2 - value / 20}
+						cx="0"
+						cy="0"
+					/>
 				</g>
 			) : (
-				<rect
-					fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
-					width={value}
-					height={value}
-					x="0"
-					y="0"
-					style={{ filter: 'url(#dropshadow)' }}
-				/>
+				<g>
+					<rect
+						data-node-status={status}
+						fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
+						width={value}
+						height={value}
+						x="0"
+						y="0"
+						style={{ filter: 'url(#dropshadow)' }}
+					/>
+
+					<rect
+						data-child-status={childStatus}
+						strokeWidth={value / 10}
+						fill="transparent"
+						width={value - value / 10}
+						height={value - value / 10}
+						x={value / 20}
+						y={value / 20}
+					/>
+				</g>
 			)}
+			{icon && <FlowNodeIcon name={icon} value={value} />}
 			<FlowNodeName name={name} value={value} />
 		</Container>
 	)
@@ -45,11 +71,36 @@ const FlowNode = ({ data: { id, value, root, parent, type = 'circle', name, hasC
 
 const Container = styled.g`
 	& > g > circle,
-	& > rect {
+	& > g > rect {
 		transform-origin: top left;
 		transition: fill-opacity 0.5s ease-in-out;
 		pointer-events: auto !important;
 	}
+
+	& > g > [data-node-status='P1'] {
+		fill: ${({ theme }) => theme.style.notificationErrorColorBg};
+	}
+
+	& > g > [data-node-status='P0'] {
+		fill: ${({ theme }) => theme.style.notificationSuccessColorBg};
+	}
+
+	& > g > [data-node-status='P99'] {
+		fill: ${({ theme }) => theme.style.notificationWarningColorBg};
+	}
+
+	& > g > [data-child-status='P1'] {
+		stroke: ${({ theme }) => theme.style.notificationErrorColorBg};
+	}
+
+	& > g > [data-child-status='P0'] {
+		stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
+	}
+
+	& > g > [data-child-status='P99'] {
+		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
+	}
+
 	cursor: default;
 
 	&[data-node-children]:not([data-node-root]) {

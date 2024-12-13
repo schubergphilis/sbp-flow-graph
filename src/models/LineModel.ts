@@ -1,3 +1,4 @@
+import { StatusType } from '../datatypes/StatusType'
 import PositionModel from './PositionModel'
 
 export default interface LineModel {
@@ -8,4 +9,5 @@ export default interface LineModel {
 	text?: string
 	startSize: number
 	endSize: number
+	status: StatusType
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
+import { StatusType } from '../datatypes/StatusType'
 import { getNodePosition, getParentNode, getParentNodePosition } from '../helpers/AutoPosition'
 import { useAppSelector } from '../hooks/ReduxStore'
 import LineModel from '../models/LineModel'
@@ -44,7 +45,8 @@ const LineBox = () => {
 						parentId: node.getAttribute('data-node-parent') as string,
 						text: `${node.getAttribute('data-node-id') as string}`,
 						startSize: Number(node.getAttribute('data-node-size') ?? 0),
-						endSize: Number(getParentNode(node)?.getAttribute('data-node-size') ?? 0)
+						endSize: Number(getParentNode(node)?.getAttribute('data-node-size') ?? 0),
+						status: `${element.getAttribute('data-node-status') as StatusType}`
 					}
 				})
 		},

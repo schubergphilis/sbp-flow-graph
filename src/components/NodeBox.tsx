@@ -48,7 +48,10 @@ const NodeBox = ({ data }: Props) => {
 	const createDataList = useCallback((data: ProcessModel[]) => {
 		return data.map((item) => {
 			const hasChildren = data.find(({ parent }) => parent === item.id) ? true : undefined
-			return { ...item, hasChildren: hasChildren }
+			const childStatus = data.find(
+				({ parent, status }) => parent === item.id && status !== 'P0' && status !== 'P'
+			)?.status
+			return { ...item, hasChildren: hasChildren, childStatus: childStatus }
 		})
 	}, [])
 

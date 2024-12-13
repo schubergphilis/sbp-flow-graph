@@ -5,7 +5,7 @@ interface Props {
 	data: LineModel
 }
 
-const Line = ({ data: { start, end, text, startSize, endSize } }: Props) => {
+const Line = ({ data: { start, end, text, startSize, endSize, status } }: Props) => {
 	const angle = (Math.atan2(start.x - end.x, start.y - end.y) * 180) / Math.PI
 
 	const startAngle = Math.atan2(end.y - start.y, end.x - start.x)
@@ -31,7 +31,7 @@ const Line = ({ data: { start, end, text, startSize, endSize } }: Props) => {
 						: 0
 
 	return (
-		<Container>
+		<Container data-line-status={status}>
 			<text
 				x={start.x}
 				y={start.y}
@@ -58,6 +58,18 @@ const Container = styled.g`
 	pointer-events: none;
 	& > text {
 		user-select: none;
+	}
+
+	&[data-line-status='P1'] > path {
+		stroke: ${({ theme }) => theme.style.notificationErrorColorBg};
+	}
+
+	&[data-line-status='P0'] > path {
+		stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
+	}
+
+	&[data-line-status='P99'] > path {
+		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
 	}
 `
 export default Line
