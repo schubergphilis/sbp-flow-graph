@@ -1,7 +1,7 @@
 {
 	"name": "sbp-flow-graph",
 	"private": true,
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"type": "module",
 	"types": "./dist/index.d.ts",
 	"exports": {
@@ -22,8 +22,19 @@
 		"build": "yarn clean && rollup -c --bundleConfigAsCjs",
 		"release": "standard-version"
 	},
-	"dependencies": {},
-	"peerDependencies": {},
+	"peerDependencies": {
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0"
+	},
+	"resolutions": {
+		"react-element-to-jsx-string/react": "19.0.0"
+	},
+	"overrides": {
+		"react-element-to-jsx-string/react": "19.0.0"
+	},
+	"dependencies": {
+		"styled-components": "6.1.15"
+	},
 	"devDependencies": {
 		"@open-wc/building-rollup": "^3.0.2",
 		"@reduxjs/toolkit": "^2.6.0",
@@ -58,7 +69,6 @@
 		"rollup-plugin-typescript": "^1.0.1",
 		"rollup-plugin-typescript2": "^0.36.0",
 		"standard-version": "^9.5.0",
-		"styled-components": "6.1.15",
 		"typescript": "^5.7.3",
 		"vite": "^6.1.1",
 		"vite-tsconfig-paths": "^5.1.4"
