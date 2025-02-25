@@ -1,7 +1,7 @@
 {
 	"name": "sbp-flow-graph",
 	"private": true,
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"type": "module",
 	"types": "./dist/index.d.ts",
 	"exports": {
@@ -22,12 +22,10 @@
 		"build": "yarn clean && rollup -c --bundleConfigAsCjs",
 		"release": "standard-version"
 	},
-	"dependencies": {},
-	"peerDependencies": {
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0",
+	"dependencies": {
 		"styled-components": "6.1.15"
 	},
+	"peerDependencies": {},
 	"devDependencies": {
 		"@open-wc/building-rollup": "^3.0.2",
 		"@reduxjs/toolkit": "^2.6.0",
@@ -49,6 +47,8 @@
 		"eslint-plugin-react-refresh": "^0.4.19",
 		"prettier": "^3.5.2",
 		"prettier-plugin-organize-imports": "^4.1.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
 		"react-redux": "^9.2.0",
 		"rollup": "^4.30.1",
 		"rollup-plugin-delete": "^2.1.0",
