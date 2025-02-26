@@ -1,5 +1,5 @@
+import LineModel from '@models/LineModel'
 import styled from 'styled-components'
-import LineModel from '../models/LineModel'
 
 interface Props {
 	data: LineModel
@@ -60,15 +60,15 @@ const Container = styled.g`
 		user-select: none;
 	}
 
-	&[data-line-status='P1'] > path {
+	&[data-line-status='Error'] > path {
 		stroke: ${({ theme }) => theme.style.notificationErrorColorBg};
 	}
 
-	&[data-line-status='P0'] > path {
+	&[data-line-status='Success'] > path {
 		stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
 	}
 
-	&[data-line-status='P99'] > path {
+	&[data-line-status='Unknown'] > path {
 		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
 	}
 `

@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import styled from 'styled-components'
-import { StatusType } from '../datatypes/StatusType'
-import { getNodePosition, getParentNode, getParentNodePosition } from '../helpers/AutoPosition'
-import { useAppSelector } from '../hooks/ReduxStore'
-import LineModel from '../models/LineModel'
-import PositionModel from '../models/PositionModel'
-import { ProcessModel } from '../models/ProcessModel'
+import { StatusType } from '@datatypes/StatusType'
+import { getNodePosition, getParentNode, getParentNodePosition } from '@helpers/AutoPosition'
+import { useAppSelector } from '@hooks/ReduxStore'
+import LineModel from '@models/LineModel'
+import PositionModel from '@models/PositionModel'
+import ProcessModel from '@models/ProcessModel'
 import {
 	getDataListState,
 	getDragElementState,
@@ -13,7 +11,9 @@ import {
 	getUpdateState,
 	getZoomLevelState,
 	isClusterDragState
-} from '../store/SettingsSlice'
+} from '@store/SettingsSlice'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import styled from 'styled-components'
 import Line from './Line'
 
 const LineBox = () => {
@@ -29,8 +29,8 @@ const LineBox = () => {
 
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 
-	const timerRef = useRef<NodeJS.Timeout>()
-	const updateRef = useRef<NodeJS.Timeout>()
+	const timerRef = useRef<NodeJS.Timeout>(undefined)
+	const updateRef = useRef<NodeJS.Timeout>(undefined)
 
 	const getLineData = useCallback(
 		(nodes: SVGElement[]): LineModel[] => {

@@ -1,15 +1,15 @@
-import { useCallback, useLayoutEffect, useState } from 'react'
-import styled from 'styled-components'
-import { getNodePosition } from '../helpers/AutoPosition'
-import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
-import PositionModel from '../models/PositionModel'
+import { getNodePosition } from '@helpers/AutoPosition'
+import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
+import PositionModel from '@models/PositionModel'
 import {
 	getPanPositionState,
 	getZoomLevelState,
 	setClusterDragState,
 	setDragElementState,
 	setPositionState
-} from '../store/SettingsSlice'
+} from '@store/SettingsSlice'
+import { useCallback, useLayoutEffect, useState } from 'react'
+import styled from 'styled-components'
 
 interface Props {
 	children: JSX.Element

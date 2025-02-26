@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import styled from 'styled-components'
-import { AutoPosition } from '../helpers/AutoPosition'
-import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
-import { useDidMountEffect } from '../hooks/UseDidMountEffect'
-import NodeModel from '../models/NodeModel'
-import PositionModel from '../models/PositionModel'
-import { ProcessModel } from '../models/ProcessModel'
+import { AutoPosition } from '@helpers/AutoPosition'
+import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
+import { useDidMountEffect } from '@hooks/UseDidMountEffect'
+import NodeModel from '@models/NodeModel'
+import PositionModel from '@models/PositionModel'
+import ProcessModel from '@models/ProcessModel'
 import {
 	getDataListState,
 	getPanPositionState,
@@ -14,7 +12,9 @@ import {
 	getZoomLevelState,
 	setDataListState,
 	setPositionListState
-} from '../store/SettingsSlice'
+} from '@store/SettingsSlice'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import styled from 'styled-components'
 import FlowNode from './FlowNode'
 
 interface Props {
@@ -32,7 +32,7 @@ const NodeBox = ({ data }: Props) => {
 	const [isTriggered, setIsTriggered] = useState<boolean>(false)
 	const [isPositioned, setIsPositioned] = useState<boolean>(false)
 
-	const timerRef = useRef<NodeJS.Timeout>()
+	const timerRef = useRef<NodeJS.Timeout>(undefined)
 
 	const getDataList = useMemo(() => {
 		return dataList?.filter((item) => positionList?.find(({ id, isVisible }) => id === item.id && isVisible))
@@ -49,7 +49,7 @@ const NodeBox = ({ data }: Props) => {
 		return data.map((item) => {
 			const hasChildren = data.find(({ parent }) => parent === item.id) ? true : undefined
 			const childStatus = data.find(
-				({ parent, status }) => parent === item.id && status !== 'P0' && status !== 'P'
+				({ parent, status }) => parent === item.id && status !== 'Success' && status !== 'Unknown'
 			)?.status
 			return { ...item, hasChildren: hasChildren, childStatus: childStatus }
 		})

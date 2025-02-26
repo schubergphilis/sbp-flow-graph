@@ -1,6 +1,6 @@
+import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
+import { getDragElementState, setVisibleState } from '@store/SettingsSlice'
 import { useCallback, useLayoutEffect } from 'react'
-import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
-import { getDragElementState, setVisibleState } from '../store/SettingsSlice'
 
 interface Props {
 	children: JSX.Element

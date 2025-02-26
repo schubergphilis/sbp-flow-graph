@@ -1,22 +1,24 @@
+import Click from '@components/Click'
+import Debug from '@components/Debug'
+import Drag from '@components/Drag'
+import LineBox from '@components/LineBox'
+import NodeBox from '@components/NodeBox'
+import Pan from '@components/Pan'
+import StateProvider from '@components/StateProvider'
+import SVGMarker from '@components/SVGMarker'
+import SVGShadow from '@components/SVGShadow'
+import ZoomTools from '@components/ZoomTools'
+import ProcessModel from '@models/ProcessModel'
 import styled from 'styled-components'
-import { ProcessModel } from '../models/ProcessModel'
-import Click from './Click'
-import Debug from './Debug'
-import Drag from './Drag'
-import LineBox from './LineBox'
-import NodeBox from './NodeBox'
-import Pan from './Pan'
-import StateProvider from './StateProvider'
-import SVGMarker from './SVGMarker'
-import SVGShadow from './SVGShadow'
-import ZoomTools from './ZoomTools'
 
 interface Props {
 	data: ProcessModel[]
+	isDebug?: boolean
 }
-const Flow = ({ data }: Props) => {
+
+const Flow = ({ data, isDebug = false }: Props) => {
 	return (
-		<StateProvider>
+		<StateProvider isDebug={isDebug}>
 			<Pan>
 				<Drag>
 					<Click>
@@ -25,7 +27,7 @@ const Flow = ({ data }: Props) => {
 							<SVGMarker />
 							<LineBox />
 							<NodeBox data={data} />
-							<Debug isDebug={false} />
+							<Debug isDebug={isDebug} />
 						</SvgCanvast>
 					</Click>
 				</Drag>
@@ -39,6 +41,5 @@ const SvgCanvast = styled.svg`
 	width: 100%;
 	height: 100%;
 	overflow: visible;
-	border: 1px solid red;
 `
 export default Flow

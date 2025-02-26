@@ -1,5 +1,5 @@
+import ProcessModel from '@models/ProcessModel'
 import styled from 'styled-components'
-import { ProcessModel } from '../models/ProcessModel'
 import FlowNodeIcon from './FlowNodeIcon'
 import FlowNodeName from './FlowNodeName'
 
@@ -77,27 +77,27 @@ const Container = styled.g`
 		pointer-events: auto !important;
 	}
 
-	& > g > [data-node-status='P1'] {
+	& > g > [data-node-status='Error'] {
 		fill: ${({ theme }) => theme.style.notificationErrorColorBg};
 	}
 
-	& > g > [data-node-status='P0'] {
+	& > g > [data-node-status='Success'] {
 		fill: ${({ theme }) => theme.style.notificationSuccessColorBg};
 	}
 
-	& > g > [data-node-status='P99'] {
+	& > g > [data-node-status='Warning'] {
 		fill: ${({ theme }) => theme.style.notificationWarningColorBg};
 	}
 
-	& > g > [data-child-status='P1'] {
+	& > g > [data-child-status='Error'] {
 		stroke: ${({ theme }) => theme.style.notificationErrorColorBg};
 	}
 
-	& > g > [data-child-status='P0'] {
+	& > g > [data-child-status='Success'] {
 		stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
 	}
 
-	& > g > [data-child-status='P99'] {
+	& > g > [data-child-status='Unknown'] {
 		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
 	}
 

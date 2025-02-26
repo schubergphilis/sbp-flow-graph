@@ -1,6 +1,6 @@
+import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
+import { getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
 import { useCallback } from 'react'
-import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
-import { getZoomLevelState, setPanPositionState } from '../store/SettingsSlice'
 import CenterIcon from './icons/CenterIcon'
 import { ActionButton } from './ZoomTools'
 

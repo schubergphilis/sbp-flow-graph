@@ -1,10 +1,10 @@
+import { getNodePosition } from '@helpers/AutoPosition'
+import { useAppSelector } from '@hooks/ReduxStore'
+import OffsetModel from '@models/OffsetModel'
+import PositionModel from '@models/PositionModel'
+import { getDragElementState, getPanPositionState, getZoomLevelState, isClusterDragState } from '@store/SettingsSlice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { getNodePosition } from '../helpers/AutoPosition'
-import { useAppSelector } from '../hooks/ReduxStore'
-import OffsetModel from '../models/OffsetModel'
-import PositionModel from '../models/PositionModel'
-import { getDragElementState, getPanPositionState, getZoomLevelState, isClusterDragState } from '../store/SettingsSlice'
 
 interface Props {
 	isDebug?: boolean
@@ -21,8 +21,8 @@ const Debug = ({ isDebug = false }: Props) => {
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 	const [center, setCenter] = useState<OffsetModel | undefined>()
 
-	const timerRef = useRef<NodeJS.Timeout>()
-	const updateRef = useRef<NodeJS.Timeout>()
+	const timerRef = useRef<NodeJS.Timeout>(undefined)
+	const updateRef = useRef<NodeJS.Timeout>(undefined)
 
 	const testData = useCallback(
 		(nodes: SVGElement[]): JSX.Element[] => {

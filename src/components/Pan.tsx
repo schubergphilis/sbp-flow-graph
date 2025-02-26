@@ -1,8 +1,8 @@
+import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
+import PositionModel from '@models/PositionModel'
+import { getPanPositionState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { useAppDispatch, useAppSelector } from '../hooks/ReduxStore'
-import PositionModel from '../models/PositionModel'
-import { getPanPositionState, getZoomLevelState, setPanPositionState } from '../store/SettingsSlice'
 
 interface Props {
 	children: JSX.Element
