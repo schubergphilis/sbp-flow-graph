@@ -1,15 +1,15 @@
 import Flow from '@components/Flow'
+import { CloudStyle } from '@gmtdi/frontend-shared-components'
 import ProcessModel from '@models/ProcessModel'
 import { GlobalStyles, lightTheme } from '@styles/ThemeConfig'
-import { ThemeProvider } from 'styled-components'
 import * as data from './flowdata.json'
 
 const App = () => {
 	return (
-		<ThemeProvider theme={lightTheme}>
+		<CloudStyle lightStyle={lightTheme}>
 			<GlobalStyles />
 			<Flow data={data.data as ProcessModel[]} />
-		</ThemeProvider>
+		</CloudStyle>
 	)
 }
 

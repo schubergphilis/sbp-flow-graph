@@ -1,4 +1,4 @@
-import { StatusType } from '../datatypes/StatusType'
+import { StatusType } from '@datatypes/StatusType'
 import PositionModel from './PositionModel'
 
 export default interface LineModel {

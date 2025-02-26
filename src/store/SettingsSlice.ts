@@ -1,8 +1,8 @@
+import NodeModel from '@models/NodeModel'
+import PositionModel from '@models/PositionModel'
+import ProcessModel from '@models/ProcessModel'
 import { PayloadAction, createSlice, current } from '@reduxjs/toolkit'
-import NodeModel from '../models/NodeModel'
-import PositionModel from '../models/PositionModel'
-import { ProcessModel } from '../models/ProcessModel'
-import { AppState } from '../store/Store'
+import { AppState } from '@store/Store'
 
 // Type for our state
 export interface SettingsState {

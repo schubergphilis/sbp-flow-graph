@@ -1,1 +1,1 @@
-export type StatusType = 'P' | 'P0' | 'P1' | 'P2' | 'P99'
+export type StatusType = 'Success' | 'Warning' | 'Error' | 'Info' | 'Unknown'

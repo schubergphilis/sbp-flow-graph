@@ -1,7 +1,7 @@
-import NodeModel from '../models/NodeModel'
-import OffsetModel from '../models/OffsetModel'
-import PositionModel from '../models/PositionModel'
-import { ProcessModel } from '../models/ProcessModel'
+import NodeModel from '@models/NodeModel'
+import OffsetModel from '@models/OffsetModel'
+import PositionModel from '@models/PositionModel'
+import ProcessModel from '@models/ProcessModel'
 
 export const AutoPosition = (
 	nodeList: ProcessModel[] = [],

@@ -34,11 +34,11 @@ export const localStorageMiddleware: Middleware<Dispatch> =
 			return
 		})
 
-		localStorage.setItem('applicationState', JSON.stringify(tempState))
+		localStorage.setItem('flowGraphState', JSON.stringify(tempState))
 	}
 
 export const reHydrateStore = () => {
-	if (typeof window === 'undefined' || window.localStorage.getItem('applicationState') === null) return
+	if (typeof window === 'undefined' || window.localStorage.getItem('flowGraphState') === null) return
 
-	return JSON.parse(localStorage.getItem('applicationState') ?? '') // re-hydrate the store
+	return JSON.parse(localStorage.getItem('flowGraphState') ?? '') // re-hydrate the store
 }

@@ -1,4 +1,4 @@
-import { CssColorType } from '../datatypes/CssColorType'
+import { CssColorType } from '@gmtdi/frontend-shared-components'
 
 declare module 'styled-components' {
 	export interface DefaultFonts {
@@ -47,7 +47,7 @@ declare module 'styled-components' {
 	}
 
 	export interface DefaultTheme {
-		style: DefaultStyle
+		style: DefaultStyleWithCustomVars
 		fonts: DefaultFonts
 	}
 }

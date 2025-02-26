@@ -1,7 +1,7 @@
-import { ProcessType } from '../datatypes/ProcessType'
-import { StatusType } from '../datatypes/StatusType'
+import { ProcessType } from '@datatypes/ProcessType'
+import { StatusType } from '@datatypes/StatusType'
 
-export interface ProcessModel {
+export default interface ProcessModel {
 	id: string
 	name?: string
 	value: number

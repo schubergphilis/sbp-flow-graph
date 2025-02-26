@@ -1,6 +1,6 @@
+import { CustomMiddlewareAPI, localStorageMiddleware, reHydrateStore } from '@middleware/LocalStorageMiddleware'
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
-import { CustomMiddlewareAPI, localStorageMiddleware, reHydrateStore } from '../middleware/LocalStorageMiddleware'
-import { settingsSlice } from '../store/SettingsSlice'
+import { settingsSlice } from '@store/SettingsSlice'
 
 export const reducers = combineReducers({
 	[settingsSlice.name]: settingsSlice.reducer
