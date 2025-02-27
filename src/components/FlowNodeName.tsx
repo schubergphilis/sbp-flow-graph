@@ -3,7 +3,7 @@ interface Props {
 	value: number
 }
 const FlowNodeName = ({ name, value }: Props) => {
-	const textLength = (name?.length || 1) * 11
+	const textLength = Math.max((name?.length || 1) * 11, 75)
 
 	return (
 		<g transform={`translate(${value / 2}, ${value + 30})`}>

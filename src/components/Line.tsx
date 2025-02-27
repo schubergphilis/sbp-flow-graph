@@ -69,7 +69,7 @@ const Container = styled.g`
 	}
 
 	&[data-line-status='Unknown'] > path {
-		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
+		stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
 	}
 `
 export default Line

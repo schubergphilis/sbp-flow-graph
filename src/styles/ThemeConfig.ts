@@ -1,5 +1,4 @@
-import { DefaultFonts, DefaultStyle, createGlobalStyle } from 'styled-components'
-import { DefaultTheme } from 'styled-components/dist/types'
+import { DefaultFonts, DefaultStyleWithCustomVars, createGlobalStyle } from 'styled-components'
 
 export const GlobalStyles = createGlobalStyle`
     html,
@@ -11,14 +10,14 @@ export const GlobalStyles = createGlobalStyle`
 
 `
 
-const customFonts: DefaultFonts = {
+export const customFonts: DefaultFonts = {
 	fontRegular: 'TT Interphases Regular',
 	fontBold: 'TT Interphases Bold',
 	headerReqular: 'TT Interphases Bold',
 	code: 'TT Interphases Mono Regular'
 }
 
-const customLightStyle: DefaultStyle = {
+export const lightStyle: DefaultStyleWithCustomVars = {
 	radius: 8,
 	fontSize: 16,
 	shadow: 'rgba(2, 12, 23, 0.25)',
@@ -46,14 +45,11 @@ const customLightStyle: DefaultStyle = {
 	notificationSuccessColorBg: 'rgb(7, 188, 12)',
 	notificationErrorColor: 'rgb(255, 255, 255)',
 	notificationErrorColorBg: 'rgb(231, 76, 60)',
+	notificationUnknownColor: 'rgb(255, 255, 255)',
+	notificationUnknownColorBg: 'rgb(142, 142, 142)',
 	cardColorBg: 'rgba(232, 242, 253, .90)',
 	inputColorActive: 'rgb(30, 128, 237)',
 	inputColorBg: 'rgb(255, 255, 255)',
 	inputPlaceholder: 'rgba(22, 12, 23, .5)',
 	navigationColorBg: 'rgba(232, 242, 253, .90)'
-}
-
-export const lightTheme: DefaultTheme = {
-	style: customLightStyle,
-	fonts: customFonts
 }

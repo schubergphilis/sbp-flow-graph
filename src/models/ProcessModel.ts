@@ -6,9 +6,12 @@ export default interface ProcessModel {
 	name?: string
 	value: number
 	root?: boolean
-	type?: ProcessType
-	hasChildren?: boolean
-	parent?: string
 	status?: StatusType
+	type?: ProcessType
+	icon?: string
+	parent?: string
+	/** @description Only use for transormation */
+	hasChildren?: boolean
+	/** @description Only use for transormation */
 	childStatus?: StatusType
 }

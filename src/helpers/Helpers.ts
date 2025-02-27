@@ -23,3 +23,8 @@ export const generateSteps = (firstStep: number, lastStep: number, stepSize: num
 export const closestNumber = (counts: number[], goal: number): number => {
 	return counts.reduce((prev, curr) => (Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev))
 }
+
+export const getRandomNumberBetween = (start: number, end: number): number => {
+	const randomNumber = Math.random() * (end - start) + start
+	return Math.round(randomNumber * 100) / 100
+}

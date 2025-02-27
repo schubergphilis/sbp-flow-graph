@@ -89,6 +89,13 @@ const Container = styled.g`
 		fill: ${({ theme }) => theme.style.notificationWarningColorBg};
 	}
 
+	& > g > [data-node-status='Unknown'] {
+		&::before {
+			content: 'xx${({ theme }) => theme.style.notificationUnknownColorBg}';
+		}
+		fill: ${({ theme }) => theme.style.notificationUnknownColorBg};
+	}
+
 	& > g > [data-child-status='Error'] {
 		stroke: ${({ theme }) => theme.style.notificationErrorColorBg};
 	}
@@ -98,7 +105,7 @@ const Container = styled.g`
 	}
 
 	& > g > [data-child-status='Unknown'] {
-		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
+		stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
 	}
 
 	cursor: default;

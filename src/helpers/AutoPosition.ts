@@ -2,6 +2,7 @@ import NodeModel from '@models/NodeModel'
 import OffsetModel from '@models/OffsetModel'
 import PositionModel from '@models/PositionModel'
 import ProcessModel from '@models/ProcessModel'
+import { getRandomNumberBetween } from './Helpers'
 
 export const AutoPosition = (
 	nodeList: ProcessModel[] = [],
@@ -96,7 +97,7 @@ const calculatePosition = (
 	offset: PositionModel,
 	zoomLevel: number
 ): OffsetModel => {
-	const isRoot = (node.getAttribute('data-node-root') ?? false) as boolean
+	const isRoot = (node.getAttribute('data-node-root') ?? 'false') === 'true'
 
 	const parentChildList = getParentChildList(node, offset, zoomLevel)
 
@@ -105,10 +106,10 @@ const calculatePosition = (
 	let i = 0
 
 	do {
-		pos = positionNode(node, hasChildren ? spacing * 3 : spacing, offset, zoomLevel)
+		pos = positionNode(node, hasChildren ? spacing * 2.5 : spacing, offset, zoomLevel)
 		freeSpace = parentChildList.find((child) => isCircleColliding(child, pos) && child) === undefined ? 1 : 0
 		i++
-	} while (freeSpace < 1 || (freeSpace == 0 && i < 20))
+	} while (i < 20 && freeSpace < 1)
 
 	if (isRoot) {
 		// Overwrite position for rootNode to the center of the page
@@ -128,7 +129,8 @@ const isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean 
 }
 
 const randomPosition = (node: OffsetModel, parent: OffsetModel, spacing: number): PositionModel => {
-	const radius = parent.width / 2 + node.width / 2 + spacing
+	const size = parent.width / 2 + node.width / 2 + spacing
+	const radius = getRandomNumberBetween(size, size * 3)
 
 	const angle = Math.random() * Math.PI * 2
 
