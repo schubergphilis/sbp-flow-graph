@@ -89,7 +89,7 @@ const Drag = ({ children }: Props) => {
 				const element = ev.target as SVGElement
 
 				const target = element.closest('g[data-node]') as SVGElement
-				const id = target?.getAttribute('data-node-id') ?? ''
+				const id = target?.getAttribute('data-node-id') ?? undefined
 				dispatch(setDragElementState(id))
 				setIsDragging(true)
 
