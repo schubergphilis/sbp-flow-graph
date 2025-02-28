@@ -27,6 +27,11 @@ const Drag = ({ children }: Props) => {
 	const [startDragging, setStartDragging] = useState<boolean>(false)
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 
+	const getTargetPos = useCallback((target: SVGElement): PositionModel => {
+		const pos = target.getAttribute('data-pos')?.split(',') ?? ['0', '0']
+		return { x: Number(pos[0]), y: Number(pos[1]) }
+	}, [])
+
 	const handleMouseDown = useCallback(
 		(ev: React.MouseEvent<HTMLDivElement>) => {
 			if (ev.button !== 0) return
@@ -56,23 +61,12 @@ const Drag = ({ children }: Props) => {
 
 			setMouseOffset({ x: ev.nativeEvent.offsetX, y: ev.nativeEvent.offsetY })
 
-			targets.forEach((target) => {
-				const node = target.querySelector<SVGElement>('circle, rect') ?? null
-				const pos = getNodePosition(node)
-				target.setAttribute('data-pos', `${pos.x},${pos.y}`)
-			})
-
 			setStartDragging(true)
 
 			dispatch(setClusterDragState(ev.metaKey))
 		},
 		[selectedElement, dispatch]
 	)
-
-	const getTargetPos = useCallback((target: SVGElement): PositionModel => {
-		const pos = target.getAttribute('data-pos')?.split(',') ?? ['0', '0']
-		return { x: Number(pos[0]), y: Number(pos[1]) }
-	}, [])
 
 	const handleMove = useCallback(
 		(ev: MouseEvent) => {
@@ -81,9 +75,14 @@ const Drag = ({ children }: Props) => {
 
 			const offset = panPosition ?? { x: 0, y: 0 }
 
-			const threshold = 10
-			const thresholdX = Math.abs(ev.clientX - mouseOffset.x - offset.x) > threshold
-			const thresholdY = Math.abs(ev.clientY - mouseOffset.y - offset.y) > threshold
+			const mouse: PositionModel = {
+				x: (ev.clientX - offset.x) / zoomLevel - mouseOffset.x,
+				y: (ev.clientY - offset.y) / zoomLevel - mouseOffset.y
+			}
+
+			const threshold = 20
+			const thresholdX = Math.abs(mouse.x) > threshold
+			const thresholdY = Math.abs(mouse.y) > threshold
 
 			if (!isDragging && (thresholdX || thresholdY)) {
 				const element = ev.target as SVGElement
@@ -92,53 +91,74 @@ const Drag = ({ children }: Props) => {
 				const id = target?.getAttribute('data-node-id') ?? undefined
 				dispatch(setDragElementState(id))
 				setIsDragging(true)
-
-				console.log(`--- Drag ${(targetList?.length ?? 0) > 1 ? 'Cluster ' : ''}Start ---`, id)
 			}
 
 			targetList?.forEach((target) => {
-				const node = target.querySelector<SVGElement>('circle, rect') ?? null
-				const box = getNodePosition(node, offset, zoomLevel)
+				const box = getNodePosition(target, offset, zoomLevel)
+				const boxOffset = getTargetPos(target)
+
+				const center: PositionModel = {
+					x: boxOffset.x - box.width / 2,
+					y: boxOffset.y - box.height / 2
+				}
+
+				const pos: PositionModel = {
+					x: Math.round(center.x + mouse.x),
+					y: Math.round(center.y + mouse.y)
+				}
+
+				target.setAttribute('transform', `translate(${pos.x}, ${pos.y})`)
+			})
+		},
+		[isDragging, panPosition, targetList, dispatch, zoomLevel, getTargetPos, mouseOffset]
+	)
+
+	const handleMoveEnd = useCallback(
+		(ev: MouseEvent) => {
+			dispatch(setDragElementState(undefined))
+			dispatch(setClusterDragState(false))
+
+			setStartDragging(false)
+
+			if (!isDragging) {
+				const offset = panPosition ?? { x: 0, y: 0 }
+
+				const element = ev.target as SVGElement
+
+				const target = element.closest('g[data-node]') as SVGElement
+
+				if (!target) return
+
+				const box = getNodePosition(target, offset, zoomLevel)
 				const boxOffset = getTargetPos(target)
 
 				const pos: PositionModel = {
-					x: Math.round((boxOffset.x - offset.x + (ev.clientX - offset.x)) / zoomLevel - mouseOffset.x),
-					y: Math.round((boxOffset.y - offset.y + (ev.clientY - offset.y)) / zoomLevel - mouseOffset.y)
+					x: Math.floor(boxOffset.x - box.width / 2),
+					y: Math.floor(boxOffset.y - box.height / 2)
 				}
 
-				const group = target.closest('g[data-node]')
+				target.setAttribute('transform', `translate(${pos.x}, ${pos.y})`)
+				return
+			}
 
-				if (!group) return
+			setIsDragging(false)
 
-				group?.setAttribute('transform', `translate(${pos.x - box.width / 2}, ${pos.y - box.height / 2})`)
+			targetList?.forEach((target) => {
+				// const node = target.querySelector<SVGElement>('circle, rect') ?? null
+				const id = (target?.getAttribute('data-node-id') ?? '').replace(/^X/gim, '')
+				const pos = getNodePosition(target, panPosition, zoomLevel)
+
+				target.setAttribute('data-pos', `${pos.x},${pos.y}`)
+				dispatch(setPositionState({ id: id, x: pos.x, y: pos.y, isVisible: true }))
 			})
+
+			setTargetList(undefined)
+
+			window.removeEventListener('mousemove', handleMove)
+			window.removeEventListener('mouseup', handleMoveEnd)
 		},
-		[isDragging, panPosition, targetList, dispatch, zoomLevel, getTargetPos, mouseOffset.x, mouseOffset.y]
+		[dispatch, getTargetPos, handleMove, isDragging, panPosition, targetList, zoomLevel]
 	)
-
-	const handleMoveEnd = useCallback(() => {
-		dispatch(setDragElementState(undefined))
-		dispatch(setClusterDragState(false))
-
-		setStartDragging(false)
-
-		if (!isDragging) return
-
-		setIsDragging(false)
-
-		targetList?.forEach((target) => {
-			const node = target.querySelector<SVGElement>('circle, rect') ?? null
-			const id = (target?.getAttribute('data-node-id') ?? '').replace(/^X/gim, '')
-			const pos = getNodePosition(node, panPosition, zoomLevel)
-			target.setAttribute('data-pos', `${pos.x},${pos.y}`)
-			dispatch(setPositionState({ id: id, x: pos.x, y: pos.y, isVisible: true }))
-		})
-
-		setTargetList(undefined)
-
-		window.removeEventListener('mousemove', handleMove)
-		window.removeEventListener('mouseup', handleMoveEnd)
-	}, [dispatch, handleMove, isDragging, panPosition, targetList, zoomLevel])
 
 	useLayoutEffect(() => {
 		if (!startDragging) return

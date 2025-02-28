@@ -1,25 +1,28 @@
 interface Props {
 	name?: string
-	value: number
+	boxHeight: number
+	boxWidth: number
 }
-const FlowNodeName = ({ name, value }: Props) => {
+const FlowNodeName = ({ name, boxWidth, boxHeight }: Props) => {
 	const textLength = Math.max((name?.length || 1) * 11, 75)
 
 	return (
-		<g transform={`translate(${value / 2}, ${value + 30})`}>
-			<rect
-				width={textLength}
-				height="30"
-				fill="#fff"
-				x={-textLength / 2}
-				y={-16}
-				rx="15"
-				ry="15"
-				style={{ filter: 'url(#dropshadow)' }}
-			/>
-			<text dominantBaseline="middle" textAnchor="middle">
-				{name}
-			</text>
+		<g transform={`translate(${boxWidth / 2}, 0)`}>
+			<g transform={`translate(${0}, ${boxHeight + 30})`}>
+				<rect
+					width={textLength}
+					height="30"
+					fill="#fff"
+					x={-textLength / 2}
+					y={-16}
+					rx="15"
+					ry="15"
+					style={{ filter: 'url(#dropshadow)' }}
+				/>
+				<text dominantBaseline="middle" textAnchor="middle">
+					{name}
+				</text>
+			</g>
 		</g>
 	)
 }

@@ -16,13 +16,13 @@ interface Props {
 	isDebug?: boolean
 }
 
-const Flow = ({ data, isDebug = false }: Props) => {
+const Flow = ({ data, isDebug = true }: Props) => {
 	return (
 		<StateProvider isDebug={isDebug}>
 			<Pan>
 				<Drag>
 					<Click>
-						<SvgCanvast>
+						<SvgCanvast $isDebug={isDebug}>
 							<SVGShadow />
 							<SVGMarker />
 							<LineBox />
@@ -37,9 +37,10 @@ const Flow = ({ data, isDebug = false }: Props) => {
 	)
 }
 
-const SvgCanvast = styled.svg`
+const SvgCanvast = styled.svg<{ $isDebug: boolean }>`
 	width: 100%;
 	height: 100%;
 	overflow: visible;
+	${({ $isDebug }) => $isDebug && 'background-color: #ff000040'}
 `
 export default Flow

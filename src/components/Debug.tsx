@@ -112,7 +112,7 @@ const Debug = ({ isDebug = false }: Props) => {
 
 	useEffect(() => {
 		if (!isDebug) return
-		timerRef.current = setTimeout(updateAllLines, 2)
+		timerRef.current = setTimeout(updateAllLines, 20)
 	}, [updateAllLines, isDebug])
 
 	useEffect(() => {

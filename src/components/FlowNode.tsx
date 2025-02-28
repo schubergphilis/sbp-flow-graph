@@ -10,11 +10,14 @@ interface Props {
 const FlowNode = ({
 	data: { id, value, root, parent, type = 'circle', name, icon, hasChildren, status, childStatus }
 }: Props) => {
+	const textLength = Math.max((name?.length || 1) * 11, 75)
+	const boxSize = Math.max(textLength, value)
+
 	return (
 		<Container
 			data-node-id={`X${id}`}
 			data-node
-			data-node-root={root}
+			data-node-root={root ? 'true' : undefined}
 			data-node-parent={parent ? `X${parent}` : undefined}
 			data-node-type={type}
 			data-node-size={value / 2}
@@ -22,10 +25,10 @@ const FlowNode = ({
 			fillOpacity={0}
 			transform={'translate(-10000, -10000)'}>
 			{type === 'circle' ? (
-				<g transform={`translate(${value / 2}, ${value / 2})`}>
+				<g transform={`translate(${boxSize / 2}, ${value / 2})`}>
 					<circle
 						data-node-status={status}
-						fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
+						// fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
 						r={value / 2}
 						cx="0"
 						cy="0"
@@ -44,7 +47,7 @@ const FlowNode = ({
 				<g>
 					<rect
 						data-node-status={status}
-						fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
+						// fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
 						width={value}
 						height={value}
 						x="0"
@@ -64,7 +67,7 @@ const FlowNode = ({
 				</g>
 			)}
 			{icon && <FlowNodeIcon name={icon} value={value} />}
-			<FlowNodeName name={name} value={value} />
+			<FlowNodeName name={name} boxHeight={value} boxWidth={boxSize} />
 		</Container>
 	)
 }
@@ -90,9 +93,6 @@ const Container = styled.g`
 	}
 
 	& > g > [data-node-status='Unknown'] {
-		&::before {
-			content: 'xx${({ theme }) => theme.style.notificationUnknownColorBg}';
-		}
 		fill: ${({ theme }) => theme.style.notificationUnknownColorBg};
 	}
 
@@ -110,7 +110,7 @@ const Container = styled.g`
 
 	cursor: default;
 
-	&[data-node-children]:not([data-node-root]) {
+	&[data-node-children]:not([data-node-root='true']) {
 		cursor: pointer;
 	}
 `
