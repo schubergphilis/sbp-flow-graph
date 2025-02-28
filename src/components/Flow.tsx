@@ -16,7 +16,7 @@ interface Props {
 	isDebug?: boolean
 }
 
-const Flow = ({ data, isDebug = true }: Props) => {
+const Flow = ({ data, isDebug = false }: Props) => {
 	return (
 		<StateProvider isDebug={isDebug}>
 			<Pan>
