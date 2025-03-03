@@ -1,14 +1,18 @@
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import { getDragElementState, setVisibleState } from '@store/SettingsSlice'
-import { useCallback, useLayoutEffect } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
 interface Props {
 	children: JSX.Element
+	onNodeClick?: (id: string) => void
 }
 
-const Click = ({ children }: Props) => {
+const Click = ({ children, onNodeClick }: Props) => {
+	const clickTimeout = useRef<NodeJS.Timeout>(undefined)
+
 	const dispatch = useAppDispatch()
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
+	const [selectedId, setSelectedId] = useState<string>('')
 
 	const handleClick = useCallback(
 		(ev: MouseEvent) => {
@@ -23,20 +27,38 @@ const Click = ({ children }: Props) => {
 			ev.preventDefault()
 
 			const id = element.getAttribute('data-node-id') as string
-			console.log('---- Node Click ----', element.getAttribute('data-node-id'))
+			setSelectedId(id.replace(/^X/gim, ''))
 
-			dispatch(setVisibleState(id))
+			if (clickTimeout.current) clearTimeout(clickTimeout.current)
+
+			clickTimeout.current = setTimeout(() => {
+				dispatch(setVisibleState(id))
+			}, 500)
 		},
 		[dispatch, dragElement]
 	)
 
+	const handeDoubleClick = useCallback(
+		(ev: MouseEvent) => {
+			if (clickTimeout.current) clearTimeout(clickTimeout.current) // Cancel single-click action
+
+			if (onNodeClick) onNodeClick(selectedId)
+
+			ev.stopPropagation()
+			ev.preventDefault()
+		},
+		[onNodeClick, selectedId]
+	)
+
 	useLayoutEffect(() => {
+		document.addEventListener('dblclick', handeDoubleClick)
 		document.addEventListener('mouseup', handleClick)
 
 		return () => {
+			document.removeEventListener('dblclick', handeDoubleClick)
 			document.removeEventListener('mouseup', handleClick)
 		}
-	}, [handleClick])
+	}, [handleClick, handeDoubleClick])
 
 	return <>{children}</>
 }

@@ -14,14 +14,15 @@ import styled from 'styled-components'
 interface Props {
 	data: ProcessModel[]
 	isDebug?: boolean
+	onNodeClick?: (id: string) => void
 }
 
-const Flow = ({ data, isDebug = false }: Props) => {
+const Flow = ({ data, isDebug = false, onNodeClick }: Props) => {
 	return (
 		<StateProvider isDebug={isDebug}>
 			<Pan>
 				<Drag>
-					<Click>
+					<Click onNodeClick={onNodeClick}>
 						<SvgCanvast $isDebug={isDebug}>
 							<SVGShadow />
 							<SVGMarker />
