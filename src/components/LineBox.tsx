@@ -54,11 +54,11 @@ const LineBox = () => {
 	)
 
 	const handleLines = useMemo((): JSX.Element[] => {
-		return lines.map((data, index) => <Line key={`line_${index}`} data={data} />)
+		return lines.map((data) => <Line key={`line_${data.id}`} data={data} />)
 	}, [lines])
 
 	const handleDraggedLines = useMemo((): JSX.Element[] => {
-		return draggedLines.map((data, index) => <Line key={`line_dragged_${index}`} data={data} />)
+		return draggedLines.map((data) => <Line key={`line_dragged_${data.id}`} data={data} />)
 	}, [draggedLines])
 
 	const updateSelectedLines = useCallback(() => {

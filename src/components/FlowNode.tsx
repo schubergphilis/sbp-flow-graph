@@ -1,6 +1,5 @@
 import ProcessModel from '@models/ProcessModel'
 import styled from 'styled-components'
-import FlowNodeIcon from './FlowNodeIcon'
 import FlowNodeName from './FlowNodeName'
 
 interface Props {
@@ -44,7 +43,7 @@ const FlowNode = ({
 					/>
 				</g>
 			) : (
-				<g>
+				<g transform={`translate(${boxSize / 2 - value / 2}, 0)`}>
 					<rect
 						data-node-status={status}
 						// fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
@@ -66,7 +65,7 @@ const FlowNode = ({
 					/>
 				</g>
 			)}
-			{icon && <FlowNodeIcon name={icon} value={value} />}
+
 			<FlowNodeName name={name} boxHeight={value} boxWidth={boxSize} />
 		</Container>
 	)

@@ -90,8 +90,6 @@ export const settingsSlice = createSlice({
 			// List To Affected Nodes
 			let items = getVisibilityNodes(dataList, showNodes, id)
 
-			console.log(showNodes, items)
-
 			// List of found positions
 			const foundList = items
 				.map(({ id }) => positionList.find((item) => item.id === id))
@@ -102,12 +100,21 @@ export const settingsSlice = createSlice({
 				positionList = positionList.map<NodeModel>((item) => {
 					const index = foundList.findIndex(({ id }) => item.id === id && item.isVisible === !showNodes)
 
-					return { ...item, isVisible: index >= 0 ? (showNodes ? true : false) : item.isVisible }
+					if (index >= 0) {
+						return { ...item, isVisible: showNodes }
+					}
+
+					return item
 				})
 				items = []
 			}
 
-			state.positionList = [...positionList, ...items]
+			if (items.length > 0) {
+				state.positionList = [...positionList, ...items]
+			} else {
+				state.positionList = positionList
+			}
+
 			state.update = (state.update || 0) + 1
 		},
 		setDataListState(state, { payload }: PayloadAction<ProcessModel[]>) {

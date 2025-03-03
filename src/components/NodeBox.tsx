@@ -91,7 +91,9 @@ const NodeBox = ({ data }: Props) => {
 	}, [update])
 
 	return (
-		<Container data-node-group>{getDataList?.map((node, index) => <FlowNode key={index} data={node} />)}</Container>
+		<Container data-node-group>
+			{getDataList?.map((node) => <FlowNode key={`node_${node.id}`} data={node} />)}
+		</Container>
 	)
 }
 
