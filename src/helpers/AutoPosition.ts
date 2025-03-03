@@ -52,7 +52,7 @@ export const getParentNodePosition = (
 	offset: PositionModel = { x: 0, y: 0 },
 	zoomLevel: number = 1
 ): OffsetModel => {
-	const parent = getParentNode(node) // ?.querySelector<SVGElement>('circle, rect') ?? null
+	const parent = getParentNode(node)?.querySelector<SVGElement>('circle, rect') ?? null
 
 	return getNodePosition(parent, offset, zoomLevel)
 }
