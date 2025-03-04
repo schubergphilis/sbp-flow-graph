@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import { getDragElementState, setVisibleState } from '@store/SettingsSlice'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef } from 'react'
 
 interface Props {
 	children: JSX.Element
@@ -12,7 +12,6 @@ const Click = ({ children, onNodeClick }: Props) => {
 
 	const dispatch = useAppDispatch()
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
-	const [selectedId, setSelectedId] = useState<string>('')
 
 	const handleClick = useCallback(
 		(ev: MouseEvent) => {
@@ -27,7 +26,6 @@ const Click = ({ children, onNodeClick }: Props) => {
 			ev.preventDefault()
 
 			const id = element.getAttribute('data-node-id') as string
-			setSelectedId(id.replace(/^X/gim, ''))
 
 			if (clickTimeout.current) clearTimeout(clickTimeout.current)
 
@@ -42,12 +40,19 @@ const Click = ({ children, onNodeClick }: Props) => {
 		(ev: MouseEvent) => {
 			if (clickTimeout.current) clearTimeout(clickTimeout.current) // Cancel single-click action
 
-			if (onNodeClick) onNodeClick(selectedId)
+			const target = ev.target as SVGElement
+			const element = target.closest('[data-node-id]')
+
+			if (!element || dragElement) return
+
+			const id = element.getAttribute('data-node-id') as string
+
+			if (onNodeClick) onNodeClick(id.replace(/^X/gim, ''))
 
 			ev.stopPropagation()
 			ev.preventDefault()
 		},
-		[onNodeClick, selectedId]
+		[dragElement, onNodeClick]
 	)
 
 	useLayoutEffect(() => {
