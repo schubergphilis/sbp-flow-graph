@@ -68,6 +68,14 @@ const Container = styled.g`
 		stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
 	}
 
+	&[data-line-status='Warning'] > path {
+		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
+	}
+
+	&[data-line-status='Info'] > path {
+		stroke: ${({ theme }) => theme.style.notificationInfoColorBg};
+	}
+
 	&[data-line-status='Unknown'] > path {
 		stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
 	}
