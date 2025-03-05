@@ -10,8 +10,9 @@ export default interface ProcessModel {
 	type?: ProcessType
 	icon?: string
 	parent?: string
-	/** @description Only use for transormation */
+	badge?: number
+	/** @description Only use for transformation */
 	hasChildren?: boolean
-	/** @description Only use for transormation */
+	/** @description Only use for transformation */
 	childStatus?: StatusType
 }

@@ -1,5 +1,6 @@
 import ProcessModel from '@models/ProcessModel'
 import styled from 'styled-components'
+import FlowNodeBadge from './FlowNodeBadge'
 import FlowNodeName from './FlowNodeName'
 
 interface Props {
@@ -7,7 +8,7 @@ interface Props {
 }
 
 const FlowNode = ({
-	data: { id, value, root, parent, type = 'circle', name, icon, hasChildren, status, childStatus }
+	data: { id, value, root, parent, type = 'circle', name, icon, badge = 0, hasChildren, status, childStatus }
 }: Props) => {
 	const textLength = Math.max((name?.length || 1) * 11, 75)
 	const boxSize = Math.max(textLength, value)
@@ -67,6 +68,7 @@ const FlowNode = ({
 			)}
 
 			<FlowNodeName name={name} boxHeight={value} boxWidth={boxSize} />
+			{badge > 0 && <FlowNodeBadge badge={badge} type={type} nodeSize={value} boxWidth={boxSize} />}
 		</Container>
 	)
 }
