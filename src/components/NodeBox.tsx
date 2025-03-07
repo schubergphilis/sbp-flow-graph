@@ -18,7 +18,7 @@ import styled from 'styled-components'
 import FlowNode from './FlowNode'
 
 interface Props {
-	data: ProcessModel[]
+	data?: ProcessModel[]
 }
 
 const NodeBox = ({ data }: Props) => {
@@ -39,9 +39,9 @@ const NodeBox = ({ data }: Props) => {
 	}, [dataList, positionList])
 
 	const getInitialPositionList = useCallback(() => {
-		const root = data.find(({ root }) => root)
+		const root = data?.find(({ root }) => root)
 		return data
-			.filter(({ id, parent }) => id === root?.id || parent === root?.id)
+			?.filter(({ id, parent }) => id === root?.id || parent === root?.id)
 			.map<NodeModel>(({ id }) => ({ id: id, isVisible: true, x: 0, y: 0 }))
 	}, [data])
 
@@ -56,15 +56,18 @@ const NodeBox = ({ data }: Props) => {
 	}, [])
 
 	useDidMountEffect(() => {
-		if (isTriggered || positionList) return
-		console.log('--- first time positions ---')
-		setIsTriggered(true)
+		if (isTriggered || (positionList && positionList.length > 0) || dataList?.length === 0) return
+
 		const list = getInitialPositionList()
 
+		if (!list) return
+
 		dispatch(setPositionListState(list))
+		setIsTriggered(true)
 	}, [dispatch, getInitialPositionList, isTriggered, positionList])
 
 	useEffect(() => {
+		if (!data) return
 		const list = createDataList(data)
 
 		dispatch(setDataListState(list))

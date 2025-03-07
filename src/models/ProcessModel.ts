@@ -11,6 +11,7 @@ export default interface ProcessModel {
 	icon?: string
 	parent?: string
 	badge?: number
+	tooltip?: string
 	/** @description Only use for transformation */
 	hasChildren?: boolean
 	/** @description Only use for transformation */

@@ -14,7 +14,7 @@ import styled from 'styled-components'
 import Tooltip from './Tooltip'
 
 interface Props {
-	data: ProcessModel[]
+	data?: ProcessModel[]
 	isDebug?: boolean
 	onNodeClick?: (id: string) => void
 }
