@@ -20,8 +20,6 @@ const Drag = ({ children }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 
-	const selectedElement = undefined
-
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [targetList, setTargetList] = useState<SVGElement[]>()
 	const [startDragging, setStartDragging] = useState<boolean>(false)
@@ -35,8 +33,6 @@ const Drag = ({ children }: Props) => {
 	const handleMouseDown = useCallback(
 		(ev: React.MouseEvent<HTMLDivElement>) => {
 			if (ev.button !== 0) return
-
-			if (selectedElement !== '' && selectedElement !== undefined) return
 
 			const element = ev.target as SVGElement
 
@@ -65,7 +61,7 @@ const Drag = ({ children }: Props) => {
 
 			dispatch(setClusterDragState(ev.metaKey))
 		},
-		[selectedElement, dispatch]
+		[dispatch]
 	)
 
 	const handleMove = useCallback(
@@ -89,6 +85,7 @@ const Drag = ({ children }: Props) => {
 
 				const target = element.closest('g[data-node]') as SVGElement
 				const id = target?.getAttribute('data-node-id') ?? undefined
+
 				dispatch(setDragElementState(id))
 				setIsDragging(true)
 			}

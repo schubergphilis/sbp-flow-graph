@@ -8,7 +8,7 @@ interface Props {
 }
 
 const FlowNode = ({
-	data: { id, value, root, parent, type = 'circle', name, icon, badge = 0, hasChildren, status, childStatus }
+	data: { id, value, root, parent, type = 'circle', name, icon, badge = 0, tooltip, hasChildren, status, childStatus }
 }: Props) => {
 	const textLength = Math.max((name?.length || 1) * 11, 75)
 	const boxSize = Math.max(textLength, value)
@@ -41,6 +41,7 @@ const FlowNode = ({
 						r={value / 2 - value / 20}
 						cx="0"
 						cy="0"
+						data-node-tooltip={tooltip}
 					/>
 				</g>
 			) : (
@@ -63,6 +64,7 @@ const FlowNode = ({
 						height={value - value / 10}
 						x={value / 20}
 						y={value / 20}
+						data-node-tooltip={tooltip}
 					/>
 				</g>
 			)}

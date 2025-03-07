@@ -8,8 +8,10 @@ import StateProvider from '@components/StateProvider'
 import SVGMarker from '@components/SVGMarker'
 import SVGShadow from '@components/SVGShadow'
 import ZoomTools from '@components/ZoomTools'
+
 import ProcessModel from '@models/ProcessModel'
 import styled from 'styled-components'
+import Tooltip from './Tooltip'
 
 interface Props {
 	data: ProcessModel[]
@@ -22,15 +24,17 @@ const Flow = ({ data, isDebug = false, onNodeClick }: Props) => {
 		<StateProvider isDebug={isDebug}>
 			<Pan>
 				<Drag>
-					<Click onNodeClick={onNodeClick}>
-						<SvgCanvast $isDebug={isDebug}>
-							<SVGShadow />
-							<SVGMarker />
-							<LineBox />
-							<NodeBox data={data} />
-							<Debug isDebug={isDebug} />
-						</SvgCanvast>
-					</Click>
+					<Tooltip>
+						<Click onNodeClick={onNodeClick}>
+							<SvgCanvast $isDebug={isDebug}>
+								<SVGShadow />
+								<SVGMarker />
+								<LineBox />
+								<NodeBox data={data} />
+								<Debug isDebug={isDebug} />
+							</SvgCanvast>
+						</Click>
+					</Tooltip>
 				</Drag>
 			</Pan>
 			<ZoomTools />
