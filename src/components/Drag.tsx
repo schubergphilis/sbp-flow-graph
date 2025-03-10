@@ -24,6 +24,7 @@ const Drag = ({ children }: Props) => {
 	const [targetList, setTargetList] = useState<SVGElement[]>()
 	const [startDragging, setStartDragging] = useState<boolean>(false)
 	const [isDragging, setIsDragging] = useState<boolean>(false)
+	const [targetNode, setTargetNode] = useState<SVGElement>()
 
 	const getTargetPos = useCallback((target: SVGElement): PositionModel => {
 		const pos = target.getAttribute('data-pos')?.split(',') ?? ['0', '0']
@@ -39,6 +40,8 @@ const Drag = ({ children }: Props) => {
 			const target = element.closest('g[data-node]') as SVGElement
 
 			if (!target || !target?.hasAttribute('data-node')) return
+
+			setTargetNode(target)
 
 			ev.stopPropagation()
 			ev.preventDefault()
@@ -81,10 +84,7 @@ const Drag = ({ children }: Props) => {
 			const thresholdY = Math.abs(mouse.y) > threshold
 
 			if (!isDragging && (thresholdX || thresholdY)) {
-				const element = ev.target as SVGElement
-
-				const target = element.closest('g[data-node]') as SVGElement
-				const id = target?.getAttribute('data-node-id') ?? undefined
+				const id = targetNode?.getAttribute('data-node-id') ?? undefined
 
 				dispatch(setDragElementState(id))
 				setIsDragging(true)
@@ -107,7 +107,7 @@ const Drag = ({ children }: Props) => {
 				target.setAttribute('transform', `translate(${pos.x}, ${pos.y})`)
 			})
 		},
-		[isDragging, panPosition, targetList, dispatch, zoomLevel, getTargetPos, mouseOffset]
+		[isDragging, panPosition, targetList, dispatch, zoomLevel, getTargetPos, mouseOffset, targetNode]
 	)
 
 	const handleMoveEnd = useCallback(
@@ -139,6 +139,7 @@ const Drag = ({ children }: Props) => {
 			}
 
 			setIsDragging(false)
+			setTargetNode(undefined)
 
 			targetList?.forEach((target) => {
 				// const node = target.querySelector<SVGElement>('circle, rect') ?? null
