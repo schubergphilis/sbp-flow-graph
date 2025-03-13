@@ -19,9 +19,10 @@ import FlowNode from './FlowNode'
 
 interface Props {
 	data?: ProcessModel[]
+	iconSelector?: (name: string) => JSX.Element
 }
 
-const NodeBox = ({ data }: Props) => {
+const NodeBox = ({ data, iconSelector }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
@@ -95,7 +96,7 @@ const NodeBox = ({ data }: Props) => {
 
 	return (
 		<Container data-node-group>
-			{getDataList?.map((node) => <FlowNode key={`node_${node.id}`} data={node} />)}
+			{getDataList?.map((node) => <FlowNode key={`node_${node.id}`} data={node} iconSelector={iconSelector} />)}
 		</Container>
 	)
 }

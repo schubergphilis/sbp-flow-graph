@@ -17,9 +17,10 @@ interface Props {
 	data?: ProcessModel[]
 	isDebug?: boolean
 	onNodeClick?: (id: string) => void
+	iconSelector?: (name: string) => JSX.Element
 }
 
-const Flow = ({ data, isDebug = false, onNodeClick }: Props) => {
+const Flow = ({ data, isDebug = false, onNodeClick, iconSelector }: Props) => {
 	return (
 		<StateProvider isDebug={isDebug}>
 			<Pan>
@@ -30,7 +31,7 @@ const Flow = ({ data, isDebug = false, onNodeClick }: Props) => {
 								<SVGShadow />
 								<SVGMarker />
 								<LineBox />
-								<NodeBox data={data} />
+								<NodeBox data={data} iconSelector={iconSelector} />
 								<Debug isDebug={isDebug} />
 							</SvgCanvast>
 						</Click>
