@@ -35,7 +35,9 @@ const LineBox = () => {
 	const getLineData = useCallback(
 		(nodes: SVGElement[]): LineModel[] => {
 			return nodes
-				.filter((node) => node.getAttribute('data-node-root') !== 'true')
+				.filter(
+					(node) => node.getAttribute('data-node-root') !== 'true' && node.getAttribute('data-node-visible') !== 'false'
+				)
 				.map<LineModel>((node) => {
 					const element = node.querySelector('circle, rect') as SVGElement
 					return {
@@ -78,7 +80,7 @@ const LineBox = () => {
 	const updateAllLines = useCallback(() => {
 		const regex = isClusterDrag
 			? '[dummy-nothing]'
-			: `[data-node]:not([data-node-id=${dragElement}],[data-node-parent=${dragElement}])`
+			: `[data-node]:not([data-node-id=${dragElement}],[data-node-parent=${dragElement}],[data-node-visible=false])`
 
 		const nodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
 

@@ -51,9 +51,13 @@ const Drag = ({ children }: Props) => {
 			let targets: SVGElement[] = []
 
 			if (ev.metaKey) {
-				targets = [...document.querySelectorAll<SVGElement>(`[data-node-parent=${id}],[data-node-id=${id}]`)]
-			} else {
 				targets = [target]
+			} else {
+				targets = [
+					...document.querySelectorAll<SVGElement>(
+						`[data-node-parent=${id}]:not([data-node-children-visible=true]),[data-node-id=${id}]`
+					)
+				]
 			}
 
 			setTargetList(targets)
@@ -93,6 +97,9 @@ const Drag = ({ children }: Props) => {
 			targetList?.forEach((target) => {
 				const box = getNodePosition(target, offset, zoomLevel)
 				const boxOffset = getTargetPos(target)
+
+				// Don't set position on nodes that aren't opened yet (need autoPosition first)
+				if (boxOffset.x === 0 && boxOffset.y === 0) return
 
 				const center: PositionModel = {
 					x: boxOffset.x - box.width / 2,
@@ -143,11 +150,17 @@ const Drag = ({ children }: Props) => {
 
 			targetList?.forEach((target) => {
 				// const node = target.querySelector<SVGElement>('circle, rect') ?? null
-				const id = (target?.getAttribute('data-node-id') ?? '').replace(/^X/gim, '')
+				const id = (target.getAttribute('data-node-id') ?? '').replace(/^X/gim, '')
 				const pos = getNodePosition(target, panPosition, zoomLevel)
+				const isVisible = target.getAttribute('data-node-visible') === 'true'
+				const initialPos = getTargetPos(target)
+
+				// Don't set position on nodes that aren't opened yet (need autoPosition first)
+				if (!isVisible && initialPos.x === 0 && initialPos.y === 0) return
 
 				target.setAttribute('data-pos', `${pos.x},${pos.y}`)
-				dispatch(setPositionState({ id: id, x: pos.x, y: pos.y, isVisible: true }))
+
+				dispatch(setPositionState({ id: id, x: pos.x, y: pos.y, isVisible: isVisible }))
 			})
 
 			setTargetList(undefined)

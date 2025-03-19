@@ -9,35 +9,38 @@ export const AutoPosition = (
 	positionList: NodeModel[] = [],
 	offset: PositionModel = { x: 0, y: 0 },
 	zoomLevel: number = 1,
-	spacing: number = 25
+	spacing: number = 125
 ): NodeModel[] => {
 	const viewport = getWindowDimensions() as unknown as OffsetModel
 
-	const posList = nodeList.map(({ id, hasChildren }) => {
-		const node = document.querySelector<SVGElement>(`[data-node-id=X${id}]`)!
+	const posList = nodeList
+		.sort((a) => (a.parent === undefined ? -1 : 0))
+		.filter(({ isVisible }) => isVisible)
+		.map(({ id, isVisible }) => {
+			const node = document.querySelector<SVGElement>(`[data-node-id=X${id}]`)!
 
-		const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
+			const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
 
-		const box: OffsetModel = savedPos
-			? getNodePosition(node, offset, zoomLevel)
-			: calculatePosition(node, hasChildren ?? false, spacing, viewport, offset, zoomLevel)
-		const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : { x: box.x, y: box.y }
+			const box: OffsetModel = savedPos
+				? getNodePosition(node, offset, zoomLevel)
+				: calculatePosition(node, spacing, viewport, offset, zoomLevel)
+			const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : { x: box.x, y: box.y }
 
-		node.setAttribute('data-pos', `${pos.x},${pos.y}`)
+			node.setAttribute('data-pos', `${pos.x},${pos.y}`)
 
-		const group = node.closest('g[data-node]')
+			const group = node.closest('g[data-node]')
 
-		if (!group) return { id: id, x: pos.x, y: pos.y, isVisible: false }
+			if (!group) return { id: id, x: pos.x, y: pos.y, isVisible: isVisible }
 
-		group.setAttribute('fill-opacity', '1')
+			group.setAttribute('fill-opacity', '1')
 
-		group?.setAttribute(
-			'transform',
-			`translate(${Math.round(pos.x - box.width / 2)}, ${Math.round(pos.y - box.height / 2)})`
-		)
+			group?.setAttribute(
+				'transform',
+				`translate(${Math.round(pos.x - box.width / 2)}, ${Math.round(pos.y - box.height / 2)})`
+			)
 
-		return { id: id, x: pos.x, y: pos.y, isVisible: true }
-	})
+			return { id: id, x: pos.x, y: pos.y, isVisible: isVisible }
+		})
 
 	return posList
 }
@@ -53,7 +56,6 @@ export const getParentNodePosition = (
 	zoomLevel: number = 1
 ): OffsetModel => {
 	const parent = getParentNode(node)?.querySelector<SVGElement>('circle, rect') ?? null
-
 	return getNodePosition(parent, offset, zoomLevel)
 }
 
@@ -96,7 +98,6 @@ const getParentChildList = (node: SVGElement, offset: PositionModel, zoomLevel: 
 
 const calculatePosition = (
 	node: SVGElement,
-	hasChildren: boolean,
 	spacing: number,
 	viewport: OffsetModel,
 	offset: PositionModel,
@@ -111,7 +112,7 @@ const calculatePosition = (
 	let i = 0
 
 	do {
-		pos = positionNode(node, hasChildren ? spacing * 4 : spacing, offset, zoomLevel)
+		pos = positionNode(node, spacing, offset, zoomLevel)
 		freeSpace = parentChildList.find((child) => isCircleColliding(child, pos) && child) === undefined ? 1 : 0
 		i++
 	} while (i < 20 && freeSpace < 1)
@@ -135,7 +136,7 @@ const isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean 
 
 const randomPosition = (node: OffsetModel, parent: OffsetModel, spacing: number): PositionModel => {
 	const size = parent.width / 2 + node.width / 2 + spacing
-	const radius = getRandomNumberBetween(size, size * 2)
+	const radius = getRandomNumberBetween(size, size * 3)
 
 	const angle = Math.random() * Math.PI * 2
 

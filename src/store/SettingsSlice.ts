@@ -26,9 +26,6 @@ export const settingsSlice = createSlice({
 	name: 'settings',
 	initialState,
 	reducers: {
-		setUpdateState(state) {
-			state.update = (state.update || 0) + 1
-		},
 		setDragElementState(state, { payload }: PayloadAction<string | undefined>) {
 			state.dragElement = payload
 		},
@@ -52,29 +49,14 @@ export const settingsSlice = createSlice({
 			state.positionList = list.length > 0 ? list : payload
 		},
 		setPositionState(state, { payload }: PayloadAction<NodeModel>) {
-			const id = payload.id
 			const positionList: NodeModel[] = [...current(state.positionList ?? [])]
-			const dataList: ProcessModel[] = [...(state.dataList ?? [])]
 
-			// List To Affected Nodes
-			const items = getVisibilityNodes(dataList, false, id)
-
-			// List of found positions
-			const foundList = items
-				.flatMap(({ id }) => positionList.find((item) => item.id === id && item.isVisible === false))
-				.filter((item) => item !== undefined)
-
-			const newPositionList = positionList.filter((item) => {
-				const index = foundList.findIndex(({ id }) => item.id === id)
-				return index >= 0 ? false : true
-			})
-
-			const index = newPositionList.findIndex(({ id }) => id === payload.id)
+			const index = positionList.findIndex(({ id }) => id === payload.id)
 
 			// Remove position when found
-			if (index >= 0) newPositionList.splice(index, 1)
+			if (index >= 0) positionList.splice(index, 1)
 
-			state.positionList = [...newPositionList, payload]
+			state.positionList = [...positionList, payload]
 		},
 		setVisibleState(state, { payload }: PayloadAction<string>) {
 			const id = payload.replace(/^X/gim, '')
@@ -161,8 +143,7 @@ export const {
 	setPositionListState,
 	setPositionState,
 	setDataListState,
-	setVisibleState,
-	setUpdateState
+	setVisibleState
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

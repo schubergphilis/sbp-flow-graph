@@ -36,25 +36,35 @@ const NodeBox = ({ data, iconSelector }: Props) => {
 	const timerRef = useRef<NodeJS.Timeout>(undefined)
 
 	const getDataList = useMemo(() => {
-		return dataList?.filter((item) => positionList?.find(({ id, isVisible }) => id === item.id && isVisible))
+		return dataList?.filter((item) => positionList?.find(({ id }) => id === item.id))
 	}, [dataList, positionList])
 
-	const getInitialPositionList = useCallback(() => {
+	const getInitialPositionList = useCallback((): NodeModel[] | undefined => {
 		const root = data?.find(({ root }) => root)
-		return data
-			?.filter(({ id, parent }) => id === root?.id || parent === root?.id)
-			.map<NodeModel>(({ id }) => ({ id: id, isVisible: true, x: 0, y: 0 }))
+
+		return data?.map(({ id, parent }) => ({
+			id: id,
+			isVisible: id === root?.id || parent === root?.id ? true : false,
+			x: 0,
+			y: 0
+		}))
 	}, [data])
 
-	const createDataList = useCallback((data: ProcessModel[]) => {
-		return data.map((item) => {
-			const hasChildren = data.find(({ parent }) => parent === item.id) ? true : undefined
-			const childStatus = data.find(
-				({ parent, status }) => parent === item.id && status !== 'Success' && status !== 'Unknown'
-			)?.status
-			return { ...item, hasChildren: hasChildren, childStatus: childStatus }
-		})
-	}, [])
+	const createDataList = useCallback(
+		(data: ProcessModel[]) => {
+			return data.map((item) => {
+				const hasChildren = data.find(({ parent }) => parent === item.id) ? true : undefined
+				const childStatus = data.find(
+					({ parent, status }) => parent === item.id && status !== 'Success' && status !== 'Unknown'
+				)?.status
+
+				const isVisible = positionList?.find(({ id }) => id === item.id)?.isVisible ?? false
+
+				return { ...item, hasChildren: hasChildren, childStatus: childStatus, isVisible: isVisible }
+			})
+		},
+		[positionList]
+	)
 
 	useDidMountEffect(() => {
 		if (isTriggered || (positionList && positionList.length > 0) || dataList?.length === 0) return
@@ -86,6 +96,7 @@ const NodeBox = ({ data, iconSelector }: Props) => {
 				dispatch(setPositionListState(list))
 				console.log('--- auto position ---')
 			}
+
 			setIsPositioned(true)
 		}, 1)
 	}, [dispatch, getDataList, isPositioned, panPosition, positionList, zoomLevel])

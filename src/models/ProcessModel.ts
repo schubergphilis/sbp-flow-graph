@@ -16,4 +16,6 @@ export default interface ProcessModel {
 	hasChildren?: boolean
 	/** @description Only use for transformation */
 	childStatus?: StatusType
+	/** @description Only use for transformation */
+	isVisible?: boolean
 }

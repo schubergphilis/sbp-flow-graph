@@ -1,4 +1,5 @@
 import ProcessModel from '@models/ProcessModel'
+import { useCallback } from 'react'
 import styled from 'styled-components'
 import FlowNodeBadge from './FlowNodeBadge'
 import FlowNodeIcon from './FlowNodeIcon'
@@ -10,11 +11,29 @@ interface Props {
 }
 
 const FlowNode = ({
-	data: { id, value, root, parent, type = 'circle', name, icon, badge = 0, tooltip, hasChildren, status, childStatus },
+	data: {
+		id,
+		value,
+		root,
+		parent,
+		type = 'circle',
+		name,
+		icon,
+		badge = 0,
+		tooltip,
+		hasChildren,
+		status,
+		childStatus,
+		isVisible
+	},
 	iconSelector
 }: Props) => {
 	const textLength = Math.max((name?.length || 1) * 11, 75)
 	const boxSize = Math.max(textLength, value)
+
+	const hasChildernVisible = useCallback((id: string) => {
+		return document.querySelector(`[data-node-parent=X${id}][data-node-visible=true]`) !== null
+	}, [])
 
 	return (
 		<Container
@@ -25,6 +44,8 @@ const FlowNode = ({
 			data-node-type={type}
 			data-node-size={value / 2}
 			data-node-children={hasChildren}
+			data-node-children-visible={!root && hasChildren ? hasChildernVisible(id) : undefined}
+			data-node-visible={isVisible}
 			fillOpacity={0}
 			transform={'translate(-10000, -10000)'}>
 			{type === 'circle' ? (
@@ -86,7 +107,7 @@ const Container = styled.g`
 	& > g > circle,
 	& > g > rect {
 		transform-origin: top left;
-		transition: fill-opacity 0.5s ease-in-out;
+		transition: fill-opacity 0.25s ease-in-out;
 		pointer-events: auto !important;
 	}
 
@@ -122,6 +143,18 @@ const Container = styled.g`
 
 	&[data-node-children]:not([data-node-root='true']) {
 		cursor: pointer;
+	}
+
+	&[data-node-visible='false'] {
+		fill-opacity: 0;
+		& > g > circle,
+		& > g > rect {
+			pointer-events: none !important;
+		}
+	}
+
+	&[transform='translate(-10000, -10000)'] {
+		display: none;
 	}
 `
 

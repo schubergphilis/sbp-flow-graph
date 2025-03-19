@@ -13,10 +13,15 @@ const Click = ({ children, onNodeClick }: Props) => {
 	const dispatch = useAppDispatch()
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
 
+	const updateChildNodeVisible = useCallback((id: string, element: SVGElement) => {
+		const isVisible = document.querySelector(`[data-node-parent=${id}][data-node-visible=true]`) !== null
+		element.setAttribute('data-node-children-visible', `${isVisible}`)
+	}, [])
+
 	const handleClick = useCallback(
 		(ev: MouseEvent) => {
 			const target = ev.target as SVGElement
-			const element = target.closest('[data-node-id]')
+			const element = target.closest('[data-node-id]') as SVGElement
 			const isRoot = element?.hasAttribute('data-node-root')
 			const hasChildren = element?.hasAttribute('data-node-children')
 
@@ -31,9 +36,10 @@ const Click = ({ children, onNodeClick }: Props) => {
 
 			clickTimeout.current = setTimeout(() => {
 				dispatch(setVisibleState(id))
+				setTimeout(() => updateChildNodeVisible(id, element), 1)
 			}, 300)
 		},
-		[dispatch, dragElement]
+		[dispatch, dragElement, updateChildNodeVisible]
 	)
 
 	const handeDoubleClick = useCallback(
