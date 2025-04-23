@@ -21,6 +21,7 @@ const FlowNode = ({
 		icon,
 		badge = 0,
 		tooltip,
+		info,
 		hasChildren,
 		status,
 		childStatus,
@@ -41,6 +42,7 @@ const FlowNode = ({
 			data-node
 			data-node-root={root ? 'true' : undefined}
 			data-node-parent={parent ? `X${parent}` : undefined}
+			data-node-info={info ?? undefined}
 			data-node-type={type}
 			data-node-size={value / 2}
 			data-node-children={hasChildren}

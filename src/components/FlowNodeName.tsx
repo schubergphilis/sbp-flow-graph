@@ -2,9 +2,10 @@ interface Props {
 	name?: string
 	boxHeight: number
 	boxWidth: number
+	minSize?: number
 }
-const FlowNodeName = ({ name, boxWidth, boxHeight }: Props) => {
-	const textLength = Math.max((name?.length || 1) * 11, 75)
+const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 75 }: Props) => {
+	const textLength = Math.max((name?.length || 1) * 11, minSize)
 
 	return (
 		<g transform={`translate(${boxWidth / 2}, 0)`}>

@@ -6,7 +6,7 @@ export default interface LineModel {
 	end: PositionModel
 	id: string
 	parentId: string
-	text?: string
+	info?: string
 	startSize: number
 	endSize: number
 	status: StatusType

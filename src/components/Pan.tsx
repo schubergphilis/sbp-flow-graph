@@ -13,8 +13,6 @@ const Pan = ({ children }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 
-	const selectedElement = undefined // useAppSelector<string>(getSelectedElementState)
-
 	const [isPanning, setIsPanning] = useState<boolean>(false)
 	const [pageOffset, setPageOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [boxOffset, setBoxOffset] = useState<PositionModel>({ x: 0, y: 0 })
@@ -52,18 +50,16 @@ const Pan = ({ children }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
-			// panRef.current?.style.removeProperty('transform-origin')
-
 			const target = ev.target as HTMLDivElement
 
 			if (!target.hasAttribute('data-container')) return
 
-			const posX = boxOffset.y + (ev.offsetY - mouseOffset.y) - pageOffset.y
-			const posY = boxOffset.x + (ev.offsetX - mouseOffset.x) - pageOffset.x
+			const posX = boxOffset.x + (ev.offsetX - mouseOffset.x) - pageOffset.x
+			const posY = boxOffset.y + (ev.offsetY - mouseOffset.y) - pageOffset.y
 
 			setPos({
-				y: posX,
-				x: posY
+				x: posX,
+				y: posY
 			})
 		},
 		[boxOffset, pageOffset, mouseOffset, setPos]
@@ -75,11 +71,8 @@ const Pan = ({ children }: Props) => {
 		panRef.current?.removeEventListener('mousemove', handleMove)
 		panRef.current?.removeEventListener('mouseup', handleMoveEnd)
 
-		// Dont save position when dragging when you are dragging when a bubble is selected
-		if (selectedElement !== '' && selectedElement !== undefined) return
-
 		dispatch(setPanPositionState(pos))
-	}, [dispatch, handleMove, pos, selectedElement])
+	}, [dispatch, handleMove, pos])
 
 	useLayoutEffect(() => {
 		if (!panPosition) return

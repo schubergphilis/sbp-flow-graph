@@ -28,7 +28,7 @@ export const AutoPosition = (
 
 			node.setAttribute('data-pos', `${pos.x},${pos.y}`)
 
-			const group = node.closest('g[data-node]')
+			const group = node.closest('[data-node]')
 
 			if (!group) return { id: id, x: pos.x, y: pos.y, isVisible: isVisible }
 

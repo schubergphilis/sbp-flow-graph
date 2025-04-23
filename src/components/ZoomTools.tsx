@@ -1,10 +1,11 @@
 import { closestNumber, generateSteps } from '@helpers/Helpers'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
-import { getZoomLevelState, setZoomLevelState } from '@store/SettingsSlice'
+import { getShowInfoState, getZoomLevelState, setShowInfoState, setZoomLevelState } from '@store/SettingsSlice'
 import { useCallback, useEffect } from 'react'
 import styled from 'styled-components'
 import CenterTool from './CenterTool'
 import AddIcon from './icons/AddIcon'
+import InfoIcon from './icons/InfoIcon'
 import RemoveIcon from './icons/RemoveIcon'
 
 const ZoomTools = () => {
@@ -15,7 +16,9 @@ const ZoomTools = () => {
 	const selectedElement = ''
 
 	const dispatch = useAppDispatch()
+
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
+	const showInfo = useAppSelector<boolean>(getShowInfoState)
 
 	const handleZoomLevel = useCallback(
 		(level: number, delta: number) => {
@@ -50,6 +53,10 @@ const ZoomTools = () => {
 		[handleZoomLevel, zoomLevel]
 	)
 
+	const handleShowInfo = useCallback(() => {
+		dispatch(setShowInfoState(!showInfo))
+	}, [dispatch, showInfo])
+
 	useEffect(() => {
 		document.addEventListener('wheel', handleScroll)
 
@@ -60,20 +67,29 @@ const ZoomTools = () => {
 
 	return (
 		<Container>
-			<Level>level: {Math.round(zoomLevel * 100) / 100}</Level>
-			<ActionButton
-				disabled={maxZoom === zoomLevel || selectedElement !== ''}
-				type="button"
-				onClick={(ev) => setZoom(ev, 1)}>
-				<AddIcon />
-			</ActionButton>
-			<CenterTool />
-			<ActionButton
-				disabled={minZoom === zoomLevel || selectedElement !== ''}
-				type="button"
-				onClick={(ev) => setZoom(ev, -1)}>
-				<RemoveIcon />
-			</ActionButton>
+			<Left>
+				<Level>level: {Math.round(zoomLevel * 100) / 100}</Level>
+			</Left>
+			<Center>
+				<ActionButton
+					disabled={maxZoom === zoomLevel || selectedElement !== ''}
+					type="button"
+					onClick={(ev) => setZoom(ev, 1)}>
+					<AddIcon />
+				</ActionButton>
+				<CenterTool />
+				<ActionButton
+					disabled={minZoom === zoomLevel || selectedElement !== ''}
+					type="button"
+					onClick={(ev) => setZoom(ev, -1)}>
+					<RemoveIcon />
+				</ActionButton>
+			</Center>
+			<Right>
+				<ActionButton $isSelected={showInfo} onClick={handleShowInfo}>
+					<InfoIcon />
+				</ActionButton>
+			</Right>
 		</Container>
 	)
 }
@@ -83,7 +99,7 @@ const Container = styled.div`
 	bottom: 0;
 	right: 0;
 	display: flex;
-	flex-direction: column;
+	//flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
 	gap: 0.5em;
@@ -94,21 +110,29 @@ const Container = styled.div`
 const Level = styled.div`
 	font-size: 0.75em;
 `
-export const ActionButton = styled.button`
+const Left = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+`
+const Center = styled(Left)``
+const Right = styled(Left)``
+
+export const ActionButton = styled.button<{ $isSelected?: boolean }>`
 	border-radius: 0.5em;
-	background-color: rgba(255, 255, 255, 0.75);
+	background-color: ${({ $isSelected, theme }) => ($isSelected ? theme.style.colorPrimary : theme.style.cardColorBg)};
 	height: 3em;
 	width: 3em;
-	border: 1px solid black;
+	border: 1px solid ${({ theme }) => theme.style.borderColor};
 	cursor: pointer;
 	pointer-events: all !important;
 
 	&:hover {
-		background-color: rgba(233, 233, 233, 0.75);
+		filter: hue-rotate(2deg) brightness(95%);
 	}
 
 	&:active {
-		background-color: rgba(200, 200, 200, 0.75);
+		filter: hue-rotate(4deg) brightness(90%);
 	}
 `
 export default ZoomTools

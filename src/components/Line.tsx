@@ -1,12 +1,17 @@
+import { useAppSelector } from '@hooks/ReduxStore'
 import LineModel from '@models/LineModel'
+import { getShowInfoState } from '@store/SettingsSlice'
 import styled from 'styled-components'
+import FlowNodeName from './FlowNodeName'
 
 interface Props {
 	data: LineModel
 }
 
-const Line = ({ data: { start, end, text, startSize, endSize, status } }: Props) => {
-	const angle = (Math.atan2(start.x - end.x, start.y - end.y) * 180) / Math.PI
+const Line = ({ data: { start, end, info, startSize, endSize, status } }: Props) => {
+	const showInfo = useAppSelector<boolean>(getShowInfoState)
+
+	const textLength = (info?.length || 1) * 11
 
 	const startAngle = Math.atan2(end.y - start.y, end.x - start.x)
 	const startX = start.x + startSize * Math.cos(startAngle)
@@ -19,37 +24,28 @@ const Line = ({ data: { start, end, text, startSize, endSize, status } }: Props)
 	const midX = (startX + endX) / 2
 	const midY = (startY + endY) / 2
 
-	const textAngle =
-		angle < 0 && angle <= -135
-			? angle - 180
-			: angle > 45 && angle <= 135
-				? angle + 180
-				: angle < 0 && angle >= -45
-					? angle
-					: angle > 0 && angle <= 45
-						? angle
-						: 0
+	const firstX = (startX + midX) / 2
+	const firstY = (startY + midY) / 2
+
+	const lastX = (endX + midX) / 2
+	const lastY = (endY + midY) / 2
 
 	return (
 		<Container data-line-status={status}>
-			<text
-				x={start.x}
-				y={start.y}
-				textAnchor="middle"
-				dominantBaseline="central"
-				transform={`rotate(${textAngle}, ${start.x}, ${start.y})`}
-				fillOpacity={0}>
-				{text}
-			</text>
-
 			<path
-				d={`M${start.x} ${start.y}  ${midX} ${midY} L${end.x} ${end.y}`}
+				d={`M${start.x} ${start.y} ${firstX} ${firstY} ${midX} ${midY} ${lastX} ${lastY} L${end.x} ${end.y}`}
 				stroke={`hsl(${Math.random() * 360}, 50%, 50%)`}
 				strokeWidth={1}
 				strokeDasharray={4}
 				markerMid="url(#arrow)"
 				fill="none"
 			/>
+
+			{showInfo && info && (
+				<g transform={`translate(${midX - textLength / 2}, ${midY})`}>
+					<FlowNodeName name={info ?? ''} boxHeight={-30} boxWidth={textLength} minSize={30} />
+				</g>
+			)}
 		</Container>
 	)
 }
@@ -64,20 +60,52 @@ const Container = styled.g`
 		stroke: ${({ theme }) => theme.style.notificationErrorColorBg};
 	}
 
-	&[data-line-status='Success'] > path {
-		stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
+	&[data-line-status='Success'] {
+		& > g:last-child {
+			& rect {
+				stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
+				stroke-width: 2;
+			}
+		}
+		& > path {
+			stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
+		}
 	}
 
-	&[data-line-status='Warning'] > path {
-		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
+	&[data-line-status='Warning'] {
+		& > g:last-child {
+			& rect {
+				stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
+				stroke-width: 2;
+			}
+		}
+		& > path {
+			stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
+		}
 	}
 
-	&[data-line-status='Info'] > path {
-		stroke: ${({ theme }) => theme.style.notificationInfoColorBg};
+	&[data-line-status='Info'] {
+		& > g:last-child {
+			& rect {
+				stroke: ${({ theme }) => theme.style.notificationInfoColorBg};
+				stroke-width: 2;
+			}
+		}
+		& > path {
+			stroke: ${({ theme }) => theme.style.notificationInfoColorBg};
+		}
 	}
 
-	&[data-line-status='Unknown'] > path {
-		stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
+	&[data-line-status='Unknown'] {
+		& > g:last-child {
+			& rect {
+				stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
+				stroke-width: 2;
+			}
+		}
+		& > path {
+			stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
+		}
 	}
 `
 export default Line

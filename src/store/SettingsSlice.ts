@@ -12,13 +12,15 @@ export interface SettingsState {
 	panPosition?: PositionModel
 	positionList?: NodeModel[]
 	dataList?: ProcessModel[]
+	showInfo: boolean
 	update: number
 }
 
 // Initial state
 const initialState: SettingsState = {
 	zoomLevel: 1,
-	update: 1
+	update: 1,
+	showInfo: false
 }
 
 // Actual Slice
@@ -37,6 +39,9 @@ export const settingsSlice = createSlice({
 		},
 		setPanPositionState(state, { payload }: PayloadAction<PositionModel>) {
 			state.panPosition = payload
+		},
+		setShowInfoState(state, { payload }: PayloadAction<boolean>) {
+			state.showInfo = payload
 		},
 		setPositionListState(state, { payload }: PayloadAction<NodeModel[]>) {
 			const positionList: NodeModel[] = [...(state.positionList ?? [])]
@@ -135,6 +140,8 @@ export const getDataListState = (state: AppState): ProcessModel[] | undefined =>
 
 export const getUpdateState = (state: AppState): number => state.settings.update
 
+export const getShowInfoState = (state: AppState): boolean => state.settings.showInfo
+
 export const {
 	setDragElementState,
 	setClusterDragState,
@@ -143,7 +150,8 @@ export const {
 	setPositionListState,
 	setPositionState,
 	setDataListState,
-	setVisibleState
+	setVisibleState,
+	setShowInfoState
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

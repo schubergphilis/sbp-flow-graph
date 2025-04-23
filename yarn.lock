@@ -1000,10 +1000,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.1.tgz#de633db3ec2ef6a3c89e2f19038063e8a122e2c2"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
-"@gmtdi/frontend-shared-components@1.0.1-86":
-  version "1.0.1-86"
-  resolved "https://npm.pkg.github.com/download/@gmtdi/frontend-shared-components/1.0.1-86/30b212ef5f1f3769cb0221b618e27d13a34ade99#30b212ef5f1f3769cb0221b618e27d13a34ade99"
-  integrity sha512-QYsiHHZSLhO0mRuOc5Hx+ozl9YeHWGOL5MeQ7oG6QNApUV7/66FUXL6EVGlp2Pl/FewZb6HGjKCNoJ9VchWq8g==
+"@gmtdi/frontend-shared-components@1.0.1-102":
+  version "1.0.1-102"
+  resolved "https://npm.pkg.github.com/download/@gmtdi/frontend-shared-components/1.0.1-102/f9b36c8cf7b6dbc24f56cfa75de3ce998093daf3#f9b36c8cf7b6dbc24f56cfa75de3ce998093daf3"
+  integrity sha512-TcshWgGc3PICsjwvbyppQvRgwJAeCynKnxLtE1AET3VKpPXLDcgAKy7Eje7jwkQ++GmTLxOPhl9SDb7ehiAZNQ==
   dependencies:
     styled-components "^6.1.14"
 

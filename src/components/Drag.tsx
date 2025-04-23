@@ -37,7 +37,7 @@ const Drag = ({ children }: Props) => {
 
 			const element = ev.target as SVGElement
 
-			const target = element.closest('g[data-node]') as SVGElement
+			const target = element.closest('[data-node]') as SVGElement
 
 			if (!target || !target?.hasAttribute('data-node')) return
 
@@ -129,7 +129,7 @@ const Drag = ({ children }: Props) => {
 
 				const element = ev.target as SVGElement
 
-				const target = element.closest('g[data-node]') as SVGElement
+				const target = element.closest('[data-node]') as SVGElement
 
 				if (!target) return
 

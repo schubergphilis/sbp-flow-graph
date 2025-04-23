@@ -8,6 +8,7 @@
 			"type": "circle",
 			"icon": null,
 			"parent": "5eefc5da-40d2-5afc-af3a-e7b6c2730b0d",
+			"info": "100",
 			"badge": 0,
 			"tooltip": "Schuberg Philis: Success \\r\\n incidents: 0",
 			"status": "Success"
@@ -55,6 +56,7 @@
 			"type": "rect",
 			"icon": null,
 			"parent": "ae891d20-55b1-5686-ba1d-cbb68845d9cc",
+			"info": "50",
 			"badge": 0,
 			"tooltip": "ETL: 03_02_main_micos: Unknown \\r\\n incidents: 0",
 			"status": "Unknown"
@@ -91,6 +93,7 @@
 			"type": "circle",
 			"icon": null,
 			"parent": "dbf49854-07bd-5fcf-a769-0718afaf1336",
+			"info": "75",
 			"badge": 0,
 			"tooltip": "GIP Interfaces for Sealbag Storten: Unknown \\r\\n incidents: 0",
 			"status": "Unknown"
@@ -115,6 +118,7 @@
 			"type": "circle",
 			"icon": null,
 			"parent": "83685073-4d93-576f-b71b-8a754e1cc51b",
+			"info": "25",
 			"badge": 0,
 			"tooltip": "GIP Cash Management: Success \\r\\n incidents: 0",
 			"status": "Success"
@@ -916,6 +920,7 @@
 			"type": "circle",
 			"icon": null,
 			"parent": "5eefc5da-40d2-5afc-af3a-e7b6c2730b0d",
+			"info": "75",
 			"badge": 0,
 			"tooltip": "OGD: Unknown \\r\\n incidents: 0",
 			"status": "Unknown"
