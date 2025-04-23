@@ -13,6 +13,7 @@ interface Props {
 const FlowNode = ({
 	data: {
 		id,
+		refrenceId,
 		value,
 		root,
 		parent,
@@ -39,6 +40,7 @@ const FlowNode = ({
 	return (
 		<Container
 			data-node-id={`X${id}`}
+			data-node-reference={`X${refrenceId}`}
 			data-node
 			data-node-root={root ? 'true' : undefined}
 			data-node-parent={parent ? `X${parent}` : undefined}

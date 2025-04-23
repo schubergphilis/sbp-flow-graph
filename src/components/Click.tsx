@@ -51,9 +51,9 @@ const Click = ({ children, onNodeClick }: Props) => {
 
 			if (!element || dragElement) return
 
-			const id = element.getAttribute('data-node-id') as string
+			const referenceId = element.getAttribute('data-node-reference')?.replace(/^X/gim, '') as string
 
-			if (onNodeClick) onNodeClick(id.replace(/^X/gim, ''))
+			if (onNodeClick) onNodeClick(referenceId ?? '')
 
 			ev.stopPropagation()
 			ev.preventDefault()

@@ -3,6 +3,7 @@ import { StatusType } from '@datatypes/StatusType'
 
 export default interface ProcessModel {
 	id: string
+	refrenceId: string
 	name?: string
 	value: number
 	root?: boolean
