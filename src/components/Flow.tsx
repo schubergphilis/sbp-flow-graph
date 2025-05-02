@@ -16,11 +16,12 @@ import Tooltip from './Tooltip'
 interface Props {
 	data?: ProcessModel[]
 	isDebug?: boolean
+	spacing?: number
 	onNodeClick?: (id: string) => void
 	iconSelector?: (name: string) => JSX.Element
 }
 
-const Flow = ({ data, isDebug = false, onNodeClick, iconSelector }: Props) => {
+const Flow = ({ data, isDebug = false, spacing, onNodeClick, iconSelector }: Props) => {
 	return (
 		<StateProvider isDebug={isDebug}>
 			<Pan>
@@ -31,7 +32,7 @@ const Flow = ({ data, isDebug = false, onNodeClick, iconSelector }: Props) => {
 								<SVGShadow />
 								<SVGMarker />
 								<LineBox />
-								<NodeBox data={data} iconSelector={iconSelector} />
+								<NodeBox data={data} iconSelector={iconSelector} spacing={spacing} />
 								<Debug isDebug={isDebug} />
 							</SvgCanvast>
 						</Click>

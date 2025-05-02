@@ -48,7 +48,7 @@ const LineBox = () => {
 						info: node.getAttribute('data-node-info') as string,
 						startSize: Number(node.getAttribute('data-node-size') ?? 0),
 						endSize: Number(getParentNode(node)?.getAttribute('data-node-size') ?? 0),
-						status: `${element.getAttribute('data-node-status') as StatusType}`
+						status: `${element?.getAttribute('data-node-status') as StatusType}`
 					}
 				})
 		},

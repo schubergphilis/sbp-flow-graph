@@ -20,9 +20,10 @@ import FlowNode from './FlowNode'
 interface Props {
 	data?: ProcessModel[]
 	iconSelector?: (name: string) => JSX.Element
+	spacing?: number
 }
 
-const NodeBox = ({ data, iconSelector }: Props) => {
+const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
@@ -90,7 +91,7 @@ const NodeBox = ({ data, iconSelector }: Props) => {
 		if (isPositioned || !dataList) return
 
 		timerRef.current = setTimeout(() => {
-			const list = AutoPosition(dataList, positionList, panPosition, zoomLevel, 50)
+			const list = AutoPosition(dataList, positionList, panPosition, zoomLevel, spacing)
 
 			if (list.length > 0) {
 				dispatch(setPositionListState(list))
