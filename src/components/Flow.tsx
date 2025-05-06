@@ -11,6 +11,7 @@ import ZoomTools from '@components/ZoomTools'
 
 import ProcessModel from '@models/ProcessModel'
 import styled from 'styled-components'
+import SVGInnerShadow from './SVGInnerShadow'
 import Tooltip from './Tooltip'
 
 interface Props {
@@ -31,6 +32,7 @@ const Flow = ({ data, isDebug = false, spacing, onNodeClick, iconSelector }: Pro
 							<SvgCanvast $isDebug={isDebug}>
 								<SVGShadow />
 								<SVGMarker />
+								<SVGInnerShadow />
 								<LineBox />
 								<NodeBox data={data} iconSelector={iconSelector} spacing={spacing} />
 								<Debug isDebug={isDebug} />

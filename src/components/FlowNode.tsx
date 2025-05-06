@@ -70,6 +70,7 @@ const FlowNode = ({
 						cx="0"
 						cy="0"
 						data-node-tooltip={tooltip}
+						style={{ filter: 'url(#innershadow)' }}
 					/>
 				</g>
 			) : (
@@ -93,6 +94,7 @@ const FlowNode = ({
 						x={value / 20}
 						y={value / 20}
 						data-node-tooltip={tooltip}
+						style={{ filter: 'url(#innershadow)' }}
 					/>
 				</g>
 			)}

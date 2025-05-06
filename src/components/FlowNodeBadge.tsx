@@ -15,7 +15,7 @@ const FlowNodeBadge = ({ badge, boxWidth, nodeSize, type = 'circle' }: Props) =>
 		<g
 			transform={`translate(${boxWidth / 2 + nodeSize / 2}, ${type === 'circle' ? badgeSize / 2 : 0})`}
 			style={{ filter: 'url(#dropshadow)' }}>
-			<Badge fill="yellow" r={badgeSize} cx="0" cy="0" style={{ filter: 'url(#dropshadow)' }} />
+			<Badge r={badgeSize} cx="0" cy="0" style={{ filter: 'url(#dropshadow)' }} />
 			<Text dominantBaseline="middle" textAnchor="middle">
 				{badge}
 			</Text>
