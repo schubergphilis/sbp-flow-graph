@@ -151,6 +151,8 @@ const Container = styled.g`
 
 	&[data-node-visible='false'] {
 		fill-opacity: 0;
+		stroke-opacity: 0;
+
 		& > g > circle,
 		& > g > rect {
 			pointer-events: none !important;
