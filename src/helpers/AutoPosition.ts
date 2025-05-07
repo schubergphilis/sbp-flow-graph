@@ -68,8 +68,8 @@ export const getNodePosition = (
 	const size = Number(node?.getAttribute('data-node-size') ?? 0)
 
 	// Temp size for auto position isColliding()
-	const width = pos.width > 0 ? pos.width : size
-	const height = pos.height > 0 ? pos.height : size * 1.5
+	const width = pos.width > 0 ? pos.width : size * 1.25
+	const height = pos.height > 0 ? pos.height : size * 2
 
 	return {
 		width: Math.round(width / zoomLevel),
@@ -120,6 +120,8 @@ const calculatePosition = (
 		const found = parentChildList.find((child) => isCircleColliding(child, pos))
 		freeSpace = found === undefined ? 1 : 0
 		i++
+
+		if (freeSpace === 0 && i === 20) console.log('still colliding', pos)
 	} while (i < 20 && freeSpace < 1)
 
 	if (isRoot) {
@@ -150,7 +152,7 @@ const _isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean
 
 const randomPosition = (node: OffsetModel, parent: OffsetModel, spacing: number): PositionModel => {
 	const size = parent.width + node.width + spacing
-	const radius = getRandomNumberBetween(size, size * 2)
+	const radius = getRandomNumberBetween(size, size * 2.5)
 
 	const angle = Math.random() * Math.PI * 2
 

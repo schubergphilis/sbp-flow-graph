@@ -34,7 +34,7 @@ const App = () => {
 					console.log('test')
 				}}
 				iconSelector={selectIcon}
-				spacing={100}
+				spacing={50}
 			/>
 		</CloudStyle>
 	)
