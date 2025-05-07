@@ -26,11 +26,11 @@ const Debug = ({ isDebug = false }: Props) => {
 
 	const testData = useCallback(
 		(nodes: SVGElement[]): JSX.Element[] => {
-			return nodes.map((node) => {
+			return nodes.map((node, index) => {
 				const pos = getNodePosition(node, panPosition, zoomLevel)
 
 				return (
-					<g key={`debug_${node.id}`}>
+					<g key={`debug_${node.id}_${index}`}>
 						<text x={pos.x} y={pos.y - pos.height / 1.75} textAnchor="middle" dominantBaseline="central">
 							{pos.x} x {pos.y} / {pos.width}
 						</text>

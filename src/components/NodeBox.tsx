@@ -100,7 +100,7 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 
 			setIsPositioned(true)
 		}, 1)
-	}, [dispatch, getDataList, isPositioned, panPosition, positionList, zoomLevel])
+	}, [dispatch, getDataList, isPositioned, panPosition, positionList, spacing, zoomLevel])
 
 	useDidMountEffect(() => {
 		setIsPositioned(false)

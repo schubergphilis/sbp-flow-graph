@@ -65,10 +65,15 @@ export const getNodePosition = (
 	zoomLevel: number = 1
 ): OffsetModel => {
 	const pos = node?.getBoundingClientRect() ?? { width: 0, height: 0, x: 0, y: 0 }
+	const size = Number(node?.getAttribute('data-node-size') ?? 0)
+
+	// Temp size for auto position isColliding()
+	const width = pos.width > 0 ? pos.width : size
+	const height = pos.height > 0 ? pos.height : size * 1.5
 
 	return {
-		width: Math.round(pos.width / zoomLevel),
-		height: Math.round(pos.height / zoomLevel),
+		width: Math.round(width / zoomLevel),
+		height: Math.round(height / zoomLevel),
 		x: Math.round((pos.x + pos.width / 2 - offset.x) / zoomLevel),
 		y: Math.round((pos.y + pos.height / 2 - offset.y) / zoomLevel)
 	}
@@ -110,10 +115,10 @@ const calculatePosition = (
 	let freeSpace = 0
 	let pos = { x: 0, y: 0 } as OffsetModel
 	let i = 0
-
 	do {
 		pos = positionNode(node, spacing, offset, zoomLevel)
-		freeSpace = parentChildList.find((child) => isCircleColliding(child, pos) && child) === undefined ? 1 : 0
+		const found = parentChildList.find((child) => isCircleColliding(child, pos))
+		freeSpace = found === undefined ? 1 : 0
 		i++
 	} while (i < 20 && freeSpace < 1)
 
@@ -127,16 +132,25 @@ const calculatePosition = (
 }
 
 const isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean => {
-	const distance = Math.sqrt(
-		(circle2.x - circle1.x) * (circle2.x - circle1.x) + (circle2.y - circle1.y) * (circle2.y - circle1.y)
+	return !(
+		circle1.x + circle1.width < circle2.x ||
+		circle1.x > circle2.x + circle2.width ||
+		circle1.y + circle1.height < circle2.y ||
+		circle1.y > circle2.y + circle2.height
 	)
+}
+const _isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean => {
+	const a = Math.max(circle1.width, circle1.height) + Math.max(circle2.width, circle2.height)
+	const x = circle1.x - circle2.x
+	const y = circle1.y - circle2.y
 
-	return distance <= circle1.width / 2 + circle2.width / 2 // Collision check
+	const distance = Math.sqrt(x * x + y * y)
+	return a > distance
 }
 
 const randomPosition = (node: OffsetModel, parent: OffsetModel, spacing: number): PositionModel => {
-	const size = parent.width / 2 + node.width / 2 + spacing
-	const radius = getRandomNumberBetween(size, size * 3)
+	const size = parent.width + node.width + spacing
+	const radius = getRandomNumberBetween(size, size * 2)
 
 	const angle = Math.random() * Math.PI * 2
 
