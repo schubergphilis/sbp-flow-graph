@@ -22,25 +22,14 @@ export const AutoPosition = (
 
 			const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
 
-			const box: OffsetModel = savedPos
-				? getNodePosition(node, offset, zoomLevel)
-				: calculatePosition(node, spacing, offset, zoomLevel)
+			const box: OffsetModel = getNodePosition(node, offset, zoomLevel)
 
 			// Overwrite position for rootNode to the center of the page
 			const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : isRoot ? center : { x: box.x, y: box.y }
 
-			node.setAttribute('data-pos', `${pos.x},${pos.y}`)
+			setNodePosition(node, box, pos)
 
-			const group = node.closest('[data-node]')
-
-			if (!group) return { id: id, x: pos.x, y: pos.y, isVisible: isVisible }
-
-			group.setAttribute('fill-opacity', '1')
-
-			group?.setAttribute(
-				'transform',
-				`translate(${Math.round(pos.x - box.width / 2)}, ${Math.round(pos.y - box.height / 2)})`
-			)
+			determenChildPositions(node, box, pos, offset, spacing, zoomLevel)
 
 			return { id: id, x: pos.x, y: pos.y, isVisible: isVisible }
 		})
@@ -82,6 +71,39 @@ export const getNodePosition = (
 	}
 }
 
+const setNodePosition = (node: SVGElement, box: OffsetModel, pos: PositionModel) => {
+	node.setAttribute('data-pos', `${pos.x},${pos.y}`)
+	node.setAttribute('fill-opacity', '1')
+
+	node.setAttribute(
+		'transform',
+		`translate(${Math.round(pos.x - box.width / 2)}, ${Math.round(pos.y - box.height / 2)})`
+	)
+}
+
+const calculateRadius = (
+	pos: OffsetModel,
+	children: SVGElement[],
+	spacing: number,
+	offset: PositionModel,
+	zoomLevel: number
+): number => {
+	const list = children.map((child) => getNodePosition(child, offset, zoomLevel))
+
+	const maxChildSize = Math.max(...list.map(({ width, height }) => Math.max(width, height)))
+
+	const totalWidth = list.reduce((sum, { width, height }) => sum + Math.max(width, height), 0)
+	const totalSpace = spacing * list.length
+
+	const minCircumference = Math.round(2 * Math.PI * (Math.max(pos.width, pos.height) / 2 + spacing + maxChildSize / 2))
+
+	const circumference = Math.max(totalWidth + totalSpace, minCircumference)
+
+	const radius = Math.round(circumference / (2 * Math.PI))
+
+	return radius
+}
+
 const getWindowDimensions = (): { width: number; height: number } => {
 	const hasWindow = typeof window !== 'undefined'
 
@@ -94,88 +116,36 @@ const getWindowDimensions = (): { width: number; height: number } => {
 	}
 }
 
-const getParentChildList = (node: SVGElement, offset: PositionModel, zoomLevel: number): OffsetModel[] => {
+const getChildList = (node: SVGElement): SVGElement[] => {
 	const nodeId = node.getAttribute('data-node-id') as string
-	const parentId = node.getAttribute('data-node-parent') as string
 	const childList = [
-		...(document.querySelectorAll<SVGElement>(`[data-node-parent=${parentId}]:not([data-node-id=${nodeId}])`) ?? [])
+		...(document.querySelectorAll<SVGElement>(`[data-node-parent=${nodeId}][data-node-visible=true]`) ?? [])
 	]
 
-	return childList.map((child) => getNodePosition(child, offset, zoomLevel))
+	return childList
 }
 
-const calculatePosition = (
+const determenChildPositions = (
 	node: SVGElement,
-	spacing: number,
+	box: OffsetModel,
+	pos: PositionModel,
 	offset: PositionModel,
+	spacing: number,
 	zoomLevel: number
-): OffsetModel => {
-	const parentChildList = getParentChildList(node, offset, zoomLevel)
-	const position = getNodePosition(node)
+) => {
+	const childList = getChildList(node)
 
-	const maxChildSize = Math.max(...parentChildList.map(({ width, height }) => Math.max(width, height)))
+	const total = childList.length
+	const radius = calculateRadius(box, childList, spacing, offset, zoomLevel)
 
-	const totalWidth = parentChildList.reduce((sum, { width, height }) => sum + Math.max(width, height), 0)
-	const totalSpace = spacing * (parentChildList.length + 1)
+	childList.forEach((child, index) => {
+		const box = getNodePosition(child, offset, zoomLevel)
+		const angle = ((2 * Math.PI) / total) * index
 
-	const minCircumference = Math.round(
-		2 * Math.PI * (Math.max(position.width, position.height) / 2 + spacing + maxChildSize / 2)
-	)
+		const posX = pos.x + Math.round(radius * Math.cos(angle))
+		const posY = pos.y + Math.round(radius * Math.sin(angle))
 
-	const circumference = Math.max(totalWidth + totalSpace, minCircumference)
-
-	const radius = Math.round(circumference / (2 * Math.PI))
-
-	let freeSpace = 0
-	let pos = { x: 0, y: 0 } as OffsetModel
-	let i = 0
-
-	do {
-		pos = positionNode(node, radius, offset, zoomLevel)
-		const found = parentChildList.find((child) => isCircleColliding(child, pos))
-		freeSpace = found === undefined ? 1 : 0
-		i++
-
-		if (freeSpace === 0 && i === 20) console.log('still colliding', pos, node)
-	} while (i < 20 && freeSpace < 1)
-
-	return pos
-}
-
-const isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean => {
-	return !(
-		circle1.x + circle1.width < circle2.x ||
-		circle1.x > circle2.x + circle2.width ||
-		circle1.y + circle1.height < circle2.y ||
-		circle1.y > circle2.y + circle2.height
-	)
-}
-const _isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean => {
-	const a = Math.max(circle1.width, circle1.height) + Math.max(circle2.width, circle2.height)
-	const x = circle1.x - circle2.x
-	const y = circle1.y - circle2.y
-
-	const distance = Math.sqrt(x * x + y * y)
-	return a > distance
-}
-
-const randomPosition = (parent: OffsetModel, radius: number): PositionModel => {
-	const angle = Math.random() * Math.PI * 2
-
-	const randomX = Math.round(Math.cos(angle) * radius)
-	const randomY = Math.round(Math.sin(angle) * radius)
-
-	const posX = parent.x + randomX
-	const posY = parent.y + randomY
-	return { x: posX, y: posY }
-}
-
-const positionNode = (node: SVGElement, radius: number, offset: PositionModel, zoomLevel: number): OffsetModel => {
-	// const target = node.querySelector<SVGElement>('circle, rect')!
-	const nodeOffset = getNodePosition(node, offset, zoomLevel)
-	const parentOffset = getParentNodePosition(node, offset, zoomLevel)
-
-	const position = randomPosition(parentOffset, radius)
-
-	return { ...position, width: nodeOffset.width, height: nodeOffset.height }
+		const childPos: PositionModel = { x: posX, y: posY }
+		setNodePosition(child, box, childPos)
+	})
 }
