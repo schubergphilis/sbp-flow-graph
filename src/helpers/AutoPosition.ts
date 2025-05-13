@@ -2,7 +2,6 @@ import NodeModel from '@models/NodeModel'
 import OffsetModel from '@models/OffsetModel'
 import PositionModel from '@models/PositionModel'
 import ProcessModel from '@models/ProcessModel'
-import { getRandomNumberBetween } from './Helpers'
 
 export const AutoPosition = (
 	nodeList: ProcessModel[] = [],
@@ -12,19 +11,23 @@ export const AutoPosition = (
 	spacing: number = 125
 ): NodeModel[] => {
 	const viewport = getWindowDimensions() as unknown as OffsetModel
+	const center: PositionModel = { x: Math.round(viewport.width / 2), y: Math.round(viewport.height / 2) }
 
 	const posList = nodeList
 		.sort((a) => (a.parent === undefined ? -1 : 0))
 		.filter(({ isVisible }) => isVisible)
 		.map(({ id, isVisible }) => {
 			const node = document.querySelector<SVGElement>(`[data-node-id=X${id}]`)!
+			const isRoot = (node.getAttribute('data-node-root') ?? 'false') === 'true'
 
 			const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
 
 			const box: OffsetModel = savedPos
 				? getNodePosition(node, offset, zoomLevel)
-				: calculatePosition(node, spacing, viewport, offset, zoomLevel)
-			const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : { x: box.x, y: box.y }
+				: calculatePosition(node, spacing, offset, zoomLevel)
+
+			// Overwrite position for rootNode to the center of the page
+			const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : isRoot ? center : { x: box.x, y: box.y }
 
 			node.setAttribute('data-pos', `${pos.x},${pos.y}`)
 
@@ -104,31 +107,37 @@ const getParentChildList = (node: SVGElement, offset: PositionModel, zoomLevel: 
 const calculatePosition = (
 	node: SVGElement,
 	spacing: number,
-	viewport: OffsetModel,
 	offset: PositionModel,
 	zoomLevel: number
 ): OffsetModel => {
-	const isRoot = (node.getAttribute('data-node-root') ?? 'false') === 'true'
-
 	const parentChildList = getParentChildList(node, offset, zoomLevel)
+	const position = getNodePosition(node)
+
+	const maxChildSize = Math.max(...parentChildList.map(({ width, height }) => Math.max(width, height)))
+
+	const totalWidth = parentChildList.reduce((sum, { width, height }) => sum + Math.max(width, height), 0)
+	const totalSpace = spacing * (parentChildList.length + 1)
+
+	const minCircumference = Math.round(
+		2 * Math.PI * (Math.max(position.width, position.height) / 2 + spacing + maxChildSize / 2)
+	)
+
+	const circumference = Math.max(totalWidth + totalSpace, minCircumference)
+
+	const radius = Math.round(circumference / (2 * Math.PI))
 
 	let freeSpace = 0
 	let pos = { x: 0, y: 0 } as OffsetModel
 	let i = 0
+
 	do {
-		pos = positionNode(node, spacing, offset, zoomLevel)
+		pos = positionNode(node, radius, offset, zoomLevel)
 		const found = parentChildList.find((child) => isCircleColliding(child, pos))
 		freeSpace = found === undefined ? 1 : 0
 		i++
 
-		if (freeSpace === 0 && i === 20) console.log('still colliding', pos)
+		if (freeSpace === 0 && i === 20) console.log('still colliding', pos, node)
 	} while (i < 20 && freeSpace < 1)
-
-	if (isRoot) {
-		// Overwrite position for rootNode to the center of the page
-		pos.x = Math.round(viewport.width / 2)
-		pos.y = Math.round(viewport.height / 2)
-	}
 
 	return pos
 }
@@ -150,10 +159,7 @@ const _isCircleColliding = (circle1: OffsetModel, circle2: OffsetModel): boolean
 	return a > distance
 }
 
-const randomPosition = (node: OffsetModel, parent: OffsetModel, spacing: number): PositionModel => {
-	const size = parent.width + node.width + spacing
-	const radius = getRandomNumberBetween(size, size * 2.5)
-
+const randomPosition = (parent: OffsetModel, radius: number): PositionModel => {
 	const angle = Math.random() * Math.PI * 2
 
 	const randomX = Math.round(Math.cos(angle) * radius)
@@ -164,12 +170,12 @@ const randomPosition = (node: OffsetModel, parent: OffsetModel, spacing: number)
 	return { x: posX, y: posY }
 }
 
-const positionNode = (node: SVGElement, spacing: number, offset: PositionModel, zoomLevel: number): OffsetModel => {
+const positionNode = (node: SVGElement, radius: number, offset: PositionModel, zoomLevel: number): OffsetModel => {
 	// const target = node.querySelector<SVGElement>('circle, rect')!
 	const nodeOffset = getNodePosition(node, offset, zoomLevel)
 	const parentOffset = getParentNodePosition(node, offset, zoomLevel)
 
-	const position = randomPosition(nodeOffset, parentOffset, spacing)
+	const position = randomPosition(parentOffset, radius)
 
 	return { ...position, width: nodeOffset.width, height: nodeOffset.height }
 }
