@@ -13,6 +13,8 @@ const Click = ({ children, onNodeClick }: Props) => {
 	const dispatch = useAppDispatch()
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
 
+	const ref = useRef<HTMLDivElement>(null)
+
 	const updateChildNodeVisible = useCallback((id: string, element: SVGElement) => {
 		const isVisible = document.querySelector(`[data-node-parent=${id}][data-node-visible=true]`) !== null
 		element.setAttribute('data-node-children-visible', `${isVisible}`)
@@ -62,12 +64,14 @@ const Click = ({ children, onNodeClick }: Props) => {
 	)
 
 	useLayoutEffect(() => {
-		document.addEventListener('dblclick', handeDoubleClick)
-		document.addEventListener('mouseup', handleClick)
+		ref.current = document.querySelector<HTMLDivElement>('[data-container]')
+
+		ref.current?.addEventListener('dblclick', handeDoubleClick)
+		ref.current?.addEventListener('mouseup', handleClick)
 
 		return () => {
-			document.removeEventListener('dblclick', handeDoubleClick)
-			document.removeEventListener('mouseup', handleClick)
+			ref.current?.removeEventListener('dblclick', handeDoubleClick)
+			ref.current?.removeEventListener('mouseup', handleClick)
 		}
 	}, [handleClick, handeDoubleClick])
 

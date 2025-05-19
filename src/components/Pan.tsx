@@ -19,6 +19,7 @@ const Pan = ({ children }: Props) => {
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [pos, _setPos] = useState<PositionModel>({ x: 0, y: 0 })
 
+	const ref = useRef<HTMLDivElement>(null)
 	const panRef = useRef<HTMLDivElement>(null)
 	const posRef = useRef<PositionModel>({ x: 0, y: 0 })
 
@@ -28,7 +29,7 @@ const Pan = ({ children }: Props) => {
 	}, [])
 
 	const handleMouseDown = useCallback((ev: MouseEvent) => {
-		ev.stopPropagation()
+		// ev.stopPropagation()
 		ev.preventDefault()
 
 		if (ev.button !== 0) return
@@ -80,25 +81,30 @@ const Pan = ({ children }: Props) => {
 	}, [setPos, panPosition])
 
 	useLayoutEffect(() => {
-		const container = document.querySelector<HTMLDivElement>('[data-container]')
+		const container = panRef.current?.closest<HTMLDivElement>('[data-container]')
+
 		setPageOffset({ y: container?.offsetTop ?? 0, x: container?.offsetLeft ?? 0 })
 	}, [])
 
 	useLayoutEffect(() => {
-		document.addEventListener('mousedown', handleMouseDown)
+		const node = panRef.current?.closest<HTMLDivElement>('[data-container]')
+
+		node?.addEventListener('mousedown', handleMouseDown)
+
 		return () => {
-			document.removeEventListener('mousedown', handleMouseDown)
+			node?.removeEventListener('mousedown', handleMouseDown)
 		}
 	}, [handleMouseDown])
 
 	useLayoutEffect(() => {
 		if (!isPanning) return
-		document.addEventListener('mousemove', handleMove)
-		document.addEventListener('mouseup', handleMoveEnd)
+		ref.current = panRef.current?.closest<HTMLDivElement>('[data-container]') ?? null
+		ref.current?.addEventListener('mousemove', handleMove)
+		ref.current?.addEventListener('mouseup', handleMoveEnd)
 
 		return () => {
-			document.removeEventListener('mousemove', handleMove)
-			document.removeEventListener('mouseup', handleMoveEnd)
+			ref.current?.removeEventListener('mousemove', handleMove)
+			ref.current?.removeEventListener('mouseup', handleMoveEnd)
 		}
 	}, [isPanning, handleMove, handleMoveEnd])
 

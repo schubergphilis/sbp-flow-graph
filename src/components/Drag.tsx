@@ -8,7 +8,7 @@ import {
 	setDragElementState,
 	setPositionState
 } from '@store/SettingsSlice'
-import { useCallback, useLayoutEffect, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 interface Props {
@@ -25,6 +25,8 @@ const Drag = ({ children }: Props) => {
 	const [startDragging, setStartDragging] = useState<boolean>(false)
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 	const [targetNode, setTargetNode] = useState<SVGElement>()
+
+	const ref = useRef<HTMLDivElement>(null)
 
 	const getTargetPos = useCallback((target: SVGElement): PositionModel => {
 		const pos = target.getAttribute('data-pos')?.split(',') ?? ['0', '0']
@@ -165,21 +167,21 @@ const Drag = ({ children }: Props) => {
 
 			setTargetList(undefined)
 
-			window.removeEventListener('mousemove', handleMove)
-			window.removeEventListener('mouseup', handleMoveEnd)
+			ref.current?.removeEventListener('mousemove', handleMove)
+			ref.current?.removeEventListener('mouseup', handleMoveEnd)
 		},
 		[dispatch, getTargetPos, handleMove, isDragging, panPosition, targetList, zoomLevel]
 	)
 
 	useLayoutEffect(() => {
 		if (!startDragging) return
-
-		document.addEventListener('mousemove', handleMove)
-		document.addEventListener('mouseup', handleMoveEnd)
+		ref.current = document.querySelector<HTMLDivElement>('[data-container]')
+		ref.current?.addEventListener('mousemove', handleMove)
+		ref.current?.addEventListener('mouseup', handleMoveEnd)
 
 		return () => {
-			document.removeEventListener('mousemove', handleMove)
-			document.removeEventListener('mouseup', handleMoveEnd)
+			ref.current?.removeEventListener('mousemove', handleMove)
+			ref.current?.removeEventListener('mouseup', handleMoveEnd)
 		}
 	}, [startDragging, handleMove, handleMoveEnd])
 
