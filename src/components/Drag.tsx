@@ -1,7 +1,8 @@
-import { getNodePosition } from '@helpers/AutoPosition'
+import { getNodePosition, getTargetOffset } from '@helpers/AutoPosition'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
 import {
+	getPagetOffsetState,
 	getPanPositionState,
 	getZoomLevelState,
 	setClusterDragState,
@@ -19,6 +20,7 @@ const Drag = ({ children }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
+	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
 
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [targetList, setTargetList] = useState<SVGElement[]>()
@@ -27,11 +29,6 @@ const Drag = ({ children }: Props) => {
 	const [targetNode, setTargetNode] = useState<SVGElement>()
 
 	const ref = useRef<HTMLDivElement>(null)
-
-	const getTargetPos = useCallback((target: SVGElement): PositionModel => {
-		const pos = target.getAttribute('data-pos')?.split(',') ?? ['0', '0']
-		return { x: Number(pos[0]), y: Number(pos[1]) }
-	}, [])
 
 	const handleMouseDown = useCallback(
 		(ev: React.MouseEvent<HTMLDivElement>) => {
@@ -78,7 +75,7 @@ const Drag = ({ children }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
-			const offset = panPosition ?? { x: 0, y: 0 }
+			const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
 
 			const mouse: PositionModel = {
 				x: (ev.clientX - offset.x) / zoomLevel - mouseOffset.x,
@@ -98,7 +95,7 @@ const Drag = ({ children }: Props) => {
 
 			targetList?.forEach((target) => {
 				const box = getNodePosition(target, offset, zoomLevel)
-				const boxOffset = getTargetPos(target)
+				const boxOffset = getTargetOffset(target)
 
 				// Don't set position on nodes that aren't opened yet (need autoPosition first)
 				if (boxOffset.x === 0 && boxOffset.y === 0) return
@@ -116,7 +113,7 @@ const Drag = ({ children }: Props) => {
 				target.setAttribute('transform', `translate(${pos.x}, ${pos.y})`)
 			})
 		},
-		[isDragging, panPosition, targetList, dispatch, zoomLevel, getTargetPos, mouseOffset, targetNode]
+		[isDragging, panPosition, pageOffset, targetList, dispatch, zoomLevel, mouseOffset, targetNode]
 	)
 
 	const handleMoveEnd = useCallback(
@@ -127,7 +124,7 @@ const Drag = ({ children }: Props) => {
 			setStartDragging(false)
 
 			if (!isDragging) {
-				const offset = panPosition ?? { x: 0, y: 0 }
+				const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
 
 				const element = ev.target as SVGElement
 
@@ -136,7 +133,7 @@ const Drag = ({ children }: Props) => {
 				if (!target) return
 
 				const box = getNodePosition(target, offset, zoomLevel)
-				const boxOffset = getTargetPos(target)
+				const boxOffset = getTargetOffset(target)
 
 				const pos: PositionModel = {
 					x: Math.floor(boxOffset.x - box.width / 2),
@@ -153,9 +150,10 @@ const Drag = ({ children }: Props) => {
 			targetList?.forEach((target) => {
 				// const node = target.querySelector<SVGElement>('circle, rect') ?? null
 				const id = (target.getAttribute('data-node-id') ?? '').replace(/^X/gim, '')
-				const pos = getNodePosition(target, panPosition, zoomLevel)
+				const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
+				const pos = getNodePosition(target, offset, zoomLevel)
 				const isVisible = target.getAttribute('data-node-visible') === 'true'
-				const initialPos = getTargetPos(target)
+				const initialPos = getTargetOffset(target)
 
 				// Don't set position on nodes that aren't opened yet (need autoPosition first)
 				if (!isVisible && initialPos.x === 0 && initialPos.y === 0) return
@@ -170,7 +168,7 @@ const Drag = ({ children }: Props) => {
 			ref.current?.removeEventListener('mousemove', handleMove)
 			ref.current?.removeEventListener('mouseup', handleMoveEnd)
 		},
-		[dispatch, getTargetPos, handleMove, isDragging, panPosition, targetList, zoomLevel]
+		[dispatch, handleMove, isDragging, pageOffset, panPosition, targetList, zoomLevel]
 	)
 
 	useLayoutEffect(() => {

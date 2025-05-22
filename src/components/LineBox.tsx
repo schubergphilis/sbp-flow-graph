@@ -7,6 +7,7 @@ import ProcessModel from '@models/ProcessModel'
 import {
 	getDataListState,
 	getDragElementState,
+	getPagetOffsetState,
 	getPanPositionState,
 	getUpdateState,
 	getZoomLevelState,
@@ -21,6 +22,7 @@ const LineBox = () => {
 	const isClusterDrag = useAppSelector<boolean>(isClusterDragState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
+	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
 	const openDataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 	const update = useAppSelector<number>(getUpdateState)
 
@@ -34,15 +36,21 @@ const LineBox = () => {
 
 	const getLineData = useCallback(
 		(nodes: SVGElement[]): LineModel[] => {
+			const offset: PositionModel = {
+				x: (panPosition?.x ?? 0) + pageOffset.x,
+				y: (panPosition?.y ?? 0) + pageOffset.y
+			}
+
 			return nodes
 				.filter(
 					(node) => node.getAttribute('data-node-root') !== 'true' && node.getAttribute('data-node-visible') !== 'false'
 				)
 				.map<LineModel>((node) => {
 					const element = node.querySelector('circle, rect') as SVGElement
+
 					return {
-						start: getNodePosition(element, panPosition, zoomLevel),
-						end: getParentNodePosition(node, panPosition, zoomLevel),
+						start: getNodePosition(element, offset, zoomLevel),
+						end: getParentNodePosition(node, offset, zoomLevel),
 						id: node.getAttribute('data-node-id') as string,
 						parentId: node.getAttribute('data-node-parent') as string,
 						info: node.getAttribute('data-node-info') as string,
@@ -52,7 +60,7 @@ const LineBox = () => {
 					}
 				})
 		},
-		[panPosition, zoomLevel]
+		[panPosition, zoomLevel, pageOffset]
 	)
 
 	const handleLines = useMemo((): JSX.Element[] => {

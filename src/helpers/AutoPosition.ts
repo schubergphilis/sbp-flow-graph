@@ -71,6 +71,12 @@ export const getNodePosition = (
 	}
 }
 
+export const getTargetOffset = (target: SVGElement | HTMLDivElement | null): OffsetModel => {
+	const pos = target?.getAttribute('data-pos')?.split(',') ?? ['0', '0']
+	const size = Number(target?.getAttribute('data-node-size') ?? 0)
+	return { x: Number(pos[0]), y: Number(pos[1]), width: size, height: size }
+}
+
 const setNodePosition = (node: SVGElement, box: OffsetModel, pos: PositionModel) => {
 	node.setAttribute('data-pos', `${pos.x},${pos.y}`)
 	node.setAttribute('fill-opacity', '1')

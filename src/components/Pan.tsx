@@ -1,6 +1,12 @@
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
-import { getPanPositionState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
+import {
+	getPagetOffsetState,
+	getPanPositionState,
+	getZoomLevelState,
+	setPageOffsetState,
+	setPanPositionState
+} from '@store/SettingsSlice'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
@@ -12,9 +18,9 @@ const Pan = ({ children }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
+	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
 
 	const [isPanning, setIsPanning] = useState<boolean>(false)
-	const [pageOffset, setPageOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [boxOffset, setBoxOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [pos, _setPos] = useState<PositionModel>({ x: 0, y: 0 })
@@ -81,10 +87,10 @@ const Pan = ({ children }: Props) => {
 	}, [setPos, panPosition])
 
 	useLayoutEffect(() => {
-		const container = panRef.current?.closest<HTMLDivElement>('[data-container]')
+		const container = panRef.current?.closest<HTMLDivElement>('[data-container]')?.getBoundingClientRect()
 
-		setPageOffset({ y: container?.offsetTop ?? 0, x: container?.offsetLeft ?? 0 })
-	}, [])
+		dispatch(setPageOffsetState({ x: container?.x ?? 0, y: container?.y ?? 0 }))
+	}, [dispatch])
 
 	useLayoutEffect(() => {
 		const node = panRef.current?.closest<HTMLDivElement>('[data-container]')

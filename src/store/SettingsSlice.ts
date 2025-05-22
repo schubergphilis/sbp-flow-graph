@@ -10,6 +10,7 @@ export interface SettingsState {
 	isClusterDrag?: boolean
 	zoomLevel: number
 	panPosition?: PositionModel
+	pageOffset: PositionModel
 	positionList?: NodeModel[]
 	dataList?: ProcessModel[]
 	showInfo: boolean
@@ -20,7 +21,8 @@ export interface SettingsState {
 const initialState: SettingsState = {
 	zoomLevel: 1,
 	update: 1,
-	showInfo: false
+	showInfo: false,
+	pageOffset: { x: 0, y: 0 }
 }
 
 // Actual Slice
@@ -39,6 +41,9 @@ export const settingsSlice = createSlice({
 		},
 		setPanPositionState(state, { payload }: PayloadAction<PositionModel>) {
 			state.panPosition = payload
+		},
+		setPageOffsetState(state, { payload }: PayloadAction<PositionModel>) {
+			state.pageOffset = payload
 		},
 		setShowInfoState(state, { payload }: PayloadAction<boolean>) {
 			state.showInfo = payload
@@ -134,6 +139,8 @@ export const getZoomLevelState = (state: AppState): number => state.settings.zoo
 
 export const getPanPositionState = (state: AppState): PositionModel | undefined => state.settings.panPosition
 
+export const getPagetOffsetState = (state: AppState): PositionModel => state.settings.pageOffset
+
 export const getPositionListState = (state: AppState): NodeModel[] | undefined => state.settings.positionList
 
 export const getDataListState = (state: AppState): ProcessModel[] | undefined => state.settings.dataList
@@ -149,6 +156,7 @@ export const {
 	setPanPositionState,
 	setPositionListState,
 	setPositionState,
+	setPageOffsetState,
 	setDataListState,
 	setVisibleState,
 	setShowInfoState
