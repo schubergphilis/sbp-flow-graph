@@ -20,12 +20,13 @@ interface Props {
 	spacing?: number
 	onNodeClick?: (id: string) => void
 	iconSelector?: (name: string) => JSX.Element
+	refresh?: number
 }
 
-const Flow = ({ data, isDebug = false, spacing, onNodeClick, iconSelector }: Props) => {
+const Flow = ({ data, isDebug = false, spacing, onNodeClick, iconSelector, refresh }: Props) => {
 	return (
 		<StateProvider isDebug={isDebug}>
-			<Pan>
+			<Pan refresh={refresh}>
 				<Drag>
 					<Tooltip>
 						<Click onNodeClick={onNodeClick}>

@@ -11,10 +11,11 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 interface Props {
+	refresh?: number
 	children: JSX.Element
 }
 
-const Pan = ({ children }: Props) => {
+const Pan = ({ children, refresh }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
@@ -90,7 +91,7 @@ const Pan = ({ children }: Props) => {
 		const container = panRef.current?.closest<HTMLDivElement>('[data-container]')?.getBoundingClientRect()
 
 		dispatch(setPageOffsetState({ x: container?.x ?? 0, y: container?.y ?? 0 }))
-	}, [dispatch])
+	}, [dispatch, refresh])
 
 	useLayoutEffect(() => {
 		const node = panRef.current?.closest<HTMLDivElement>('[data-container]')
