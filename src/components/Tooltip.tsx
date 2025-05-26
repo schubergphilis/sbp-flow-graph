@@ -2,7 +2,7 @@ import { parser } from '@gmtdi/frontend-shared-components'
 import { getNodePosition } from '@helpers/AutoPosition'
 import { useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
-import { getDragElementState, getPanPositionState, getZoomLevelState } from '@store/SettingsSlice'
+import { getDragElementState, getPagetOffsetState, getPanPositionState, getZoomLevelState } from '@store/SettingsSlice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
@@ -16,6 +16,7 @@ const Tooltip = ({ children }: Props) => {
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
+	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
 
 	const [tooltip, setTooltip] = useState<string | null>(null)
 	const [position, setPosition] = useState<PositionModel>({ x: 0, y: 0 })
@@ -48,11 +49,13 @@ const Tooltip = ({ children }: Props) => {
 	useEffect(() => {
 		if (!element) return
 
-		const offset = getNodePosition(element, panPosition, zoomLevel)
-		const size = getNodePosition(tooltipRef.current, panPosition, zoomLevel)
+		const xoffset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
+
+		const offset = getNodePosition(element, xoffset, zoomLevel)
+		const size = getNodePosition(tooltipRef.current, xoffset, zoomLevel)
 
 		setPosition({ x: offset.x - size.width / 2, y: offset.y - offset.height - size.height / 1.25 })
-	}, [element, panPosition, zoomLevel])
+	}, [element, panPosition, zoomLevel, pageOffset])
 
 	useEffect(() => {
 		if (dragElement) {
@@ -69,16 +72,19 @@ const Tooltip = ({ children }: Props) => {
 	}, [dragElement, handleMove])
 
 	return (
-		<Container>
-			<TooltipBox ref={tooltipRef} style={{ top: position.y, left: position.x }} $isActive={tooltip !== null}>
+		<>
+			<TooltipBox
+				data-tooltip
+				ref={tooltipRef}
+				style={{ top: position.y, left: position.x }}
+				$isActive={tooltip !== null}>
 				{parser((tooltip ?? '').replace(/\\r\\n/gim, '<br/>'))}
 			</TooltipBox>
 			{children}
-		</Container>
+		</>
 	)
 }
 
-const Container = styled.div``
 const TooltipBox = styled.div<{ $isActive: boolean }>`
 	position: absolute;
 	z-index: 2;

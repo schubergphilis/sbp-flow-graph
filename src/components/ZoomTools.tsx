@@ -9,9 +9,9 @@ import InfoIcon from './icons/InfoIcon'
 import RemoveIcon from './icons/RemoveIcon'
 
 const ZoomTools = () => {
-	const minZoom: number = 0.25
+	const minZoom: number = 0.2
 	const maxZoom: number = 3
-	const step: number = 0.25
+	const step: number = 0.2
 	const zoomLevels: number[] = generateSteps(minZoom, maxZoom, step)
 	const selectedElement = ''
 

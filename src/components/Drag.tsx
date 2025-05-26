@@ -183,7 +183,11 @@ const Drag = ({ children }: Props) => {
 		}
 	}, [startDragging, handleMove, handleMoveEnd])
 
-	return <Container onMouseDown={handleMouseDown}>{children}</Container>
+	return (
+		<Container data-drag onMouseDown={handleMouseDown}>
+			{children}
+		</Container>
+	)
 }
 
 const Container = styled.div`

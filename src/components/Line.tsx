@@ -34,7 +34,6 @@ const Line = ({ data: { start, end, info, startSize, endSize, status } }: Props)
 		<Container data-line-status={status}>
 			<path
 				d={`M${start.x} ${start.y} ${firstX} ${firstY} ${midX} ${midY} ${lastX} ${lastY} L${end.x} ${end.y}`}
-				stroke={`hsl(${Math.random() * 360}, 50%, 50%)`}
 				strokeWidth={1}
 				strokeDasharray={4}
 				markerMid="url(#arrow)"
@@ -52,7 +51,7 @@ const Line = ({ data: { start, end, info, startSize, endSize, status } }: Props)
 
 const Container = styled.g`
 	pointer-events: none;
-	& > text {
+	& text {
 		user-select: none;
 	}
 

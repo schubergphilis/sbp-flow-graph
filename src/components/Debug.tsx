@@ -2,7 +2,13 @@ import { getNodePosition } from '@helpers/AutoPosition'
 import { useAppSelector } from '@hooks/ReduxStore'
 import OffsetModel from '@models/OffsetModel'
 import PositionModel from '@models/PositionModel'
-import { getDragElementState, getPanPositionState, getZoomLevelState, isClusterDragState } from '@store/SettingsSlice'
+import {
+	getDragElementState,
+	getPagetOffsetState,
+	getPanPositionState,
+	getZoomLevelState,
+	isClusterDragState
+} from '@store/SettingsSlice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
@@ -15,6 +21,7 @@ const Debug = ({ isDebug = false }: Props) => {
 	const isClusterDrag = useAppSelector<boolean>(isClusterDragState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
+	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
 
 	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
 	const [selectedNodes, setSelectedNodes] = useState<JSX.Element[]>()
@@ -27,7 +34,9 @@ const Debug = ({ isDebug = false }: Props) => {
 	const testData = useCallback(
 		(nodes: SVGElement[]): JSX.Element[] => {
 			return nodes.map((node, index) => {
-				const pos = getNodePosition(node, panPosition, zoomLevel)
+				const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
+
+				const pos = getNodePosition(node, offset, zoomLevel)
 
 				return (
 					<g key={`debug_${node.id}_${index}`}>
@@ -67,7 +76,7 @@ const Debug = ({ isDebug = false }: Props) => {
 				)
 			})
 		},
-		[panPosition, zoomLevel]
+		[panPosition, zoomLevel, pageOffset]
 	)
 
 	const updateSelectedLines = useCallback(() => {
