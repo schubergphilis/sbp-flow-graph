@@ -6,6 +6,7 @@ import PositionModel from '@models/PositionModel'
 import ProcessModel from '@models/ProcessModel'
 import {
 	getDataListState,
+	getPagetOffsetState,
 	getPanPositionState,
 	getPositionListState,
 	getUpdateState,
@@ -28,6 +29,8 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
+	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+
 	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 	const update = useAppSelector<number>(getUpdateState)
 
@@ -90,8 +93,10 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 
 		if (isPositioned || !dataList) return
 
+		const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
+
 		timerRef.current = setTimeout(() => {
-			const list = AutoPosition(dataList, positionList, panPosition, zoomLevel, spacing)
+			const list = AutoPosition(dataList, positionList, offset, zoomLevel, spacing)
 
 			if (list.length > 0) {
 				dispatch(setPositionListState(list))
@@ -100,7 +105,7 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 
 			setIsPositioned(true)
 		}, 1)
-	}, [dispatch, getDataList, isPositioned, panPosition, positionList, spacing, zoomLevel])
+	}, [dispatch, getDataList, isPositioned, panPosition, positionList, spacing, zoomLevel, pageOffset])
 
 	useDidMountEffect(() => {
 		setIsPositioned(false)
