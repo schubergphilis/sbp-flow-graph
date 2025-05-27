@@ -22,6 +22,8 @@ const Tooltip = ({ children }: Props) => {
 	const [position, setPosition] = useState<PositionModel>({ x: 0, y: 0 })
 	const [element, setElement] = useState<SVGElement | null>(null)
 
+	const ref = useRef<HTMLDivElement>(null)
+
 	const handleMove = useCallback(
 		(ev: MouseEvent) => {
 			const element = ev.target as SVGElement
@@ -64,10 +66,14 @@ const Tooltip = ({ children }: Props) => {
 			return
 		}
 
-		document.addEventListener('mousemove', handleMove)
+		ref.current = document.querySelector<HTMLDivElement>('[data-container]')
+
+		ref.current?.querySelector<HTMLDivElement>('[data-container]')
+
+		ref.current?.addEventListener('mousemove', handleMove)
 
 		return () => {
-			document.removeEventListener('mousemove', handleMove)
+			ref.current?.removeEventListener('mousemove', handleMove)
 		}
 	}, [dragElement, handleMove])
 
