@@ -54,7 +54,7 @@ const Tooltip = ({ children }: Props) => {
 		const offset = getNodePosition(element, xoffset, zoomLevel)
 		const size = getNodePosition(tooltipRef.current, xoffset, zoomLevel)
 
-		setPosition({ x: offset.x - size.width / 2, y: offset.y - offset.height - size.height / 1.25 })
+		setPosition({ x: offset.x - size.width / 2, y: offset.y - size.height - offset.height / 1.25 })
 	}, [element, panPosition, zoomLevel, pageOffset])
 
 	useEffect(() => {

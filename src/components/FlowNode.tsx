@@ -23,6 +23,7 @@ const FlowNode = ({
 		badge = 0,
 		tooltip,
 		info,
+		infoTooltip,
 		hasChildren,
 		status,
 		childStatus,
@@ -45,6 +46,7 @@ const FlowNode = ({
 			data-node-root={root ? 'true' : undefined}
 			data-node-parent={parent ? `X${parent}` : undefined}
 			data-node-info={info ?? undefined}
+			data-node-info-tooltip={infoTooltip ?? undefined}
 			data-node-type={type}
 			data-node-size={value / 2}
 			data-node-children={hasChildren}
@@ -117,8 +119,8 @@ const Container = styled.g`
 		pointer-events: auto !important;
 	}
 
-	& > g > [data-node-status='Error'] {
-		fill: ${({ theme }) => theme.style.notificationErrorColorBg};
+	& > g > [data-node-status='Unknown'] {
+		fill: ${({ theme }) => theme.style.notificationUnknownColorBg};
 	}
 
 	& > g > [data-node-status='Success'] {
@@ -129,20 +131,32 @@ const Container = styled.g`
 		fill: ${({ theme }) => theme.style.notificationWarningColorBg};
 	}
 
-	& > g > [data-node-status='Unknown'] {
-		fill: ${({ theme }) => theme.style.notificationUnknownColorBg};
+	& > g > [data-node-status='Error'] {
+		fill: ${({ theme }) => theme.style.notificationErrorColorBg};
 	}
 
-	& > g > [data-child-status='Error'] {
-		stroke: ${({ theme }) => theme.style.notificationErrorColorBg};
+	& > g > [data-node-status='Critical'] {
+		fill: ${({ theme }) => theme.style.notificationCriticalColorBg};
+	}
+
+	& > g > [data-child-status='Unknown'] {
+		stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
 	}
 
 	& > g > [data-child-status='Success'] {
 		stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
 	}
 
-	& > g > [data-child-status='Unknown'] {
-		stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
+	& > g > [data-child-status='Warning'] {
+		stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
+	}
+
+	& > g > [data-child-status='Error'] {
+		stroke: ${({ theme }) => theme.style.notificationErrorColorBg};
+	}
+
+	& > g > [data-child-status='Critical'] {
+		stroke: ${({ theme }) => theme.style.notificationCriticalColorBg};
 	}
 
 	cursor: default;

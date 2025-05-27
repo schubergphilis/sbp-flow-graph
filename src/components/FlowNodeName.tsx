@@ -1,16 +1,18 @@
 interface Props {
 	name?: string
+	tooltip?: string
 	boxHeight: number
 	boxWidth: number
 	minSize?: number
 }
-const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 75 }: Props) => {
+const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 75, tooltip }: Props) => {
 	const textLength = Math.max((name?.length || 1) * 11, minSize)
 
 	return (
 		<g transform={`translate(${boxWidth / 2}, 0)`}>
 			<g transform={`translate(${0}, ${boxHeight + 30})`}>
 				<rect
+					data-node-tooltip={tooltip ?? undefined}
 					width={textLength}
 					height="30"
 					fill="#fff"

@@ -45,6 +45,8 @@ export const lightStyle: DefaultStyleWithCustomVars = {
 	notificationSuccessColorBg: 'rgb(7, 188, 12)',
 	notificationErrorColor: 'rgb(255, 255, 255)',
 	notificationErrorColorBg: 'rgb(231, 76, 60)',
+	notificationCriticalColor: 'rgb(255, 255, 255)',
+	notificationCriticalColorBg: 'rgb(231, 76, 60)',
 	notificationUnknownColor: 'rgb(255, 255, 255)',
 	notificationUnknownColorBg: 'rgb(142, 142, 142)',
 	cardColorBg: 'rgba(232, 242, 253, .90)',

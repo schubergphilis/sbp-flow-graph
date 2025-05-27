@@ -9,6 +9,7 @@
 			"icon": null,
 			"parent": "5eefc5da-40d2-5afc-af3a-e7b6c2730b0d",
 			"info": "100",
+			"infoTooltip": "This is a nice tooltip\\r\\n with multiple lines",
 			"badge": 0,
 			"tooltip": "Schuberg Philis: Success \\r\\n incidents: 0",
 			"status": "Success"
@@ -921,6 +922,7 @@
 			"icon": null,
 			"parent": "5eefc5da-40d2-5afc-af3a-e7b6c2730b0d",
 			"info": "75",
+			"infoTooltip": "This is a nice tooltip",
 			"badge": 0,
 			"tooltip": "OGD: Unknown \\r\\n incidents: 0",
 			"status": "Unknown"
@@ -1209,8 +1211,8 @@
 			"icon": null,
 			"parent": "5eefc5da-40d2-5afc-af3a-e7b6c2730b0d",
 			"badge": 0,
-			"tooltip": "ABN: Unknown \\r\\n incidents: 0",
-			"status": "Unknown"
+			"tooltip": "ABN: Critical \\r\\n incidents: 0",
+			"status": "Critical"
 		},
 		{
 			"id": "6e5bdfed-e4d8-50d9-8923-67bb16de462a-1",

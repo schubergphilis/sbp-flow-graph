@@ -8,7 +8,7 @@ interface Props {
 	data: LineModel
 }
 
-const Line = ({ data: { start, end, info, startSize, endSize, status } }: Props) => {
+const Line = ({ data: { start, end, info, startSize, endSize, status, tooltip } }: Props) => {
 	const showInfo = useAppSelector<boolean>(getShowInfoState)
 
 	const textLength = (info?.length || 1) * 11
@@ -42,7 +42,7 @@ const Line = ({ data: { start, end, info, startSize, endSize, status } }: Props)
 
 			{showInfo && info && (
 				<g transform={`translate(${midX - textLength / 2}, ${midY})`}>
-					<FlowNodeName name={info ?? ''} boxHeight={-30} boxWidth={textLength} minSize={30} />
+					<FlowNodeName name={info ?? ''} boxHeight={-30} boxWidth={textLength} minSize={30} tooltip={tooltip} />
 				</g>
 			)}
 		</Container>
@@ -53,6 +53,10 @@ const Container = styled.g`
 	pointer-events: none;
 	& text {
 		user-select: none;
+	}
+
+	& rect {
+		pointer-events: all;
 	}
 
 	&[data-line-status='Error'] > path {
@@ -92,6 +96,18 @@ const Container = styled.g`
 		}
 		& > path {
 			stroke: ${({ theme }) => theme.style.notificationInfoColorBg};
+		}
+	}
+
+	&[data-line-status='Critical'] {
+		& > g:last-child {
+			& rect {
+				stroke: ${({ theme }) => theme.style.notificationCriticalColorBg};
+				stroke-width: 2;
+			}
+		}
+		& > path {
+			stroke: ${({ theme }) => theme.style.notificationCriticalColorBg};
 		}
 	}
 
