@@ -45,7 +45,7 @@ jobs:
         run: yarn lint
 
       - name: Set version
-        run: yarn version --minor --no-git-tag-version
+        run: yarn version --patch --no-git-tag-version
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
