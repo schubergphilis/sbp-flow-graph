@@ -33,6 +33,8 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GMTDI_TOKEN }}
 
       - name: Build project
         run: yarn build
