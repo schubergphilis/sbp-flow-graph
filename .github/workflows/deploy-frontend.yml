@@ -1,0 +1,67 @@
+---
+name: Deploy Frontend Dev
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  frontend-ci:
+    environment: prod
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
+          always-auth: true
+          scope: '@gmtdi'
+          registry-url: 'https://npm.pkg.github.com'
+          token: ${{ secrets.GMTDI_TOKEN }}
+
+      - name: Install dependencies
+        working-directory: sbp-flow-graph
+        run: yarn install
+
+      - name: Build project
+        working-directory: sbp-flow-graph
+        run: yarn build
+        env:
+          GENERATE_SOURCEMAP: 'false'
+
+      - name: Run Tests
+        working-directory: sbp-flow-graph
+        run: yarn test
+
+      - name: Set version
+        run: yarn version --minor --no-git-tag-version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup git user
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "<>"
+
+      - name: Commit updated version
+        run: |
+          git add .
+          git commit -m "chore: bump version [skip ci]"
+          git push
+
+      - name: Package project
+        working-directory: sbp-flow-graph
+        run: yarn pack && yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
