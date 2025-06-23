@@ -30,7 +30,7 @@ jobs:
 
       - name: Authenticate with NPM
         run: |
-          echo "registry=https://npm.pkg.github.com/" >> ~/.npmrc
+
           echo "@schubergphilis:registry=https://npm.pkg.github.com/" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
           echo "@gmtdi:registry=https://npm.pkg.github.com/" >> ~/.npmrc
