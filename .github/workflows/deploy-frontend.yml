@@ -33,7 +33,7 @@ jobs:
           echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "@schubergphilis:registry=https://npm.pkg.github.com/" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
-          echo "@schubergphilis:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+          echo "@gmtdi:registry=https://npm.pkg.github.com/" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
