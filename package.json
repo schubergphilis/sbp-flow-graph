@@ -1,5 +1,5 @@
 {
-	"name": "sbp-flow-graph",
+	"name": "@schubergphilis/sbp-flow-graph",
 	"private": false,
 	"version": "0.0.49",
 	"license": "MIT",
