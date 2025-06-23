@@ -1,7 +1,7 @@
 {
 	"name": "sbp-flow-graph",
 	"private": false,
-	"version": "0.0.48",
+	"version": "0.0.49",
 	"license": "MIT",
 	"description": "Flow diagrams based on Force directed bubbles for ReactJS projects.",
 	"type": "module",
