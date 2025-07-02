@@ -1,4 +1,4 @@
-import { CssColorType } from '@gmtdi/frontend-shared-components'
+import { CssColorType } from '@schubergphilis/sbp-frontend-style'
 
 declare module 'styled-components' {
 	export interface DefaultFonts {
