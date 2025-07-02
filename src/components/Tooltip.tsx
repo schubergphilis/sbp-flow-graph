@@ -1,7 +1,7 @@
-import { parser } from '@gmtdi/frontend-shared-components'
 import { getNodePosition } from '@helpers/AutoPosition'
 import { useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
+import { parser } from '@schubergphilis/sbp-frontend-style'
 import { getDragElementState, getPagetOffsetState, getPanPositionState, getZoomLevelState } from '@store/SettingsSlice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
