@@ -46,7 +46,7 @@ const LineBox = () => {
 					(node) => node.getAttribute('data-node-root') !== 'true' && node.getAttribute('data-node-visible') !== 'false'
 				)
 				.map<LineModel>((node) => {
-					const element = node.querySelector('circle, rect') as SVGElement
+					const element = node.querySelector('circle, rect, polygon') as SVGElement
 
 					return {
 						start: getNodePosition(element, offset, zoomLevel),

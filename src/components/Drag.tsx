@@ -148,7 +148,6 @@ const Drag = ({ children }: Props) => {
 			setTargetNode(undefined)
 
 			targetList?.forEach((target) => {
-				// const node = target.querySelector<SVGElement>('circle, rect') ?? null
 				const id = (target.getAttribute('data-node-id') ?? '').replace(/^X/gim, '')
 				const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
 				const pos = getNodePosition(target, offset, zoomLevel)
