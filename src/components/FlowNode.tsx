@@ -38,6 +38,17 @@ const FlowNode = ({
 		return document.querySelector(`[data-node-parent=X${id}][data-node-visible=true]`) !== null
 	}, [])
 
+	const generatePolygoinPoints = (size: number) => {
+		const points = []
+		const angle = (2 * Math.PI) / 8 // 8 sides for octagon
+		for (let i = 0; i < 8; i++) {
+			const x = size / 2 + (size / 2) * Math.cos(i * angle)
+			const y = size / 2 + (size / 2) * Math.sin(i * angle)
+			points.push(`${x},${y}`)
+		}
+		return points.join(' ')
+	}
+
 	return (
 		<Container
 			data-node-id={`X${id}`}
@@ -73,6 +84,23 @@ const FlowNode = ({
 						cy="0"
 						data-node-tooltip={tooltip}
 						style={{ filter: 'url(#innershadow)' }}
+					/>
+				</g>
+			) : type === 'polygon' ? (
+				<g transform={`translate(${boxSize / 2 - value / 2}, 0)`}>
+					<polygon
+						data-node-status={status}
+						points={generatePolygoinPoints(value)}
+						style={{ filter: 'url(#dropshadow)' }}
+					/>
+
+					<polygon
+						data-child-status={childStatus}
+						points={generatePolygoinPoints(value - value / 20)}
+						strokeWidth={value / 10}
+						fill="transparent"
+						data-node-tooltip={tooltip}
+						style={{ filter: 'url(#dropshadow)' }}
 					/>
 				</g>
 			) : (
@@ -113,7 +141,8 @@ const FlowNode = ({
 
 const Container = styled.g`
 	& > g > circle,
-	& > g > rect {
+	& > g > rect,
+	& > g > polygon {
 		transform-origin: top left;
 		transition: fill-opacity 0.25s ease-in-out;
 		pointer-events: auto !important;
@@ -170,7 +199,8 @@ const Container = styled.g`
 		stroke-opacity: 0;
 
 		& > g > circle,
-		& > g > rect {
+		& > g >,
+		& > g > polygon {
 			pointer-events: none !important;
 		}
 	}

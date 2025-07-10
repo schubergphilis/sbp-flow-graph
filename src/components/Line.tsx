@@ -55,7 +55,8 @@ const Container = styled.g`
 		user-select: none;
 	}
 
-	& rect {
+	& rect,
+	& polygon {
 		pointer-events: all;
 	}
 
@@ -65,7 +66,8 @@ const Container = styled.g`
 
 	&[data-line-status='Success'] {
 		& > g:last-child {
-			& rect {
+			& rect,
+			& polygon {
 				stroke: ${({ theme }) => theme.style.notificationSuccessColorBg};
 				stroke-width: 2;
 			}
@@ -77,7 +79,8 @@ const Container = styled.g`
 
 	&[data-line-status='Warning'] {
 		& > g:last-child {
-			& rect {
+			& rect,
+			& polygon {
 				stroke: ${({ theme }) => theme.style.notificationWarningColorBg};
 				stroke-width: 2;
 			}
@@ -89,7 +92,8 @@ const Container = styled.g`
 
 	&[data-line-status='Info'] {
 		& > g:last-child {
-			& rect {
+			& rect,
+			& polygon {
 				stroke: ${({ theme }) => theme.style.notificationInfoColorBg};
 				stroke-width: 2;
 			}
@@ -101,7 +105,8 @@ const Container = styled.g`
 
 	&[data-line-status='Critical'] {
 		& > g:last-child {
-			& rect {
+			& rect,
+			& polygon {
 				stroke: ${({ theme }) => theme.style.notificationCriticalColorBg};
 				stroke-width: 2;
 			}
@@ -113,7 +118,8 @@ const Container = styled.g`
 
 	&[data-line-status='Unknown'] {
 		& > g:last-child {
-			& rect {
+			& rect,
+			& polygon {
 				stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
 				stroke-width: 2;
 			}

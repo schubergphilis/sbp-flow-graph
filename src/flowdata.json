@@ -3460,12 +3460,12 @@
 			"name": "Lastpass",
 			"value": 100,
 			"root": false,
-			"type": "rect",
+			"type": "polygon",
 			"icon": null,
 			"parent": "5eefc5da-40d2-5afc-af3a-e7b6c2730b0d",
 			"badge": 0,
 			"tooltip": "Lastpass: Success \\r\\n incidents: 0",
-			"status": "Success"
+			"status": "Error"
 		},
 		{
 			"id": "fdb20046-5bee-5a72-9642-5ba78d47816d",

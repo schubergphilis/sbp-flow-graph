@@ -1,1 +1,1 @@
-export type ProcessType = 'circle' | 'rect'
+export type ProcessType = 'circle' | 'rect' | 'polygon'
