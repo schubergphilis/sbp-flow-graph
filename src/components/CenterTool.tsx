@@ -36,7 +36,7 @@ const CenterTool = () => {
 	}, [dispatch, zoomLevel])
 
 	return (
-		<ActionButton onClick={handleClick}>
+		<ActionButton onClick={handleClick} title="Center canvas">
 			<CenterIcon />
 		</ActionButton>
 	)
