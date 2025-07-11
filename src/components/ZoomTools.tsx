@@ -73,6 +73,7 @@ const ZoomTools = () => {
 			<Center>
 				<ActionButton
 					disabled={maxZoom === zoomLevel || selectedElement !== ''}
+					title="Zoom in"
 					type="button"
 					onClick={(ev) => setZoom(ev, 1)}>
 					<AddIcon />
@@ -81,12 +82,13 @@ const ZoomTools = () => {
 				<ActionButton
 					disabled={minZoom === zoomLevel || selectedElement !== ''}
 					type="button"
+					title="Zoom out"
 					onClick={(ev) => setZoom(ev, -1)}>
 					<RemoveIcon />
 				</ActionButton>
 			</Center>
 			<Right>
-				<ActionButton $isSelected={showInfo} onClick={handleShowInfo}>
+				<ActionButton $isSelected={showInfo} onClick={handleShowInfo} title="Show importance weights">
 					<InfoIcon />
 				</ActionButton>
 			</Right>
