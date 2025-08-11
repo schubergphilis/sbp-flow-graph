@@ -148,6 +148,10 @@ const Container = styled.g`
 		pointer-events: auto !important;
 	}
 
+	& > g > [data-node-status='Running'] {
+		fill: url(#stripes);
+	}
+
 	& > g > [data-node-status='Unknown'] {
 		fill: ${({ theme }) => theme.style.notificationUnknownColorBg};
 	}

@@ -128,5 +128,26 @@ const Container = styled.g`
 			stroke: ${({ theme }) => theme.style.notificationUnknownColorBg};
 		}
 	}
+
+	&[data-line-status='Running'] {
+		& > g:last-child {
+			& rect,
+			& polygon {
+				stroke: ${({ theme }) => theme.style.notificationRunningColorBg};
+				stroke-width: 2;
+			}
+		}
+		& > path {
+			stroke: ${({ theme }) => theme.style.notificationRunningColorBg};
+			stroke-dasharray: 10;
+			animation: dash 5s linear infinite;
+		}
+	}
+
+	@keyframes dash {
+		to {
+			stroke-dashoffset: -500;
+		}
+	}
 `
 export default Line
