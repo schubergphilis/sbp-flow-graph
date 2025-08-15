@@ -7,6 +7,7 @@ import ProcessModel from '@models/ProcessModel'
 import {
 	getDataListState,
 	getDragElementState,
+	getGraphIdState,
 	getPagetOffsetState,
 	getPanPositionState,
 	getUpdateState,
@@ -25,6 +26,7 @@ const LineBox = () => {
 	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
 	const openDataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 	const update = useAppSelector<number>(getUpdateState)
+	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const [lines, setLines] = useState<LineModel[]>([])
 	const [draggedLines, setDraggedLines] = useState<LineModel[]>([])
@@ -51,7 +53,7 @@ const LineBox = () => {
 					return {
 						start: getNodePosition(element, offset, zoomLevel),
 						end: getParentNodePosition(node, offset, zoomLevel),
-						id: node.getAttribute('data-node-id') as string,
+						id: node.getAttribute('id') as string,
 						parentId: node.getAttribute('data-node-parent') as string,
 						info: node.getAttribute('data-node-info') as string,
 						tooltip: node.getAttribute('data-node-info-tooltip') as string,
@@ -65,38 +67,38 @@ const LineBox = () => {
 	)
 
 	const handleLines = useMemo((): JSX.Element[] => {
-		return lines.map((data) => <Line key={`line_${data.id}`} data={data} />)
-	}, [lines])
+		return lines.map((data) => <Line key={`line_${graphId}_${data.id}`} data={data} />)
+	}, [lines, graphId])
 
 	const handleDraggedLines = useMemo((): JSX.Element[] => {
-		return draggedLines.map((data) => <Line key={`line_dragged_${data.id}`} data={data} />)
-	}, [draggedLines])
+		return draggedLines.map((data) => <Line key={`line_dragged_${graphId}_${data.id}`} data={data} />)
+	}, [draggedLines, graphId])
 
 	const updateSelectedLines = useCallback(() => {
 		// console.log('-----Interval')
 
-		const regex = isClusterDrag ? '[data-node]' : `[data-node-id=${dragElement}],[data-node-parent=${dragElement}]`
+		const regex = isClusterDrag ? '[data-node]' : `#${dragElement},[data-node-parent=${dragElement}]`
 
-		const selectedNodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
+		const selectedNodes = [...(document.getElementById(graphId)!.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		if (!selectedNodes) return
 
 		const selected = getLineData(selectedNodes)
 
 		setDraggedLines(selected)
-	}, [isClusterDrag, dragElement, getLineData])
+	}, [isClusterDrag, dragElement, getLineData, graphId])
 
 	const updateAllLines = useCallback(() => {
 		const regex = isClusterDrag
 			? '[dummy-nothing]'
-			: `[data-node]:not([data-node-id=${dragElement}],[data-node-parent=${dragElement}],[data-node-visible=false])`
+			: `[data-node]:not(#${dragElement},[data-node-parent=${dragElement}],[data-node-visible=false])`
 
-		const nodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
+		const nodes = [...(document.getElementById(graphId)!.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		const allNodes = getLineData(nodes)
 
 		setLines(allNodes)
-	}, [isClusterDrag, dragElement, getLineData])
+	}, [isClusterDrag, dragElement, getLineData, graphId])
 
 	useEffect(() => {
 		timerRef.current = setTimeout(updateAllLines, 20)

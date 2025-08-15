@@ -1,6 +1,12 @@
 import { closestNumber, generateSteps } from '@helpers/Helpers'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
-import { getShowInfoState, getZoomLevelState, setShowInfoState, setZoomLevelState } from '@store/SettingsSlice'
+import {
+	getGraphIdState,
+	getShowInfoState,
+	getZoomLevelState,
+	setShowInfoState,
+	setZoomLevelState
+} from '@store/SettingsSlice'
 import { useCallback, useEffect } from 'react'
 import styled from 'styled-components'
 import CenterTool from './CenterTool'
@@ -19,6 +25,7 @@ const ZoomTools = () => {
 
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const showInfo = useAppSelector<boolean>(getShowInfoState)
+	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const handleZoomLevel = useCallback(
 		(level: number, delta: number) => {
@@ -58,12 +65,12 @@ const ZoomTools = () => {
 	}, [dispatch, showInfo])
 
 	useEffect(() => {
-		document.addEventListener('wheel', handleScroll)
+		document.getElementById(graphId)!.addEventListener('wheel', handleScroll)
 
 		return () => {
-			document?.removeEventListener('wheel', handleScroll)
+			document.getElementById(graphId)!.removeEventListener('wheel', handleScroll)
 		}
-	}, [handleScroll])
+	}, [handleScroll, graphId])
 
 	return (
 		<Container>

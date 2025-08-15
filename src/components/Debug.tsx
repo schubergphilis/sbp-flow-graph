@@ -4,6 +4,7 @@ import OffsetModel from '@models/OffsetModel'
 import PositionModel from '@models/PositionModel'
 import {
 	getDragElementState,
+	getGraphIdState,
 	getPagetOffsetState,
 	getPanPositionState,
 	getZoomLevelState,
@@ -22,6 +23,7 @@ const Debug = ({ isDebug = false }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
 	const [selectedNodes, setSelectedNodes] = useState<JSX.Element[]>()
@@ -81,30 +83,33 @@ const Debug = ({ isDebug = false }: Props) => {
 
 	const updateSelectedLines = useCallback(() => {
 		// console.log('-----Interval')
+		let selectedNodes: SVGElement[] = []
 
-		const regex = isClusterDrag ? '[data-node]' : `[data-node-id=${dragElement}]`
+		if (isClusterDrag) {
+			selectedNodes = [...document.getElementById(graphId)!.querySelectorAll<SVGElement>('[data-node]')]
+		} else if (dragElement) {
+			selectedNodes = [document.getElementById(dragElement)! as unknown as SVGElement]
+		}
 
-		const selectedNodes = [...document.querySelectorAll<SVGElement>(regex)]
-
-		if (!selectedNodes) return
+		if (selectedNodes.length === 0) return
 
 		const selected = testData(selectedNodes)
 
 		setSelectedNodes(selected)
-	}, [dragElement, isClusterDrag, testData])
+	}, [dragElement, isClusterDrag, testData, graphId])
 
 	const updateAllLines = useCallback(() => {
-		const regex = isClusterDrag ? '[dummy-nothing]' : `[data-node]:not([data-node-id=${dragElement}])`
+		const regex = isClusterDrag ? '[dummy-nothing]' : `[data-node]:not(#${dragElement})`
 
-		const nodes = [...(document.querySelectorAll<SVGElement>(regex) ?? [])]
+		const nodes = [...(document.getElementById(graphId)!.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		const allNodes = testData(nodes)
 
 		setTestNodes(allNodes)
-	}, [isClusterDrag, dragElement, testData])
+	}, [isClusterDrag, dragElement, testData, graphId])
 
 	const calculateCenter = useCallback(() => {
-		const target = document.querySelector<SVGElement>('[data-node-group]')
+		const target = document.getElementById(graphId)!.querySelector<SVGElement>('[data-node-group]')
 		const pos = getNodePosition(target, panPosition, zoomLevel)
 
 		const posWidth = Math.round(pos.width)
@@ -112,7 +117,7 @@ const Debug = ({ isDebug = false }: Props) => {
 		const posX = Math.round(pos.x - posWidth / 2)
 		const posY = Math.round(pos.y - posHeight / 2)
 		setCenter({ x: posX + posWidth / 2, y: posY + posHeight / 2, width: posWidth, height: posHeight })
-	}, [panPosition, zoomLevel])
+	}, [panPosition, zoomLevel, graphId])
 
 	useEffect(() => {
 		if (testNodes.length === 0) return

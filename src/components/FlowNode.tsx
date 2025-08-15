@@ -1,4 +1,6 @@
+import { useAppSelector } from '@hooks/ReduxStore'
 import ProcessModel from '@models/ProcessModel'
+import { getGraphIdState } from '@store/SettingsSlice'
 import { useCallback } from 'react'
 import styled from 'styled-components'
 import FlowNodeBadge from './FlowNodeBadge'
@@ -34,9 +36,18 @@ const FlowNode = ({
 	const textLength = Math.max((name?.length || 1) * 11, 75)
 	const boxSize = Math.max(textLength, value)
 
-	const hasChildernVisible = useCallback((id: string) => {
-		return document.querySelector(`[data-node-parent=X${id}][data-node-visible=true]`) !== null
-	}, [])
+	const graphId = useAppSelector<string>(getGraphIdState)
+
+	const hasChildernVisible = useCallback(
+		(id: string) => {
+			return (
+				document
+					.getElementById(graphId)!
+					.querySelector(`[data-node-parent=X${graphId}_${id}][data-node-visible=true]`) !== null
+			)
+		},
+		[graphId]
+	)
 
 	const generatePolygoinPoints = (size: number) => {
 		const points = []
@@ -51,11 +62,11 @@ const FlowNode = ({
 
 	return (
 		<Container
-			data-node-id={`X${id}`}
+			id={`X${graphId}_${id}`}
 			data-node-reference={`X${refrenceId}`}
 			data-node
 			data-node-root={root ? 'true' : undefined}
-			data-node-parent={parent ? `X${parent}` : undefined}
+			data-node-parent={parent ? `X${graphId}_${parent}` : undefined}
 			data-node-info={info ?? undefined}
 			data-node-info-tooltip={infoTooltip ?? undefined}
 			data-node-type={type}

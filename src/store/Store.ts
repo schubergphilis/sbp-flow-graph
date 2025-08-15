@@ -6,26 +6,29 @@ export const reducers = combineReducers({
 	[settingsSlice.name]: settingsSlice.reducer
 })
 
-const blockList = [
-	'settings/dragElement',
-	'settings/isClusterDrag',
-	'settings/dataList',
-	'settings/update'
-	// 'settings/positionList'
-]
+export const createAppStore = (storeId: string) => {
+	const blockList = [
+		'settings/dragElement',
+		'settings/isClusterDrag',
+		'settings/dataList',
+		'settings/update'
+		// 'settings/positionList'
+	]
 
-export const store = configureStore({
-	reducer: reducers,
-	devTools: process.env.NODE_ENV !== 'production',
-	preloadedState: reHydrateStore(),
-	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware().concat((x: CustomMiddlewareAPI) => {
-			x.blockList = blockList
-			return localStorageMiddleware(x)
-		})
-})
+	return configureStore({
+		reducer: reducers,
+		devTools: process.env.NODE_ENV !== 'production',
+		preloadedState: reHydrateStore(storeId),
+		middleware: (getDefaultMiddleware) =>
+			getDefaultMiddleware().concat((x: CustomMiddlewareAPI) => {
+				x.blockList = blockList
+				x.id = storeId
+				return localStorageMiddleware(x)
+			})
+	})
+}
 
 // Infer the `AppState` and `AppDispatch` types from the store itself
-export type AppState = ReturnType<typeof store.getState>
+export type AppState = ReturnType<typeof createAppStore.prototype.getState>
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
-export type AppDispatch = typeof store.dispatch
+export type AppDispatch = typeof createAppStore.prototype.dispatch

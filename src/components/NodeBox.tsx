@@ -6,6 +6,7 @@ import PositionModel from '@models/PositionModel'
 import ProcessModel from '@models/ProcessModel'
 import {
 	getDataListState,
+	getGraphIdState,
 	getPagetOffsetState,
 	getPanPositionState,
 	getPositionListState,
@@ -30,6 +31,7 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
 	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 	const update = useAppSelector<number>(getUpdateState)
@@ -96,7 +98,7 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 		const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
 
 		timerRef.current = setTimeout(() => {
-			const list = AutoPosition(dataList, positionList, offset, zoomLevel, spacing)
+			const list = AutoPosition(graphId, dataList, positionList, offset, zoomLevel, spacing)
 
 			if (list.length > 0) {
 				dispatch(setPositionListState(list))
@@ -105,7 +107,7 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 
 			setIsPositioned(true)
 		}, 1)
-	}, [dispatch, getDataList, isPositioned, panPosition, positionList, spacing, zoomLevel, pageOffset])
+	}, [dispatch, getDataList, isPositioned, panPosition, positionList, spacing, zoomLevel, pageOffset, graphId])
 
 	useDidMountEffect(() => {
 		setIsPositioned(false)
@@ -113,7 +115,9 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 
 	return (
 		<Container data-node-group>
-			{getDataList?.map((node) => <FlowNode key={`node_${node.id}`} data={node} iconSelector={iconSelector} />)}
+			{getDataList?.map((node) => (
+				<FlowNode key={`node_${graphId}_${node.id}`} data={node} iconSelector={iconSelector} />
+			))}
 		</Container>
 	)
 }
