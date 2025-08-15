@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
 import {
+	getGraphIdState,
 	getPagetOffsetState,
 	getPanPositionState,
 	getZoomLevelState,
@@ -20,6 +21,7 @@ const Pan = ({ children, refresh }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const [isPanning, setIsPanning] = useState<boolean>(false)
 	const [boxOffset, setBoxOffset] = useState<PositionModel>({ x: 0, y: 0 })
@@ -94,18 +96,18 @@ const Pan = ({ children, refresh }: Props) => {
 	}, [dispatch, refresh])
 
 	useLayoutEffect(() => {
-		const node = panRef.current?.closest<HTMLDivElement>('[data-container]')
+		const node = document.getElementById(graphId) as HTMLDivElement
 
 		node?.addEventListener('mousedown', handleMouseDown)
 
 		return () => {
 			node?.removeEventListener('mousedown', handleMouseDown)
 		}
-	}, [handleMouseDown])
+	}, [handleMouseDown, graphId])
 
 	useLayoutEffect(() => {
 		if (!isPanning) return
-		ref.current = panRef.current?.closest<HTMLDivElement>('[data-container]') ?? null
+		ref.current = document.getElementById(graphId) as HTMLDivElement
 		ref.current?.addEventListener('mousemove', handleMove)
 		ref.current?.addEventListener('mouseup', handleMoveEnd)
 
@@ -113,7 +115,7 @@ const Pan = ({ children, refresh }: Props) => {
 			ref.current?.removeEventListener('mousemove', handleMove)
 			ref.current?.removeEventListener('mouseup', handleMoveEnd)
 		}
-	}, [isPanning, handleMove, handleMoveEnd])
+	}, [isPanning, handleMove, handleMoveEnd, graphId])
 
 	return (
 		<Container

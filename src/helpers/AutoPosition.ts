@@ -4,6 +4,7 @@ import PositionModel from '@models/PositionModel'
 import ProcessModel from '@models/ProcessModel'
 
 export const AutoPosition = (
+	graphId: string,
 	nodeList: ProcessModel[] = [],
 	positionList: NodeModel[] = [],
 	offset: PositionModel = { x: 0, y: 0 },
@@ -17,7 +18,8 @@ export const AutoPosition = (
 		.sort((a) => (a.parent === undefined ? -1 : 0))
 		.filter(({ isVisible }) => isVisible)
 		.map(({ id, isVisible }) => {
-			const node = document.querySelector<SVGElement>(`[data-node-id=X${id}]`)!
+			const node = document.getElementById(`X${graphId}_${id}`)! as unknown as SVGElement
+
 			const isRoot = (node.getAttribute('data-node-root') ?? 'false') === 'true'
 
 			const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
@@ -39,7 +41,7 @@ export const AutoPosition = (
 
 export const getParentNode = (node: SVGElement): SVGElement | HTMLDivElement | null => {
 	const parentId = node.getAttribute('data-node-parent') as string
-	return document.querySelector<SVGElement>(`[data-node-id=${parentId}]`)
+	return document.getElementById(parentId) as SVGElement | HTMLDivElement | null
 }
 
 export const getParentNodePosition = (
@@ -123,7 +125,7 @@ const getWindowDimensions = (): { width: number; height: number } => {
 }
 
 const getChildList = (node: SVGElement): SVGElement[] => {
-	const nodeId = node.getAttribute('data-node-id') as string
+	const nodeId = node.getAttribute('id') as string
 	const childList = [
 		...(document.querySelectorAll<SVGElement>(`[data-node-parent=${nodeId}][data-node-visible=true]`) ?? [])
 	]

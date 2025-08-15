@@ -15,6 +15,7 @@ export interface SettingsState {
 	dataList?: ProcessModel[]
 	showInfo: boolean
 	update: number
+	graphId?: string
 }
 
 // Initial state
@@ -69,7 +70,7 @@ export const settingsSlice = createSlice({
 			state.positionList = [...positionList, payload]
 		},
 		setVisibleState(state, { payload }: PayloadAction<string>) {
-			const id = payload.replace(/^X/gim, '')
+			const id = payload.match(/(?<=_)([\w-]+)/gim)?.[0] ?? ''
 			let positionList: NodeModel[] = [...current(state.positionList ?? [])]
 			const dataList: ProcessModel[] = [...(state.dataList ?? [])]
 
@@ -111,6 +112,9 @@ export const settingsSlice = createSlice({
 		},
 		setDataListState(state, { payload }: PayloadAction<ProcessModel[]>) {
 			state.dataList = payload
+		},
+		setGraphIdState(state, { payload }: PayloadAction<string>) {
+			state.graphId = payload
 		}
 	}
 })
@@ -149,6 +153,8 @@ export const getUpdateState = (state: AppState): number => state.settings.update
 
 export const getShowInfoState = (state: AppState): boolean => state.settings.showInfo
 
+export const getGraphIdState = (state: AppState): string => state.settings.graphId ?? 'flowGraph'
+
 export const {
 	setDragElementState,
 	setClusterDragState,
@@ -159,7 +165,8 @@ export const {
 	setPageOffsetState,
 	setDataListState,
 	setVisibleState,
-	setShowInfoState
+	setShowInfoState,
+	setGraphIdState
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

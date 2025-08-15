@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
-import { getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
+import { getGraphIdState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
 import { useCallback } from 'react'
 import CenterIcon from './icons/CenterIcon'
 import { ActionButton } from './ZoomTools'
@@ -7,10 +7,11 @@ import { ActionButton } from './ZoomTools'
 const CenterTool = () => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
+	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const handleClick = useCallback(() => {
-		const group = document.querySelector<SVGElement>('[data-node-group]')
-		const target = document.querySelector<HTMLDivElement>('[data-pan]')
+		const group = document.getElementById(graphId)!.querySelector<SVGElement>('[data-node-group]')
+		const target = document.getElementById(graphId)!.querySelector<HTMLDivElement>('[data-pan]')
 
 		const tar = target?.getBoundingClientRect() ?? { x: 0, y: 0, width: 0, height: 0 }
 		const tarX = Math.round(tar.x)
@@ -33,7 +34,7 @@ const CenterTool = () => {
 		dispatch(setPanPositionState({ x: centerX, y: centerY }))
 
 		target?.setAttribute('style', `transform: translate(${centerX}px, ${centerY}px) scale(${zoomLevel})`)
-	}, [dispatch, zoomLevel])
+	}, [dispatch, zoomLevel, graphId])
 
 	return (
 		<ActionButton onClick={handleClick} title="Center canvas">

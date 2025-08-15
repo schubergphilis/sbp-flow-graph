@@ -2,12 +2,14 @@ import { Dispatch, Middleware, MiddlewareAPI, isAction } from '@reduxjs/toolkit'
 
 export interface CustomMiddlewareAPI extends MiddlewareAPI {
 	blockList?: string[]
+	id?: string
 }
 
 export const localStorageMiddleware: Middleware<Dispatch> =
-	({ getState, blockList = [] }: CustomMiddlewareAPI) =>
+	({ getState, blockList = [], id }: CustomMiddlewareAPI) =>
 	(next) =>
 	(action) => {
+		const storeId = `${id}State`
 		const result = next(action)
 
 		if (!isAction(action)) return result
@@ -34,11 +36,13 @@ export const localStorageMiddleware: Middleware<Dispatch> =
 			return
 		})
 
-		localStorage.setItem('flowGraphState', JSON.stringify(tempState))
+		localStorage.setItem(storeId, JSON.stringify(tempState))
 	}
 
-export const reHydrateStore = () => {
-	if (typeof window === 'undefined' || window.localStorage.getItem('flowGraphState') === null) return
+export const reHydrateStore = (id: string) => {
+	const storeId = `${id}State`
 
-	return JSON.parse(localStorage.getItem('flowGraphState') ?? '') // re-hydrate the store
+	if (typeof window === 'undefined' || window.localStorage.getItem(storeId) === null) return
+
+	return JSON.parse(localStorage.getItem(storeId) ?? '') // re-hydrate the store
 }

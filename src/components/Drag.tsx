@@ -2,6 +2,7 @@ import { getNodePosition, getTargetOffset } from '@helpers/AutoPosition'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
 import {
+	getGraphIdState,
 	getPagetOffsetState,
 	getPanPositionState,
 	getZoomLevelState,
@@ -21,6 +22,7 @@ const Drag = ({ children }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
 	const [targetList, setTargetList] = useState<SVGElement[]>()
@@ -45,7 +47,7 @@ const Drag = ({ children }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
-			const id = target?.getAttribute('data-node-id') ?? ''
+			const id = target?.getAttribute('id') ?? ''
 
 			let targets: SVGElement[] = []
 
@@ -53,9 +55,9 @@ const Drag = ({ children }: Props) => {
 				targets = [target]
 			} else {
 				targets = [
-					...document.querySelectorAll<SVGElement>(
-						`[data-node-parent=${id}]:not([data-node-children-visible=true]),[data-node-id=${id}]`
-					)
+					...document
+						.getElementById(graphId)!
+						.querySelectorAll<SVGElement>(`[data-node-parent=${id}]:not([data-node-children-visible=true]),#${id}`)
 				]
 			}
 
@@ -67,7 +69,7 @@ const Drag = ({ children }: Props) => {
 
 			dispatch(setClusterDragState(ev.metaKey))
 		},
-		[dispatch]
+		[dispatch, graphId]
 	)
 
 	const handleMove = useCallback(
@@ -87,7 +89,7 @@ const Drag = ({ children }: Props) => {
 			const thresholdY = Math.abs(mouse.y) > threshold
 
 			if (!isDragging && (thresholdX || thresholdY)) {
-				const id = targetNode?.getAttribute('data-node-id') ?? undefined
+				const id = targetNode?.getAttribute('id') ?? undefined
 
 				dispatch(setDragElementState(id))
 				setIsDragging(true)
@@ -148,7 +150,8 @@ const Drag = ({ children }: Props) => {
 			setTargetNode(undefined)
 
 			targetList?.forEach((target) => {
-				const id = (target.getAttribute('data-node-id') ?? '').replace(/^X/gim, '')
+				const id = (target.getAttribute('id') ?? '').match(/(?<=_)([\w-]+)/gim)?.[0] ?? ''
+
 				const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
 				const pos = getNodePosition(target, offset, zoomLevel)
 				const isVisible = target.getAttribute('data-node-visible') === 'true'
@@ -172,7 +175,7 @@ const Drag = ({ children }: Props) => {
 
 	useLayoutEffect(() => {
 		if (!startDragging) return
-		ref.current = document.querySelector<HTMLDivElement>('[data-container]')
+		ref.current = document.getElementById(graphId) as HTMLDivElement
 		ref.current?.addEventListener('mousemove', handleMove)
 		ref.current?.addEventListener('mouseup', handleMoveEnd)
 
@@ -180,7 +183,7 @@ const Drag = ({ children }: Props) => {
 			ref.current?.removeEventListener('mousemove', handleMove)
 			ref.current?.removeEventListener('mouseup', handleMoveEnd)
 		}
-	}, [startDragging, handleMove, handleMoveEnd])
+	}, [startDragging, handleMove, handleMoveEnd, graphId])
 
 	return (
 		<Container data-drag onMouseDown={handleMouseDown}>
