@@ -65,10 +65,10 @@ const ZoomTools = () => {
 	}, [dispatch, showInfo])
 
 	useEffect(() => {
-		document.getElementById(graphId)!.addEventListener('wheel', handleScroll)
+		document.getElementById(graphId)?.addEventListener('wheel', handleScroll)
 
 		return () => {
-			document.getElementById(graphId)!.removeEventListener('wheel', handleScroll)
+			document.getElementById(graphId)?.removeEventListener('wheel', handleScroll)
 		}
 	}, [handleScroll, graphId])
 

@@ -86,7 +86,7 @@ const Debug = ({ isDebug = false }: Props) => {
 		let selectedNodes: SVGElement[] = []
 
 		if (isClusterDrag) {
-			selectedNodes = [...document.getElementById(graphId)!.querySelectorAll<SVGElement>('[data-node]')]
+			selectedNodes = [...(document.getElementById(graphId)?.querySelectorAll<SVGElement>('[data-node]') ?? [])]
 		} else if (dragElement) {
 			selectedNodes = [document.getElementById(dragElement)! as unknown as SVGElement]
 		}
@@ -101,7 +101,7 @@ const Debug = ({ isDebug = false }: Props) => {
 	const updateAllLines = useCallback(() => {
 		const regex = isClusterDrag ? '[dummy-nothing]' : `[data-node]:not(#${dragElement})`
 
-		const nodes = [...(document.getElementById(graphId)!.querySelectorAll<SVGElement>(regex) ?? [])]
+		const nodes = [...(document.getElementById(graphId)?.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		const allNodes = testData(nodes)
 
@@ -109,7 +109,8 @@ const Debug = ({ isDebug = false }: Props) => {
 	}, [isClusterDrag, dragElement, testData, graphId])
 
 	const calculateCenter = useCallback(() => {
-		const target = document.getElementById(graphId)!.querySelector<SVGElement>('[data-node-group]')
+		const target = document.getElementById(graphId)?.querySelector<SVGElement>('[data-node-group]')
+		if (!target) return
 		const pos = getNodePosition(target, panPosition, zoomLevel)
 
 		const posWidth = Math.round(pos.width)

@@ -79,7 +79,7 @@ const LineBox = () => {
 
 		const regex = isClusterDrag ? '[data-node]' : `#${dragElement},[data-node-parent=${dragElement}]`
 
-		const selectedNodes = [...(document.getElementById(graphId)!.querySelectorAll<SVGElement>(regex) ?? [])]
+		const selectedNodes = [...(document.getElementById(graphId)?.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		if (!selectedNodes) return
 
@@ -93,7 +93,7 @@ const LineBox = () => {
 			? '[dummy-nothing]'
 			: `[data-node]:not(#${dragElement},[data-node-parent=${dragElement}],[data-node-visible=false])`
 
-		const nodes = [...(document.getElementById(graphId)!.querySelectorAll<SVGElement>(regex) ?? [])]
+		const nodes = [...(document.getElementById(graphId)?.querySelectorAll<SVGElement>(regex) ?? [])]
 
 		const allNodes = getLineData(nodes)
 

@@ -10,8 +10,8 @@ const CenterTool = () => {
 	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const handleClick = useCallback(() => {
-		const group = document.getElementById(graphId)!.querySelector<SVGElement>('[data-node-group]')
-		const target = document.getElementById(graphId)!.querySelector<HTMLDivElement>('[data-pan]')
+		const group = document.getElementById(graphId)?.querySelector<SVGElement>('[data-node-group]')
+		const target = document.getElementById(graphId)?.querySelector<HTMLDivElement>('[data-pan]')
 
 		const tar = target?.getBoundingClientRect() ?? { x: 0, y: 0, width: 0, height: 0 }
 		const tarX = Math.round(tar.x)
