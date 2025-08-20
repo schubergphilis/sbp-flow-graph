@@ -72,7 +72,7 @@ export const settingsSlice = createSlice({
 		setVisibleState(state, { payload }: PayloadAction<string>) {
 			const id = payload.match(/(?<=_)([\w-]+)/gim)?.[0] ?? ''
 			let positionList: NodeModel[] = [...current(state.positionList ?? [])]
-			const dataList: ProcessModel[] = [...(state.dataList ?? [])]
+			const dataList: ProcessModel[] = [...current(state.dataList ?? [])]
 
 			const child = dataList.find(({ parent }) => parent === id)
 

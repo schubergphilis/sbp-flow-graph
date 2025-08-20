@@ -101,7 +101,7 @@ const LineBox = () => {
 	}, [isClusterDrag, dragElement, getLineData, graphId])
 
 	useEffect(() => {
-		timerRef.current = setTimeout(updateAllLines, 20)
+		timerRef.current = setTimeout(updateAllLines, 120)
 	}, [updateAllLines, zoomLevel, update, openDataList])
 
 	useEffect(() => {

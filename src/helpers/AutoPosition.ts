@@ -141,7 +141,8 @@ const determenChildPositions = (
 	spacing: number,
 	zoomLevel: number
 ) => {
-	const childList = getChildList(node)
+	// Remove all children that already have a position set
+	const childList = getChildList(node).filter((item) => !item.getAttribute('data-pos'))
 
 	const total = childList.length
 	const radius = calculateRadius(box, childList, spacing, offset, zoomLevel)

@@ -42,29 +42,39 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 	const timerRef = useRef<NodeJS.Timeout>(undefined)
 
 	const getDataList = useMemo(() => {
-		return dataList?.filter((item) => positionList?.find(({ id }) => id === item.id))
-	}, [dataList, positionList])
+		return dataList?.filter(({ isVisible }) => isVisible)
+	}, [dataList])
 
 	const getInitialPositionList = useCallback((): NodeModel[] | undefined => {
 		const root = data?.find(({ root }) => root)
 
-		return data?.map(({ id, parent }) => ({
-			id: id,
-			isVisible: id === root?.id || parent === root?.id ? true : false,
-			x: 0,
-			y: 0
-		}))
+		if (!root) return
+
+		return data
+			?.filter(({ id, parent }) => id === root?.id || parent === root.id)
+			.map(({ id }) => ({
+				id: id,
+				isVisible: true,
+				x: 0,
+				y: 0
+			}))
 	}, [data])
 
 	const createDataList = useCallback(
 		(data: ProcessModel[]) => {
+			const root = data?.find(({ root }) => root)
 			return data.map((item) => {
 				const hasChildren = data.find(({ parent }) => parent === item.id) ? true : undefined
 				const childStatus = data.find(
 					({ parent, status }) => parent === item.id && status !== 'Success' && status !== 'Unknown'
 				)?.status
 
-				const isVisible = positionList?.find(({ id }) => id === item.id)?.isVisible ?? false
+				let isVisible = false
+				if (item.parent === root?.id) {
+					isVisible = true
+				} else {
+					isVisible = positionList?.find(({ id }) => id === item.id)?.isVisible ?? false
+				}
 
 				return { ...item, hasChildren: hasChildren, childStatus: childStatus, isVisible: isVisible }
 			})
@@ -91,14 +101,14 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 	}, [dispatch, createDataList, data])
 
 	useEffect(() => {
-		const dataList = getDataList
+		const visibleDataList = getDataList
 
-		if (isPositioned || !dataList) return
+		if (isPositioned || !visibleDataList) return
 
 		const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
 
 		timerRef.current = setTimeout(() => {
-			const list = AutoPosition(graphId, dataList, positionList, offset, zoomLevel, spacing)
+			const list = AutoPosition(graphId, visibleDataList, positionList, offset, zoomLevel, spacing)
 
 			if (list.length > 0) {
 				dispatch(setPositionListState(list))
@@ -111,7 +121,7 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 
 	useDidMountEffect(() => {
 		setIsPositioned(false)
-	}, [update])
+	}, [update, data])
 
 	return (
 		<Container data-node-group>
