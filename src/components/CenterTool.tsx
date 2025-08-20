@@ -1,13 +1,19 @@
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
-import { getGraphIdState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
-import { useCallback } from 'react'
+import { getDataListState, getGraphIdState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
+import { ProcessModel } from 'build'
+import { useCallback, useEffect } from 'react'
 import CenterIcon from './icons/CenterIcon'
 import { ActionButton } from './ZoomTools'
 
-const CenterTool = () => {
+interface Props {
+	autoCenter?: boolean
+}
+
+const CenterTool = ({ autoCenter }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const graphId = useAppSelector<string>(getGraphIdState)
+	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 
 	const handleClick = useCallback(() => {
 		const group = document.getElementById(graphId)?.querySelector<SVGElement>('[data-node-group]')
@@ -26,15 +32,20 @@ const CenterTool = () => {
 		const centerX = Math.round(tarWidth / 2 - posX - pos.width / 2)
 		const centerY = Math.round(tarHeight / 2 - posY - pos.height / 2)
 
-		// console.log('offset', offset)
 		// console.table([
 		// 	{ type: 'pos', x: posX, y: posY, width: pos.width, height: pos.height },
 		// 	{ type: 'tar', x: tarX, y: tarY, width: tar.width, height: tar.height }
 		// ])
+
 		dispatch(setPanPositionState({ x: centerX, y: centerY }))
 
 		target?.setAttribute('style', `transform: translate(${centerX}px, ${centerY}px) scale(${zoomLevel})`)
 	}, [dispatch, zoomLevel, graphId])
+
+	useEffect(() => {
+		if (!dataList || !autoCenter) return
+		handleClick()
+	}, [dataList, autoCenter, handleClick])
 
 	return (
 		<ActionButton onClick={handleClick} title="Center canvas">

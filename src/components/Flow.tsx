@@ -23,10 +23,20 @@ interface Props {
 	onNodeClick?: (id: string) => void
 	iconSelector?: (name: string) => JSX.Element
 	refresh?: number
+	autoCenter?: boolean
 	id?: string
 }
 
-const Flow = ({ data, isDebug = false, spacing, onNodeClick, iconSelector, refresh, id = 'flowGraph' }: Props) => {
+const Flow = ({
+	data,
+	isDebug = false,
+	spacing,
+	onNodeClick,
+	iconSelector,
+	refresh,
+	id = 'flowGraph',
+	autoCenter = false
+}: Props) => {
 	return (
 		<Container id={id} data-container $isDebug={isDebug}>
 			<StateProvider id={id}>
@@ -48,7 +58,7 @@ const Flow = ({ data, isDebug = false, spacing, onNodeClick, iconSelector, refre
 							</Tooltip>
 						</Drag>
 					</Pan>
-					<ZoomTools />
+					<ZoomTools autoCenter={autoCenter} />
 				</GraphId>
 			</StateProvider>
 		</Container>
