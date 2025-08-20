@@ -70,7 +70,7 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 				)?.status
 
 				let isVisible = false
-				if (item.parent === root?.id) {
+				if (item.id === root?.id || item.parent === root?.id) {
 					isVisible = true
 				} else {
 					isVisible = positionList?.find(({ id }) => id === item.id)?.isVisible ?? false
