@@ -16,10 +16,15 @@ const Click = ({ children, onNodeClick }: Props) => {
 
 	const ref = useRef<HTMLDivElement>(null)
 
-	const updateChildNodeVisible = useCallback((id: string, element: SVGElement) => {
-		const isVisible = document.querySelector(`[data-node-parent=${id}][data-node-visible=true]`) !== null
-		element.setAttribute('data-node-children-visible', `${isVisible}`)
-	}, [])
+	const updateChildNodeVisible = useCallback(
+		(id: string, element: SVGElement) => {
+			const isVisible =
+				document.getElementById(graphId)!.querySelector(`[data-node-parent=${id}][data-node-visible=true]`) !== null
+
+			element.setAttribute('data-node-children-visible', `${isVisible}`)
+		},
+		[graphId]
+	)
 
 	const handleClick = useCallback(
 		(ev: MouseEvent) => {

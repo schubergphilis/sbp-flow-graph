@@ -28,3 +28,14 @@ export const getRandomNumberBetween = (start: number, end: number): number => {
 	const randomNumber = Math.random() * (end - start) + start
 	return Math.round(randomNumber * 100) / 100
 }
+
+export const generatePolygoinPoints = (size: number) => {
+	const points = []
+	const angle = (2 * Math.PI) / 8 // 8 sides for octagon
+	for (let i = 0; i < 8; i++) {
+		const x = size / 2 + (size / 2) * Math.cos(i * angle)
+		const y = size / 2 + (size / 2) * Math.sin(i * angle)
+		points.push(`${x},${y}`)
+	}
+	return points.join(' ')
+}
