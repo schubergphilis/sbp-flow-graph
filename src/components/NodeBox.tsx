@@ -7,7 +7,7 @@ import ProcessModel from '@models/ProcessModel'
 import {
 	getDataListState,
 	getGraphIdState,
-	getPagetOffsetState,
+	getPageOffsetState,
 	getPanPositionState,
 	getPositionListState,
 	getUpdateState,
@@ -30,7 +30,7 @@ const NodeBox = ({ data, iconSelector, spacing }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
-	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)

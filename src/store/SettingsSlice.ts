@@ -143,7 +143,7 @@ export const getZoomLevelState = (state: AppState): number => state.settings.zoo
 
 export const getPanPositionState = (state: AppState): PositionModel | undefined => state.settings.panPosition
 
-export const getPagetOffsetState = (state: AppState): PositionModel => state.settings.pageOffset
+export const getPageOffsetState = (state: AppState): PositionModel => state.settings.pageOffset
 
 export const getPositionListState = (state: AppState): NodeModel[] | undefined => state.settings.positionList
 

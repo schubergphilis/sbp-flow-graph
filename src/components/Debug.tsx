@@ -5,7 +5,7 @@ import PositionModel from '@models/PositionModel'
 import {
 	getDragElementState,
 	getGraphIdState,
-	getPagetOffsetState,
+	getPageOffsetState,
 	getPanPositionState,
 	getZoomLevelState,
 	isClusterDragState
@@ -22,7 +22,7 @@ const Debug = ({ isDebug = false }: Props) => {
 	const isClusterDrag = useAppSelector<boolean>(isClusterDragState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
-	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])

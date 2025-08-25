@@ -2,7 +2,7 @@ import { getNodePosition } from '@helpers/AutoPosition'
 import { useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
 import { parser } from '@schubergphilis/sbp-frontend-style'
-import { getDragElementState, getPagetOffsetState, getPanPositionState, getZoomLevelState } from '@store/SettingsSlice'
+import { getDragElementState, getPageOffsetState, getPanPositionState, getZoomLevelState } from '@store/SettingsSlice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
@@ -16,7 +16,7 @@ const Tooltip = ({ children }: Props) => {
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
-	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 
 	const [tooltip, setTooltip] = useState<string | null>(null)
 	const [position, setPosition] = useState<PositionModel>({ x: 0, y: 0 })

@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
 import {
 	getGraphIdState,
-	getPagetOffsetState,
+	getPageOffsetState,
 	getPanPositionState,
 	getZoomLevelState,
 	setClusterDragState,
@@ -21,7 +21,7 @@ const Drag = ({ children }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
-	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })

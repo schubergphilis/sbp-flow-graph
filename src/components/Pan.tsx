@@ -2,7 +2,7 @@ import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
 import {
 	getGraphIdState,
-	getPagetOffsetState,
+	getPageOffsetState,
 	getPanPositionState,
 	getZoomLevelState,
 	setPageOffsetState,
@@ -20,7 +20,7 @@ const Pan = ({ children, refresh }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
-	const pageOffset = useAppSelector<PositionModel>(getPagetOffsetState)
+	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const [isPanning, setIsPanning] = useState<boolean>(false)
