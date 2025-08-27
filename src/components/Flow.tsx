@@ -9,6 +9,7 @@ import SVGShadow from '@components/SVGShadow'
 import ZoomTools from '@components/ZoomTools'
 
 import ProcessModel from '@models/ProcessModel'
+import { CssColorType } from '@schubergphilis/sbp-frontend-style'
 import styled from 'styled-components'
 import GraphId from './GraphId'
 import LineBox from './LineBox'
@@ -24,6 +25,8 @@ interface Props {
 	iconSelector?: (name: string) => JSX.Element
 	refresh?: number
 	autoCenter?: boolean
+	zoomSmall?: boolean
+	zoomColor?: CssColorType
 	id?: string
 }
 
@@ -35,7 +38,9 @@ const Flow = ({
 	iconSelector,
 	refresh,
 	id = 'flowGraph',
-	autoCenter = false
+	autoCenter = false,
+	zoomSmall = false,
+	zoomColor
 }: Props) => {
 	return (
 		<Container id={id} data-container $isDebug={isDebug}>
@@ -58,7 +63,7 @@ const Flow = ({
 							</Tooltip>
 						</Drag>
 					</Pan>
-					<ZoomTools autoCenter={autoCenter} />
+					<ZoomTools autoCenter={autoCenter} zoomSmall={zoomSmall} zoomColor={zoomColor} />
 				</GraphId>
 			</StateProvider>
 		</Container>

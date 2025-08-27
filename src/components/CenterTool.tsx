@@ -1,6 +1,7 @@
 import { elementGroupCenter } from '@helpers/Helpers'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import NodeModel from '@models/NodeModel'
+import { CssColorType } from '@schubergphilis/sbp-frontend-style'
 import { getGraphIdState, getPositionListState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
 import { useCallback, useEffect } from 'react'
 import CenterIcon from './icons/CenterIcon'
@@ -8,9 +9,10 @@ import { ActionButton } from './ZoomTools'
 
 interface Props {
 	autoCenter?: boolean
+	color?: CssColorType
 }
 
-const CenterTool = ({ autoCenter }: Props) => {
+const CenterTool = ({ autoCenter, color }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const graphId = useAppSelector<string>(getGraphIdState)
@@ -56,7 +58,7 @@ const CenterTool = ({ autoCenter }: Props) => {
 	}, [positionList, autoCenter, handleClick])
 
 	return (
-		<ActionButton onClick={handleClick} title="Center canvas">
+		<ActionButton onClick={handleClick} title="Center canvas" $color={color}>
 			<CenterIcon />
 		</ActionButton>
 	)
