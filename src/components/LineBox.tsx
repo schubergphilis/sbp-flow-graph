@@ -74,7 +74,7 @@ const LineBox = () => {
 
 			return lineList
 		},
-		[graphId, panPosition, zoomLevel]
+		[graphId, pageOffset, panPosition, zoomLevel]
 	)
 
 	const updateAllLines = useCallback(() => {

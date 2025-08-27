@@ -2,7 +2,6 @@ import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
 import {
 	getGraphIdState,
-	getPageOffsetState,
 	getPanPositionState,
 	getZoomLevelState,
 	setPageOffsetState,
@@ -21,7 +20,6 @@ const Pan = memo(({ children, refresh }: Props) => {
 	const graphId = useAppSelector<string>(getGraphIdState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
-	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 
 	const [isPanning, setIsPanning] = useState<boolean>(false)
 
@@ -69,8 +67,8 @@ const Pan = memo(({ children, refresh }: Props) => {
 			if (rafRef.current) cancelAnimationFrame(rafRef.current)
 
 			rafRef.current = requestAnimationFrame(() => {
-				const posX = offsetBoxRef.current.x + (ev.offsetX - offsetMouseRef.current.x) - pageOffset.x
-				const posY = offsetBoxRef.current.y + (ev.offsetY - offsetMouseRef.current.y) - pageOffset.y
+				const posX = offsetBoxRef.current.x + (ev.offsetX - offsetMouseRef.current.x)
+				const posY = offsetBoxRef.current.y + (ev.offsetY - offsetMouseRef.current.y)
 
 				positionRef.current = {
 					x: posX,
@@ -82,7 +80,7 @@ const Pan = memo(({ children, refresh }: Props) => {
 				updatePosition()
 			})
 		},
-		[pageOffset, updatePosition]
+		[updatePosition]
 	)
 
 	const handleMoveEnd = useCallback(() => {

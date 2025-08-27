@@ -23,6 +23,8 @@ const CenterTool = ({ autoCenter }: Props) => {
 			document.getElementById(graphId)?.querySelectorAll<SVGElement>('[data-node-group] [data-node-visible]') ?? []
 		)
 
+		if (group.length === 0) return
+
 		const tar = target?.getBoundingClientRect() ?? { x: 0, y: 0, width: 0, height: 0 }
 
 		const tarX = Math.round(tar.x)
@@ -50,7 +52,7 @@ const CenterTool = ({ autoCenter }: Props) => {
 
 	useEffect(() => {
 		if (!positionList || !autoCenter) return
-		setTimeout(handleClick, 121)
+		setTimeout(handleClick, 1)
 	}, [positionList, autoCenter, handleClick])
 
 	return (
