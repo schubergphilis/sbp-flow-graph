@@ -112,7 +112,7 @@ const Pan = memo(({ children, refresh }: Props) => {
 
 	useLayoutEffect(() => {
 		dispatch(setUpdateState())
-	}, [refresh])
+	}, [dispatch, refresh])
 
 	useLayoutEffect(() => {
 		updatePosition()
