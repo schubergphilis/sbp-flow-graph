@@ -1,5 +1,6 @@
 import { closestNumber, generateSteps } from '@helpers/Helpers'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
+import { CssColorType } from '@schubergphilis/sbp-frontend-style'
 import {
 	getGraphIdState,
 	getShowInfoState,
@@ -16,8 +17,10 @@ import RemoveIcon from './icons/RemoveIcon'
 
 interface Props {
 	autoCenter?: boolean
+	zoomSmall?: boolean
+	zoomColor?: CssColorType
 }
-const ZoomTools = ({ autoCenter }: Props) => {
+const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 	const minZoom: number = 0.2
 	const maxZoom: number = 3
 	const step: number = 0.2
@@ -76,7 +79,7 @@ const ZoomTools = ({ autoCenter }: Props) => {
 	}, [handleScroll, graphId])
 
 	return (
-		<Container>
+		<Container $zoomSmall={zoomSmall}>
 			<Left>
 				<Level>level: {Math.round(zoomLevel * 100) / 100}</Level>
 			</Left>
@@ -85,20 +88,26 @@ const ZoomTools = ({ autoCenter }: Props) => {
 					disabled={maxZoom === zoomLevel || selectedElement !== ''}
 					title="Zoom in"
 					type="button"
-					onClick={(ev) => setZoom(ev, 1)}>
+					onClick={(ev) => setZoom(ev, 1)}
+					$color={zoomColor}>
 					<AddIcon />
 				</ActionButton>
-				<CenterTool autoCenter={autoCenter} />
+				<CenterTool autoCenter={autoCenter} color={zoomColor} />
 				<ActionButton
 					disabled={minZoom === zoomLevel || selectedElement !== ''}
 					type="button"
 					title="Zoom out"
-					onClick={(ev) => setZoom(ev, -1)}>
+					onClick={(ev) => setZoom(ev, -1)}
+					$color={zoomColor}>
 					<RemoveIcon />
 				</ActionButton>
 			</Center>
 			<Right>
-				<ActionButton $isSelected={showInfo} onClick={handleShowInfo} title="Show importance weights">
+				<ActionButton
+					$isSelected={showInfo}
+					onClick={handleShowInfo}
+					title="Show importance weights"
+					$color={zoomColor}>
 					<InfoIcon />
 				</ActionButton>
 			</Right>
@@ -106,7 +115,7 @@ const ZoomTools = ({ autoCenter }: Props) => {
 	)
 }
 
-const Container = styled.div`
+const Container = styled.div<{ $zoomSmall: boolean }>`
 	position: absolute;
 	bottom: 0;
 	right: 0;
@@ -118,6 +127,7 @@ const Container = styled.div`
 	z-index: 1;
 	margin: 2em;
 	min-width: 4em;
+	font-size: ${({ $zoomSmall }) => ($zoomSmall ? '0.75em' : '1em')};
 `
 const Level = styled.div`
 	font-size: 0.75em;
@@ -130,9 +140,10 @@ const Left = styled.div`
 const Center = styled(Left)``
 const Right = styled(Left)``
 
-export const ActionButton = styled.button<{ $isSelected?: boolean }>`
+export const ActionButton = styled.button<{ $isSelected?: boolean; $color?: CssColorType }>`
 	border-radius: 0.5em;
-	background-color: ${({ $isSelected, theme }) => ($isSelected ? theme.style.colorPrimary : theme.style.cardColorBg)};
+	background-color: ${({ $isSelected, $color, theme }) =>
+		$isSelected ? theme.style.colorPrimary : $color ? $color : theme.style.colorSecondary};
 	height: 3em;
 	width: 3em;
 	border: 1px solid ${({ theme }) => theme.style.borderColor};
@@ -145,6 +156,11 @@ export const ActionButton = styled.button<{ $isSelected?: boolean }>`
 
 	&:active {
 		filter: hue-rotate(4deg) brightness(90%);
+	}
+
+	& svg {
+		width: 50%;
+		height: 50%;
 	}
 `
 export default ZoomTools
