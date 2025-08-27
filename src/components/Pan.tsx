@@ -61,6 +61,12 @@ const Pan = memo(({ children, refresh }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
+			if (!(ev.buttons & 1)) {
+				// Left button was released, stop dragging
+				handleMoveEnd()
+				return
+			}
+
 			const target = ev.target as HTMLDivElement
 
 			if (!target.hasAttribute('data-container')) return
@@ -80,6 +86,7 @@ const Pan = memo(({ children, refresh }: Props) => {
 				updatePosition()
 			})
 		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[updatePosition]
 	)
 
