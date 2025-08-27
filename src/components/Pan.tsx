@@ -5,7 +5,8 @@ import {
 	getPanPositionState,
 	getZoomLevelState,
 	setPageOffsetState,
-	setPanPositionState
+	setPanPositionState,
+	setUpdateState
 } from '@store/SettingsSlice'
 import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
@@ -108,6 +109,10 @@ const Pan = memo(({ children, refresh }: Props) => {
 
 		dispatch(setPageOffsetState({ x: container.x, y: container.y }))
 	}, [dispatch, refresh])
+
+	useLayoutEffect(() => {
+		dispatch(setUpdateState())
+	}, [refresh])
 
 	useLayoutEffect(() => {
 		updatePosition()

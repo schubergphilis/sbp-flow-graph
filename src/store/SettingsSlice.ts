@@ -118,6 +118,9 @@ export const settingsSlice = createSlice({
 		},
 		setGraphIdState(state, { payload }: PayloadAction<string>) {
 			state.graphId = payload
+		},
+		setUpdateState(state) {
+			state.update = (state.update || 0) + 1
 		}
 	}
 })
@@ -171,7 +174,8 @@ export const {
 	setDataListState,
 	setVisibleState,
 	setShowInfoState,
-	setGraphIdState
+	setGraphIdState,
+	setUpdateState
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
