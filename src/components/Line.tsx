@@ -1,55 +1,71 @@
+import { calculateLinePath } from '@helpers/Helpers'
 import { useAppSelector } from '@hooks/ReduxStore'
 import LineModel from '@models/LineModel'
 import { getShowInfoState } from '@store/SettingsSlice'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import FlowNodeName from './FlowNodeName'
 
 interface Props {
 	data: LineModel
+	dragged?: boolean
 }
 
-const Line = ({ data: { start, end, info, startSize, endSize, status, tooltip } }: Props) => {
-	const showInfo = useAppSelector<boolean>(getShowInfoState)
+const Line = memo(
+	({ data, dragged = false }: Props) => {
+		const showInfo = useAppSelector<boolean>(getShowInfoState)
 
-	const textLength = (info?.length || 1) * 11
+		const elementPathRef = useRef<SVGPathElement>(null)
 
-	const startAngle = Math.atan2(end.y - start.y, end.x - start.x)
-	const startX = start.x + startSize * Math.cos(startAngle)
-	const startY = start.y + startSize * Math.sin(startAngle)
+		const [isLoaded, setIsLoaded] = useState<number>(dragged ? 1 : 0)
 
-	const endAngle = Math.atan2(start.y - end.y, start.x - end.x)
-	const endX = end.x + endSize * Math.cos(endAngle)
-	const endY = end.y + endSize * Math.sin(endAngle)
+		const pathCalculations = useMemo(() => calculateLinePath(data), [data])
 
-	const midX = (startX + endX) / 2
-	const midY = (startY + endY) / 2
+		const { pathData, midX, midY, textLength } = pathCalculations
 
-	const firstX = (startX + midX) / 2
-	const firstY = (startY + midY) / 2
+		useEffect(() => {
+			setTimeout(() => setIsLoaded(1), 10)
+		}, [])
+		return (
+			<Container data-line-status={data.status}>
+				<path
+					ref={elementPathRef}
+					d={pathData}
+					strokeWidth={dragged ? 1.5 : 1}
+					strokeDasharray={4}
+					markerMid="url(#arrow)"
+					fill="none"
+					strokeOpacity={isLoaded}
+				/>
 
-	const lastX = (endX + midX) / 2
-	const lastY = (endY + midY) / 2
+				{showInfo && data.info && (
+					<g transform={`translate(${midX - textLength / 2}, ${midY})`}>
+						<FlowNodeName name={data.info} boxHeight={-30} boxWidth={textLength} minSize={30} tooltip={data.tooltip} />
+					</g>
+				)}
+			</Container>
+		)
+	},
+	(prevProps, nextProps) => {
+		// Custom comparison for better memoization
+		const prev = prevProps.data
+		const next = nextProps.data
 
-	return (
-		<Container data-line-status={status}>
-			<path
-				d={`M${start.x} ${start.y} ${firstX} ${firstY} ${midX} ${midY} ${lastX} ${lastY} L${end.x} ${end.y}`}
-				strokeWidth={1}
-				strokeDasharray={4}
-				markerMid="url(#arrow)"
-				fill="none"
-			/>
-
-			{showInfo && info && (
-				<g transform={`translate(${midX - textLength / 2}, ${midY})`}>
-					<FlowNodeName name={info ?? ''} boxHeight={-30} boxWidth={textLength} minSize={30} tooltip={tooltip} />
-				</g>
-			)}
-		</Container>
-	)
-}
+		return (
+			prev.start.x === next.start.x &&
+			prev.start.y === next.start.y &&
+			prev.end.x === next.end.x &&
+			prev.end.y === next.end.y &&
+			prev.startSize === next.startSize &&
+			prev.endSize === next.endSize &&
+			prev.status === next.status
+		)
+	}
+)
 
 const Container = styled.g`
+	transition: stroke-opacity 0.25s ease-in-out;
+
 	pointer-events: none;
 	& text {
 		user-select: none;

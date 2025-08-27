@@ -20,21 +20,22 @@ export const localStorageMiddleware: Middleware<Dispatch> =
 
 		const tempState = { ...getState() }
 
-		blockList.forEach((block) => {
+		for (let i = 0; i < blockList.length; i++) {
+			const block = blockList[i]
 			if (!block.includes('/')) {
 				delete tempState[block]
-				return
+				continue
 			}
 
 			const items = block.split('/')
 
-			if (tempState[items[0]][items[1]] === null) return
+			if (tempState[items[0]][items[1]] === null) continue
 
 			const { [items[1]]: _, ...other } = tempState[items[0]]
 
 			tempState[items[0]] = other
-			return
-		})
+			continue
+		}
 
 		localStorage.setItem(storeId, JSON.stringify(tempState))
 	}

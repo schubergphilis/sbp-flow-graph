@@ -5,6 +5,7 @@ import ProcessModel from '@models/ProcessModel'
 
 export const AutoPosition = (
 	graphId: string,
+	selectedElement: string | undefined,
 	nodeList: ProcessModel[] = [],
 	positionList: NodeModel[] = [],
 	offset: PositionModel = { x: 0, y: 0 },
@@ -12,31 +13,62 @@ export const AutoPosition = (
 	spacing: number = 125
 ): NodeModel[] => {
 	const viewport = getWindowDimensions() as unknown as OffsetModel
-	const center: PositionModel = { x: Math.round(viewport.width / 2), y: Math.round(viewport.height / 2) }
+	const center: PositionModel = {
+		x: Math.round(viewport.width / 2),
+		y: Math.round(viewport.height / 2)
+	}
 
-	const posList = nodeList
-		.sort((a) => (a.parent === undefined ? -1 : 0))
+	const adjustList = [...nodeList]
+		.sort((a) => (a.root ? -1 : 0))
 		.filter(({ isVisible }) => isVisible)
-		.map(({ id, isVisible }) => {
-			const node = document.getElementById(`X${graphId}_${id}`)! as unknown as SVGElement
+		.filter(({ parent, id }) => (selectedElement ? parent === selectedElement || id === selectedElement : true))
 
-			const isRoot = (node.getAttribute('data-node-root') ?? 'false') === 'true'
+	for (let i = 0; i < adjustList.length; i++) {
+		const { id } = adjustList[i]
+		const nodeId = `X${graphId}_${id}`
+		const node = document.getElementById(nodeId) as SVGGElement | null
 
-			const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
+		if (!node) {
+			console.warn('Node not found:', nodeId)
+			continue
+		}
 
-			const box: OffsetModel = getNodePosition(node, offset, zoomLevel)
+		const isRoot = (node.getAttribute('data-node-root') ?? 'false') === 'true'
 
-			// Overwrite position for rootNode to the center of the page
-			const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : isRoot ? center : { x: box.x, y: box.y }
+		const savedPos = positionList.find((item) => item.id === id && item.x !== 0 && item.y !== 0)
 
-			setNodePosition(node, box, pos)
+		const size: OffsetModel = getTargetOffset(node)
+		const box: OffsetModel = getNodePosition(node, offset, zoomLevel)
+		// Overwrite position for rootNode to the center of the page
+		const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : isRoot ? center : { x: size.x, y: size.y }
 
+		setNodePosition(node, box, pos)
+
+		if (
+			node.hasAttribute('data-node-visible') &&
+			node.hasAttribute('data-node-children') &&
+			node.hasAttribute('data-node-children-visible')
+		)
 			determenChildPositions(node, box, pos, offset, spacing, zoomLevel)
+	}
 
-			return { id: id, x: pos.x, y: pos.y, isVisible: isVisible }
-		})
+	const nodes = [
+		...(document.getElementById(graphId)?.querySelectorAll<SVGElement>('[data-node][data-node-visible][data-pos]') ??
+			[])
+	]
 
-	return posList
+	// Get all nodes with a position set
+	return nodes.map((node) => {
+		const id = node.id.match(/(?<=_)([\w-]+)/gim)?.[0] ?? ''
+		const pos = node.getAttribute('data-pos')?.split(',') ?? ['0', '0']
+
+		return {
+			id,
+			x: Number(pos[0]),
+			y: Number(pos[1]),
+			isVisible: true
+		} as NodeModel
+	})
 }
 
 export const getParentNode = (node: SVGElement): SVGElement | HTMLDivElement | null => {
@@ -50,6 +82,7 @@ export const getParentNodePosition = (
 	zoomLevel: number = 1
 ): OffsetModel => {
 	const parent = getParentNode(node)?.querySelector<SVGElement>('circle, rect, polygon') ?? null
+	if (parent === null) console.warn('No parent node found for:', node)
 	return getNodePosition(parent, offset, zoomLevel)
 }
 
@@ -59,7 +92,10 @@ export const getNodePosition = (
 	zoomLevel: number = 1
 ): OffsetModel => {
 	const pos = node?.getBoundingClientRect() ?? { width: 0, height: 0, x: 0, y: 0 }
+
 	const size = Number(node?.getAttribute('data-node-size') ?? 0)
+
+	if (pos.width === 0) console.warn('Node has no width, check if it is rendered correctly:', node)
 
 	// Temp size for auto position isColliding()
 	const width = pos.width > 0 ? pos.width : size * 1.25
@@ -81,7 +117,6 @@ export const getTargetOffset = (target: SVGElement | HTMLDivElement | null): Off
 
 const setNodePosition = (node: SVGElement, box: OffsetModel, pos: PositionModel) => {
 	node.setAttribute('data-pos', `${pos.x},${pos.y}`)
-	node.setAttribute('fill-opacity', '1')
 
 	node.setAttribute(
 		'transform',
@@ -125,10 +160,8 @@ const getWindowDimensions = (): { width: number; height: number } => {
 }
 
 const getChildList = (node: SVGElement): SVGElement[] => {
-	const nodeId = node.getAttribute('id') as string
-	const childList = [
-		...(document.querySelectorAll<SVGElement>(`[data-node-parent=${nodeId}][data-node-visible=true]`) ?? [])
-	]
+	const nodeId = node.id as string
+	const childList = [...(document.querySelectorAll<SVGElement>(`[data-node-parent=${nodeId}]`) ?? [])]
 
 	return childList
 }
@@ -142,19 +175,26 @@ const determenChildPositions = (
 	zoomLevel: number
 ) => {
 	// Remove all children that already have a position set
-	const childList = getChildList(node).filter((item) => !item.getAttribute('data-pos'))
+	const childList = getChildList(node)
 
 	const total = childList.length
 	const radius = calculateRadius(box, childList, spacing, offset, zoomLevel)
 
-	childList.forEach((child, index) => {
+	for (let i = 0; i < childList.length; i++) {
+		const child = childList[i]
+		const index = i
 		const box = getNodePosition(child, offset, zoomLevel)
+
 		const angle = ((2 * Math.PI) / total) * index
 
 		const posX = pos.x + Math.round(radius * Math.cos(angle))
 		const posY = pos.y + Math.round(radius * Math.sin(angle))
 
-		const childPos: PositionModel = { x: posX, y: posY }
-		setNodePosition(child, box, childPos)
-	})
+		const childPos = getTargetOffset(child)
+
+		const savedPos: PositionModel =
+			childPos.x !== 0 && childPos.y !== 0 ? { x: childPos.x, y: childPos.y } : { x: posX, y: posY }
+
+		setNodePosition(child, box, savedPos)
+	}
 }

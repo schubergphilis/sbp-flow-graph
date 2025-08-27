@@ -14,7 +14,10 @@ import AddIcon from './icons/AddIcon'
 import InfoIcon from './icons/InfoIcon'
 import RemoveIcon from './icons/RemoveIcon'
 
-const ZoomTools = () => {
+interface Props {
+	autoCenter?: boolean
+}
+const ZoomTools = ({ autoCenter }: Props) => {
 	const minZoom: number = 0.2
 	const maxZoom: number = 3
 	const step: number = 0.2
@@ -85,7 +88,7 @@ const ZoomTools = () => {
 					onClick={(ev) => setZoom(ev, 1)}>
 					<AddIcon />
 				</ActionButton>
-				<CenterTool />
+				<CenterTool autoCenter={autoCenter} />
 				<ActionButton
 					disabled={minZoom === zoomLevel || selectedElement !== ''}
 					type="button"
