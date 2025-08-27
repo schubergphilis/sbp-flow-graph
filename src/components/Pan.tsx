@@ -1,6 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
+import ProcessModel from '@models/ProcessModel'
 import {
+	getDataListState,
 	getGraphIdState,
 	getPanPositionState,
 	getZoomLevelState,
@@ -21,6 +23,7 @@ const Pan = memo(({ children, refresh }: Props) => {
 	const graphId = useAppSelector<string>(getGraphIdState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
+	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 
 	const [isPanning, setIsPanning] = useState<boolean>(false)
 
@@ -74,8 +77,8 @@ const Pan = memo(({ children, refresh }: Props) => {
 			if (rafRef.current) cancelAnimationFrame(rafRef.current)
 
 			rafRef.current = requestAnimationFrame(() => {
-				const posX = offsetBoxRef.current.x + (ev.offsetX - offsetMouseRef.current.x)
-				const posY = offsetBoxRef.current.y + (ev.offsetY - offsetMouseRef.current.y)
+				const posX = Math.round(offsetBoxRef.current.x + (ev.offsetX - offsetMouseRef.current.x))
+				const posY = Math.round(offsetBoxRef.current.y + (ev.offsetY - offsetMouseRef.current.y))
 
 				positionRef.current = {
 					x: posX,
@@ -106,9 +109,8 @@ const Pan = memo(({ children, refresh }: Props) => {
 
 	useLayoutEffect(() => {
 		const container = elementGraphRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
-
-		dispatch(setPageOffsetState({ x: container.x, y: container.y }))
-	}, [dispatch, refresh])
+		dispatch(setPageOffsetState({ x: Math.round(container.x), y: Math.round(container.y) }))
+	}, [dispatch, refresh, dataList])
 
 	useLayoutEffect(() => {
 		dispatch(setUpdateState())
