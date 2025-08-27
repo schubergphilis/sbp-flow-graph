@@ -124,33 +124,7 @@ const NodeBox = memo(
 				x: (panPosition?.x ?? 0) + pageOffset.x,
 				y: (panPosition?.y ?? 0) + pageOffset.y
 			}
-			/*
-			// Use requestIdleCallback for non-blocking positioning
-			if ('requestIdleCallback' in window) {
-				requestIdleCallback(
-					() => {
-						const list = AutoPosition(
-							graphId,
-							selectedElement,
-							processedDataList,
-							positionList,
-							offset,
-							zoomLevel,
-							spacing
-						)
 
-						if (list.length > 0) {
-							dispatch(setPositionListState(list))
-						}
-
-						setIsPositioned(true)
-						positioningRef.current = false
-					},
-					{ timeout: 50 }
-				)
-			} else {
-				*/
-			// Fallback for browsers without requestIdleCallback
 			setTimeout(() => {
 				const list = AutoPosition(graphId, selectedElement, processedDataList, positionList, offset, zoomLevel, spacing)
 
@@ -161,7 +135,6 @@ const NodeBox = memo(
 				setIsPositioned(true)
 				positioningRef.current = false
 			}, 16) // ~60fps
-			// }
 		}, [
 			dispatch,
 			graphId,
