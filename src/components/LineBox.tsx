@@ -116,7 +116,7 @@ const LineBox = () => {
 
 	useEffect(() => {
 		if (dragElement) return
-		timerRef.current = setTimeout(updateAllLines, 120)
+		timerRef.current = setTimeout(updateAllLines, 300)
 	}, [dragElement, zoomLevel, update, updateAllLines])
 
 	useEffect(() => {
