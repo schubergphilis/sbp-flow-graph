@@ -1,5 +1,7 @@
 import { getNodePosition } from '@helpers/AutoPosition'
+import { elementGroupCenter } from '@helpers/Helpers'
 import { useAppSelector } from '@hooks/ReduxStore'
+import NodeModel from '@models/NodeModel'
 import OffsetModel from '@models/OffsetModel'
 import PositionModel from '@models/PositionModel'
 import {
@@ -7,30 +9,28 @@ import {
 	getGraphIdState,
 	getPageOffsetState,
 	getPanPositionState,
+	getPositionListState,
 	getZoomLevelState,
 	isClusterDragState
 } from '@store/SettingsSlice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
-interface Props {
-	isDebug?: boolean
-}
-
-const Debug = ({ isDebug = false }: Props) => {
+const Debug = () => {
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
 	const isClusterDrag = useAppSelector<boolean>(isClusterDragState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 	const graphId = useAppSelector<string>(getGraphIdState)
+	const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
 
 	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
 	const [selectedNodes, setSelectedNodes] = useState<JSX.Element[]>()
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 	const [center, setCenter] = useState<OffsetModel | undefined>()
 
-	const timerRef = useRef<NodeJS.Timeout>(undefined)
+	// const timerRef = useRef<NodeJS.Timeout>(undefined)
 	const updateRef = useRef<NodeJS.Timeout>(undefined)
 
 	const testData = useCallback(
@@ -43,7 +43,7 @@ const Debug = ({ isDebug = false }: Props) => {
 				return (
 					<g key={`debug_${node.id}_${index}`}>
 						<text x={pos.x} y={pos.y - pos.height / 1.75} textAnchor="middle" dominantBaseline="central">
-							{pos.x} x {pos.y} / {pos.width}
+							{pos.x}x{pos.y} | {pos.width}x{pos.height}
 						</text>
 						<rect
 							width={pos.width}
@@ -83,23 +83,20 @@ const Debug = ({ isDebug = false }: Props) => {
 
 	const updateSelectedLines = useCallback(() => {
 		// console.log('-----Interval')
-		let selectedNodes: SVGElement[] = []
 
-		if (isClusterDrag) {
-			selectedNodes = [...(document.getElementById(graphId)?.querySelectorAll<SVGElement>('[data-node]') ?? [])]
-		} else if (dragElement) {
-			selectedNodes = [document.getElementById(dragElement)! as unknown as SVGElement]
-		}
+		const regex = isClusterDrag ? '[data-node]' : `#X${graphId}_${dragElement}`
 
-		if (selectedNodes.length === 0) return
+		const nodes = [...(document.getElementById(graphId)?.querySelectorAll<SVGElement>(regex) ?? [])]
 
-		const selected = testData(selectedNodes)
+		if (nodes.length === 0) return
+
+		const selected = testData(nodes)
 
 		setSelectedNodes(selected)
 	}, [dragElement, isClusterDrag, testData, graphId])
 
 	const updateAllLines = useCallback(() => {
-		const regex = isClusterDrag ? '[dummy-nothing]' : `[data-node]:not(#${dragElement})`
+		const regex = isClusterDrag ? '[dummy-nothing]' : `[data-node][data-node-visible]:not(#X${graphId}_${dragElement})`
 
 		const nodes = [...(document.getElementById(graphId)?.querySelectorAll<SVGElement>(regex) ?? [])]
 
@@ -109,16 +106,14 @@ const Debug = ({ isDebug = false }: Props) => {
 	}, [isClusterDrag, dragElement, testData, graphId])
 
 	const calculateCenter = useCallback(() => {
-		const target = document.getElementById(graphId)?.querySelector<SVGElement>('[data-node-group]')
-		if (!target) return
-		const pos = getNodePosition(target, panPosition, zoomLevel)
+		const group = Array.from(
+			document.getElementById(graphId)?.querySelectorAll<SVGElement>('[data-node-group] [data-node-visible]') ?? []
+		)
 
-		const posWidth = Math.round(pos.width)
-		const posHeight = Math.round(pos.height)
-		const posX = Math.round(pos.x - posWidth / 2)
-		const posY = Math.round(pos.y - posHeight / 2)
-		setCenter({ x: posX + posWidth / 2, y: posY + posHeight / 2, width: posWidth, height: posHeight })
-	}, [panPosition, zoomLevel, graphId])
+		const center = elementGroupCenter(group, panPosition, zoomLevel)
+
+		setCenter(center)
+	}, [graphId, panPosition, zoomLevel])
 
 	useEffect(() => {
 		if (testNodes.length === 0) return
@@ -126,9 +121,9 @@ const Debug = ({ isDebug = false }: Props) => {
 	}, [calculateCenter, testNodes])
 
 	useEffect(() => {
-		if (!isDebug) return
-		timerRef.current = setTimeout(updateAllLines, 20)
-	}, [updateAllLines, isDebug])
+		if (!positionList) return
+		updateAllLines()
+	}, [positionList, updateAllLines])
 
 	useEffect(() => {
 		setIsDragging(dragElement !== undefined)
@@ -149,31 +144,32 @@ const Debug = ({ isDebug = false }: Props) => {
 	}, [isDragging, updateAllLines])
 
 	return (
-		isDebug && (
-			<Container data-debug-group>
-				{selectedNodes}
-				{testNodes}
-				{center && (
-					<g>
-						<circle r="4" fill="blue" fillOpacity={0.5} cx={center.x} cy={center.y} />
-						<rect
-							width={center.width}
-							height={center.height}
-							x={center.x - center.width / 2}
-							y={center.y - center.height / 2}
-							stroke="blue"
-							fill="none"
-						/>
-					</g>
-				)}
-			</Container>
-		)
+		<Container data-debug-group>
+			{selectedNodes}
+			{testNodes}
+			{center && (
+				<g>
+					<circle
+						r="10"
+						fill="blue"
+						fillOpacity={0.5}
+						cx={center.x + center.width / 2}
+						cy={center.y + center.height / 2}
+					/>
+					<rect width={center.width} height={center.height} x={center.x} y={center.y} stroke="blue" fill="none" />
+				</g>
+			)}
+		</Container>
 	)
 }
 
 const Container = styled.g`
 	user-select: none;
 	pointer-events: none;
+	& * {
+		user-select: none;
+		pointer-events: none;
+	}
 `
 
 export default Debug

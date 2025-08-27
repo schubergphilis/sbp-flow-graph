@@ -1,8 +1,6 @@
 import { AutoPosition } from '@helpers/AutoPosition'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import { useDidMountEffect } from '@hooks/UseDidMountEffect'
-import NodeModel from '@models/NodeModel'
-import PositionModel from '@models/PositionModel'
 import ProcessModel from '@models/ProcessModel'
 import {
 	getDataListState,
@@ -10,12 +8,14 @@ import {
 	getPageOffsetState,
 	getPanPositionState,
 	getPositionListState,
+	getSelectedElementState,
 	getUpdateState,
 	getZoomLevelState,
 	setDataListState,
 	setPositionListState
 } from '@store/SettingsSlice'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { shallowEqual } from 'react-redux'
 import styled from 'styled-components'
 import FlowNode from './FlowNode'
 
@@ -25,112 +25,196 @@ interface Props {
 	spacing?: number
 }
 
-const NodeBox = ({ data, iconSelector, spacing }: Props) => {
-	const dispatch = useAppDispatch()
-	const zoomLevel = useAppSelector<number>(getZoomLevelState)
-	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
-	const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
-	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
-	const graphId = useAppSelector<string>(getGraphIdState)
+const NodeBox = memo(
+	({ data, iconSelector, spacing }: Props) => {
+		const dispatch = useAppDispatch()
 
-	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
-	const update = useAppSelector<number>(getUpdateState)
+		// Memoize selectors to prevent unnecessary re-renders
+		const { zoomLevel, panPosition, positionList, pageOffset, graphId, dataList, update, selectedElement } =
+			useAppSelector(
+				(state) => ({
+					zoomLevel: getZoomLevelState(state),
+					panPosition: getPanPositionState(state),
+					positionList: getPositionListState(state),
+					pageOffset: getPageOffsetState(state),
+					graphId: getGraphIdState(state),
+					dataList: getDataListState(state),
+					update: getUpdateState(state),
+					selectedElement: getSelectedElementState(state)
+				}),
+				shallowEqual // Shallow comparison for better performance
+			)
 
-	const [isTriggered, setIsTriggered] = useState<boolean>(false)
-	const [isPositioned, setIsPositioned] = useState<boolean>(false)
+		const [isPositioned, setIsPositioned] = useState<boolean>(false)
 
-	const timerRef = useRef<NodeJS.Timeout>(undefined)
+		const timerRef = useRef<NodeJS.Timeout>(undefined)
+		const positioningRef = useRef<boolean>(false)
 
-	const getDataList = useMemo(() => {
-		return dataList?.filter(({ isVisible }) => isVisible)
-	}, [dataList])
+		// Memoize data processing with better dependency tracking
+		const processedDataList = useMemo(() => {
+			if (!dataList) return []
 
-	const getInitialPositionList = useCallback((): NodeModel[] | undefined => {
-		const root = data?.find(({ root }) => root)
+			const rootId = dataList.find(({ root }) => root)?.id ?? ''
+			const positionMap = new Map(positionList?.map((pos) => [pos.id, pos]) || [])
 
-		if (!root) return
-
-		return data
-			?.filter(({ id, parent }) => id === root?.id || parent === root.id)
-			.map(({ id }) => ({
-				id: id,
-				isVisible: true,
-				x: 0,
-				y: 0
-			}))
-	}, [data])
-
-	const createDataList = useCallback(
-		(data: ProcessModel[]) => {
-			const root = data?.find(({ root }) => root)
-			return data.map((item) => {
-				const hasChildren = data.find(({ parent }) => parent === item.id) ? true : undefined
-				const childStatus = data.find(
+			return dataList.map((item) => {
+				const position = positionMap.get(item.id)
+				const isVisible = position?.isVisible ?? (item.id === rootId || item.parent === rootId)
+				const hasChildren = dataList.some(({ parent }) => parent === item.id)
+				const childStatus = dataList.find(
 					({ parent, status }) => parent === item.id && status !== 'Success' && status !== 'Unknown'
 				)?.status
 
-				let isVisible = false
-				if (item.id === root?.id || item.parent === root?.id) {
-					isVisible = true
-				} else {
-					isVisible = positionList?.find(({ id }) => id === item.id)?.isVisible ?? false
+				return {
+					...item,
+					isVisible,
+					hasChildren: hasChildren || undefined,
+					childStatus
+				}
+			})
+		}, [dataList, positionList])
+
+		// Optimized data creation with reduced complexity
+		const createOptimizedDataList = useCallback((inputData: ProcessModel[]) => {
+			if (!inputData?.length) return []
+
+			const root = inputData.find(({ root }) => root)
+			const parentMap = new Map<string, ProcessModel[]>()
+
+			// Build parent-child relationships efficiently
+			inputData.forEach((item) => {
+				if (item.parent) {
+					if (!parentMap.has(item.parent)) {
+						parentMap.set(item.parent, [])
+					}
+					parentMap.get(item.parent)!.push(item)
+				}
+			})
+
+			return inputData.map((item) => {
+				const children = parentMap.get(item.id) || []
+				const hasChildren = children.length > 0
+				const childStatus = children.find(({ status }) => status !== 'Success' && status !== 'Unknown')?.status
+
+				const isVisible = item.id === root?.id || item.parent === root?.id
+
+				return {
+					...item,
+					hasChildren: hasChildren || undefined,
+					childStatus,
+					isVisible
+				}
+			})
+		}, [])
+
+		// Debounced data list update
+		useEffect(() => {
+			if (!data?.length) return
+
+			const timeoutId = setTimeout(() => {
+				const list = createOptimizedDataList(data)
+				dispatch(setDataListState(list))
+			}, 0) // Use 0 for next tick, avoiding blocking
+
+			return () => clearTimeout(timeoutId)
+		}, [data, createOptimizedDataList, dispatch])
+
+		const schedulePositioning = useCallback(() => {
+			const offset = {
+				x: (panPosition?.x ?? 0) + pageOffset.x,
+				y: (panPosition?.y ?? 0) + pageOffset.y
+			}
+			/*
+			// Use requestIdleCallback for non-blocking positioning
+			if ('requestIdleCallback' in window) {
+				requestIdleCallback(
+					() => {
+						const list = AutoPosition(
+							graphId,
+							selectedElement,
+							processedDataList,
+							positionList,
+							offset,
+							zoomLevel,
+							spacing
+						)
+
+						if (list.length > 0) {
+							dispatch(setPositionListState(list))
+						}
+
+						setIsPositioned(true)
+						positioningRef.current = false
+					},
+					{ timeout: 50 }
+				)
+			} else {
+				*/
+			// Fallback for browsers without requestIdleCallback
+			setTimeout(() => {
+				const list = AutoPosition(graphId, selectedElement, processedDataList, positionList, offset, zoomLevel, spacing)
+
+				if (list.length > 0) {
+					dispatch(setPositionListState(list))
 				}
 
-				return { ...item, hasChildren: hasChildren, childStatus: childStatus, isVisible: isVisible }
-			})
-		},
-		[positionList]
-	)
+				setIsPositioned(true)
+				positioningRef.current = false
+			}, 16) // ~60fps
+			// }
+		}, [
+			dispatch,
+			graphId,
+			pageOffset.x,
+			pageOffset.y,
+			panPosition?.x,
+			panPosition?.y,
+			positionList,
+			processedDataList,
+			selectedElement,
+			spacing,
+			zoomLevel
+		])
 
-	useDidMountEffect(() => {
-		if (isTriggered || (positionList && positionList.length > 0) || dataList?.length === 0) return
+		// Optimized positioning with better scheduling
+		useEffect(() => {
+			if (isPositioned || !processedDataList?.length || positioningRef.current) return
 
-		const list = getInitialPositionList()
+			positioningRef.current = true
 
-		if (!list) return
+			timerRef.current = setTimeout(schedulePositioning, 1)
 
-		dispatch(setPositionListState(list))
-		setIsTriggered(true)
-	}, [dispatch, getInitialPositionList, isTriggered, positionList])
-
-	useEffect(() => {
-		if (!data) return
-		const list = createDataList(data)
-
-		dispatch(setDataListState(list))
-	}, [dispatch, createDataList, data])
-
-	useEffect(() => {
-		const visibleDataList = getDataList
-
-		if (isPositioned || !visibleDataList) return
-
-		const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
-
-		timerRef.current = setTimeout(() => {
-			const list = AutoPosition(graphId, visibleDataList, positionList, offset, zoomLevel, spacing)
-
-			if (list.length > 0) {
-				dispatch(setPositionListState(list))
-				console.log('--- auto position ---')
+			return () => {
+				if (timerRef.current) {
+					clearTimeout(timerRef.current)
+				}
+				positioningRef.current = false
 			}
+		}, [isPositioned, processedDataList?.length, schedulePositioning])
 
-			setIsPositioned(true)
-		}, 1)
-	}, [dispatch, getDataList, isPositioned, panPosition, positionList, spacing, zoomLevel, pageOffset, graphId])
+		// Reset positioning state efficiently
+		useDidMountEffect(() => {
+			setIsPositioned(false)
+			positioningRef.current = false
+		}, [update, data])
 
-	useDidMountEffect(() => {
-		setIsPositioned(false)
-	}, [update, data])
-
-	return (
-		<Container data-node-group>
-			{getDataList?.map((node) => (
-				<FlowNode key={`node_${graphId}_${node.id}`} data={node} iconSelector={iconSelector} />
-			))}
-		</Container>
-	)
-}
+		return (
+			<Container data-node-group>
+				{processedDataList.map((node) => (
+					<FlowNode key={`node_${graphId}_${node.id}`} data={node} iconSelector={iconSelector} />
+				))}
+			</Container>
+		)
+	},
+	(prevProps, nextProps) => {
+		// Custom comparison for better memoization
+		return (
+			prevProps.data === nextProps.data &&
+			prevProps.spacing === nextProps.spacing &&
+			prevProps.iconSelector === nextProps.iconSelector
+		)
+	}
+)
 
 const Container = styled.g``
 

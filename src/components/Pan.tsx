@@ -8,7 +8,7 @@ import {
 	setPageOffsetState,
 	setPanPositionState
 } from '@store/SettingsSlice'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 interface Props {
@@ -16,29 +16,29 @@ interface Props {
 	children: JSX.Element
 }
 
-const Pan = ({ children, refresh }: Props) => {
+const Pan = memo(({ children, refresh }: Props) => {
 	const dispatch = useAppDispatch()
+	const graphId = useAppSelector<string>(getGraphIdState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
-	const graphId = useAppSelector<string>(getGraphIdState)
 
 	const [isPanning, setIsPanning] = useState<boolean>(false)
-	const [boxOffset, setBoxOffset] = useState<PositionModel>({ x: 0, y: 0 })
-	const [mouseOffset, setMouseOffset] = useState<PositionModel>({ x: 0, y: 0 })
-	const [pos, _setPos] = useState<PositionModel>({ x: 0, y: 0 })
 
-	const ref = useRef<HTMLDivElement>(null)
-	const panRef = useRef<HTMLDivElement>(null)
-	const posRef = useRef<PositionModel>({ x: 0, y: 0 })
+	const elementGraphRef = useRef<HTMLDivElement>(null)
+	const elementPanRef = useRef<HTMLDivElement>(null)
+	const offsetBoxRef = useRef<PositionModel>({ x: 0, y: 0 })
+	const offsetMouseRef = useRef<PositionModel>({ x: 0, y: 0 })
+	const positionRef = useRef<PositionModel>({ x: panPosition?.x ?? 0, y: panPosition?.y ?? 0 })
+	const rafRef = useRef<number | null>(null)
 
-	const setPos = useCallback((data: PositionModel) => {
-		posRef.current = data
-		_setPos(data)
-	}, [])
+	const updatePosition = useCallback(() => {
+		if (!elementPanRef.current) return
+		// Use translate3d for hardware acceleration
+		elementPanRef.current.style.transform = `translate3d(${positionRef.current.x}px, ${positionRef.current.y}px, 0) scale(${zoomLevel})`
+	}, [zoomLevel])
 
 	const handleMouseDown = useCallback((ev: MouseEvent) => {
-		// ev.stopPropagation()
 		ev.preventDefault()
 
 		if (ev.button !== 0) return
@@ -49,10 +49,13 @@ const Pan = ({ children, refresh }: Props) => {
 
 		setIsPanning(true)
 
-		const offset = panRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
+		const offset = elementPanRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
+		offsetBoxRef.current = offset
+		offsetMouseRef.current = { x: ev.clientX, y: ev.clientY }
 
-		setBoxOffset({ x: offset.x, y: offset.y })
-		setMouseOffset({ x: ev.offsetX, y: ev.offsetY })
+		// Add will-change for optimization
+		if (!elementPanRef.current) return
+		elementPanRef.current.style.willChange = 'transform'
 	}, [])
 
 	const handleMove = useCallback(
@@ -63,76 +66,85 @@ const Pan = ({ children, refresh }: Props) => {
 			const target = ev.target as HTMLDivElement
 
 			if (!target.hasAttribute('data-container')) return
+			if (rafRef.current) cancelAnimationFrame(rafRef.current)
 
-			const posX = boxOffset.x + (ev.offsetX - mouseOffset.x) - pageOffset.x
-			const posY = boxOffset.y + (ev.offsetY - mouseOffset.y) - pageOffset.y
+			rafRef.current = requestAnimationFrame(() => {
+				const posX = offsetBoxRef.current.x + (ev.offsetX - offsetMouseRef.current.x) - pageOffset.x
+				const posY = offsetBoxRef.current.y + (ev.offsetY - offsetMouseRef.current.y) - pageOffset.y
 
-			setPos({
-				x: posX,
-				y: posY
+				positionRef.current = {
+					x: posX,
+					y: posY
+				}
+
+				if (!elementPanRef.current) return
+
+				updatePosition()
 			})
 		},
-		[boxOffset, pageOffset, mouseOffset, setPos]
+		[pageOffset, updatePosition]
 	)
 
 	const handleMoveEnd = useCallback(() => {
 		setIsPanning(false)
 
-		panRef.current?.removeEventListener('mousemove', handleMove)
-		panRef.current?.removeEventListener('mouseup', handleMoveEnd)
+		// Remove will-change to save memory
+		if (!elementPanRef.current) return
+		elementPanRef.current.style.willChange = 'auto'
 
-		dispatch(setPanPositionState(pos))
-	}, [dispatch, handleMove, pos])
+		elementGraphRef.current?.removeEventListener('mousemove', handleMove)
+		elementGraphRef.current?.removeEventListener('mouseup', handleMoveEnd)
+
+		dispatch(setPanPositionState(positionRef.current))
+	}, [dispatch, handleMove])
 
 	useLayoutEffect(() => {
-		if (!panPosition) return
-		setPos(panPosition)
-	}, [setPos, panPosition])
+		const container = elementGraphRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
 
-	useLayoutEffect(() => {
-		const container = panRef.current?.closest<HTMLDivElement>('[data-container]')?.getBoundingClientRect()
-
-		dispatch(setPageOffsetState({ x: container?.x ?? 0, y: container?.y ?? 0 }))
+		dispatch(setPageOffsetState({ x: container.x, y: container.y }))
 	}, [dispatch, refresh])
 
 	useLayoutEffect(() => {
-		const node = document.getElementById(graphId) as HTMLDivElement
+		updatePosition()
 
-		node?.addEventListener('mousedown', handleMouseDown)
+		elementGraphRef.current = document.getElementById(graphId) as HTMLDivElement
+
+		elementGraphRef.current?.addEventListener('mousedown', handleMouseDown)
 
 		return () => {
-			node?.removeEventListener('mousedown', handleMouseDown)
+			elementGraphRef.current?.removeEventListener('mousedown', handleMouseDown)
 		}
-	}, [handleMouseDown, graphId])
+	}, [graphId, handleMouseDown, updatePosition])
 
 	useLayoutEffect(() => {
 		if (!isPanning) return
-		ref.current = document.getElementById(graphId) as HTMLDivElement
-		ref.current?.addEventListener('mousemove', handleMove)
-		ref.current?.addEventListener('mouseup', handleMoveEnd)
+
+		elementGraphRef.current?.addEventListener('mousemove', handleMove)
+		elementGraphRef.current?.addEventListener('mouseup', handleMoveEnd)
 
 		return () => {
-			ref.current?.removeEventListener('mousemove', handleMove)
-			ref.current?.removeEventListener('mouseup', handleMoveEnd)
+			elementGraphRef.current?.removeEventListener('mousemove', handleMove)
+			elementGraphRef.current?.removeEventListener('mouseup', handleMoveEnd)
 		}
-	}, [isPanning, handleMove, handleMoveEnd, graphId])
+	}, [isPanning, handleMove, handleMoveEnd])
 
 	return (
-		<Container
-			data-pan
-			ref={panRef}
-			style={{
-				transform: `translate(${pos.x}px, ${pos.y}px) scale(${zoomLevel})`
-			}}>
+		<Container data-pan ref={elementPanRef}>
 			{children}
 		</Container>
 	)
-}
+})
 
 const Container = styled.div`
 	transform-origin: 0 0;
 	height: 100%;
 	width: 100%;
+
+	/* Enable GPU acceleration */
+	transform: translateZ(0);
+
+	/* Optimize compositing */
+	isolation: isolate;
 `
 
 export default Pan

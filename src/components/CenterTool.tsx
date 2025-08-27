@@ -1,6 +1,7 @@
+import { elementGroupCenter } from '@helpers/Helpers'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
-import { getDataListState, getGraphIdState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
-import { ProcessModel } from 'build'
+import NodeModel from '@models/NodeModel'
+import { getGraphIdState, getPositionListState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
 import { useCallback, useEffect } from 'react'
 import CenterIcon from './icons/CenterIcon'
 import { ActionButton } from './ZoomTools'
@@ -13,19 +14,24 @@ const CenterTool = ({ autoCenter }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const graphId = useAppSelector<string>(getGraphIdState)
-	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
+	const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
 
 	const handleClick = useCallback(() => {
-		const group = document.getElementById(graphId)?.querySelector<SVGElement>('[data-node-group]')
 		const target = document.getElementById(graphId)?.querySelector<HTMLDivElement>('[data-pan]')
 
+		const group = Array.from(
+			document.getElementById(graphId)?.querySelectorAll<SVGElement>('[data-node-group] [data-node-visible]') ?? []
+		)
+
 		const tar = target?.getBoundingClientRect() ?? { x: 0, y: 0, width: 0, height: 0 }
+
 		const tarX = Math.round(tar.x)
 		const tarY = Math.round(tar.y)
 		const tarWidth = Math.round(tar.width / zoomLevel)
 		const tarHeight = Math.round(tar.height / zoomLevel)
 
-		const pos = group?.getBoundingClientRect() ?? { x: 0, y: 0, width: 0, height: 0 }
+		const pos = elementGroupCenter(group)
+
 		const posX = Math.round(pos.x - tarX)
 		const posY = Math.round(pos.y - tarY)
 
@@ -39,13 +45,13 @@ const CenterTool = ({ autoCenter }: Props) => {
 
 		dispatch(setPanPositionState({ x: centerX, y: centerY }))
 
-		target?.setAttribute('style', `transform: translate(${centerX}px, ${centerY}px) scale(${zoomLevel})`)
-	}, [dispatch, zoomLevel, graphId])
+		target?.setAttribute('style', `transform: translate3d(${centerX}px, ${centerY}px, 0) scale(${zoomLevel})`)
+	}, [graphId, zoomLevel, dispatch])
 
 	useEffect(() => {
-		if (!dataList || !autoCenter) return
-		handleClick()
-	}, [dataList, autoCenter, handleClick])
+		if (!positionList || !autoCenter) return
+		setTimeout(handleClick, 121)
+	}, [positionList, autoCenter, handleClick])
 
 	return (
 		<ActionButton onClick={handleClick} title="Center canvas">

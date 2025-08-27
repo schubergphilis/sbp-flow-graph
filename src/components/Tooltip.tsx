@@ -3,14 +3,14 @@ import { useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
 import { parser } from '@schubergphilis/sbp-frontend-style'
 import { getDragElementState, getPageOffsetState, getPanPositionState, getZoomLevelState } from '@store/SettingsSlice'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 interface Props {
 	children: JSX.Element
 }
 
-const Tooltip = ({ children }: Props) => {
+const Tooltip = memo(({ children }: Props) => {
 	const tooltipRef = useRef<HTMLDivElement>(null)
 
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
@@ -89,7 +89,7 @@ const Tooltip = ({ children }: Props) => {
 			{children}
 		</>
 	)
-}
+})
 
 const TooltipBox = styled.div<{ $isActive: boolean }>`
 	position: absolute;

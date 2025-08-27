@@ -6,6 +6,7 @@ import { AppState } from '@store/Store'
 
 // Type for our state
 export interface SettingsState {
+	selectedElement?: string
 	dragElement?: string
 	isClusterDrag?: boolean
 	zoomLevel: number
@@ -108,6 +109,8 @@ export const settingsSlice = createSlice({
 				state.positionList = positionList
 			}
 
+			state.selectedElement = showNodes ? id : undefined
+
 			state.update = (state.update || 0) + 1
 		},
 		setDataListState(state, { payload }: PayloadAction<ProcessModel[]>) {
@@ -154,6 +157,8 @@ export const getUpdateState = (state: AppState): number => state.settings.update
 export const getShowInfoState = (state: AppState): boolean => state.settings.showInfo
 
 export const getGraphIdState = (state: AppState): string => state.settings.graphId ?? 'flowGraph'
+
+export const getSelectedElementState = (state: AppState): string | undefined => state.settings.selectedElement
 
 export const {
 	setDragElementState,

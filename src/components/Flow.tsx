@@ -1,7 +1,6 @@
 import Click from '@components/Click'
 import Debug from '@components/Debug'
 import Drag from '@components/Drag'
-import LineBox from '@components/LineBox'
 import NodeBox from '@components/NodeBox'
 import Pan from '@components/Pan'
 import StateProvider from '@components/StateProvider'
@@ -12,6 +11,7 @@ import ZoomTools from '@components/ZoomTools'
 import ProcessModel from '@models/ProcessModel'
 import styled from 'styled-components'
 import GraphId from './GraphId'
+import LineBox from './LineBox'
 import SVGInnerShadow from './SVGInnerShadow'
 import SVGStripes from './SVGStripes'
 import Tooltip from './Tooltip'
@@ -52,7 +52,7 @@ const Flow = ({
 										<SVGStripes />
 										<LineBox />
 										<NodeBox data={data} iconSelector={iconSelector} spacing={spacing} />
-										<Debug isDebug={isDebug} />
+										{isDebug && <Debug />}
 									</SvgCanvast>
 								</Click>
 							</Tooltip>
@@ -96,5 +96,14 @@ const SvgCanvast = styled.svg<{ $isDebug: boolean }>`
 	height: 100%;
 	overflow: visible;
 	${({ $isDebug }) => $isDebug && 'background-color: #ff000040'}
+
+	/* Optimize text rendering */
+  	text-rendering: optimizeSpeed;
+
+	/* Optimize shape rendering */
+	shape-rendering: optimizeSpeed;
+
+	/* Disable image smoothing for crisp edges */
+	image-rendering: pixelated;
 `
 export default Flow

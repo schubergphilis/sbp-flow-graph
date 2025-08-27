@@ -19,9 +19,13 @@ const Click = ({ children, onNodeClick }: Props) => {
 	const updateChildNodeVisible = useCallback(
 		(id: string, element: SVGElement) => {
 			const isVisible =
-				document.getElementById(graphId)!.querySelector(`[data-node-parent=${id}][data-node-visible=true]`) !== null
+				document.getElementById(graphId)!.querySelector(`[data-node-parent=${id}][data-node-visible]`) !== null
 
-			element.setAttribute('data-node-children-visible', `${isVisible}`)
+			if (isVisible) {
+				element.removeAttribute('data-node-children-visible')
+			} else {
+				element.setAttribute('data-node-children-visible', 'true')
+			}
 		},
 		[graphId]
 	)
@@ -38,13 +42,13 @@ const Click = ({ children, onNodeClick }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
-			const id = element.getAttribute('id') as string
+			const id = element.id as string
 
 			if (clickTimeout.current) clearTimeout(clickTimeout.current)
 
 			clickTimeout.current = setTimeout(() => {
 				dispatch(setVisibleState(id))
-				setTimeout(() => updateChildNodeVisible(id, element), 1)
+				updateChildNodeVisible(id, element)
 			}, 300)
 		},
 		[dispatch, dragElement, updateChildNodeVisible]

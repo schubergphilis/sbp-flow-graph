@@ -10,7 +10,7 @@ const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 75, tooltip }: Prop
 
 	return (
 		<g transform={`translate(${boxWidth / 2}, 0)`}>
-			<g transform={`translate(${0}, ${boxHeight + 30})`}>
+			<g transform={`translate(0, ${boxHeight + 30})`}>
 				<rect
 					data-node-tooltip={tooltip ?? undefined}
 					width={textLength}
