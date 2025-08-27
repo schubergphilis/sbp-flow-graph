@@ -75,8 +75,8 @@ const NodeBox = memo(
 		}, [dataList, positionList])
 
 		// Optimized data creation with reduced complexity
-		const createOptimizedDataList = useCallback((inputData: ProcessModel[]) => {
-			if (!inputData?.length) return []
+		const createOptimizedDataList = useCallback((inputData?: ProcessModel[]) => {
+			if (!inputData || !inputData?.length) return []
 
 			const root = inputData.find(({ root }) => root)
 			const parentMap = new Map<string, ProcessModel[]>()
@@ -109,8 +109,6 @@ const NodeBox = memo(
 
 		// Debounced data list update
 		useEffect(() => {
-			if (!data?.length) return
-
 			const timeoutId = setTimeout(() => {
 				const list = createOptimizedDataList(data)
 				dispatch(setDataListState(list))

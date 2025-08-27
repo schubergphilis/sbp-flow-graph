@@ -79,6 +79,12 @@ const Drag = memo(({ children }: Props) => {
 			ev.stopPropagation()
 			ev.preventDefault()
 
+			if (!(ev.buttons & 1)) {
+				// Left button was released, stop dragging
+				handleMoveEnd()
+				return
+			}
+
 			if (!targetListRef.current) return
 
 			if (rafRef.current) cancelAnimationFrame(rafRef.current)
@@ -117,6 +123,7 @@ const Drag = memo(({ children }: Props) => {
 				}
 			})
 		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[panPosition, pageOffset, dragElement, targetId, dispatch, zoomLevel]
 	)
 
