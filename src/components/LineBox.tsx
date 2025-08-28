@@ -7,6 +7,7 @@ import {
 	getDataListState,
 	getDragElementState,
 	getGraphIdState,
+	getLoadedState,
 	getPageOffsetState,
 	getPanPositionState,
 	getPositionListState,
@@ -20,25 +21,26 @@ import Line from './Line'
 
 const LineBox = () => {
 	// Memoize selectors to prevent unnecessary re-renders
-	const { zoomLevel, panPosition, pageOffset, positionList, graphId, dataList, dragElement, update } = useAppSelector(
-		(state) => ({
-			zoomLevel: getZoomLevelState(state),
-			panPosition: getPanPositionState(state),
-			pageOffset: getPageOffsetState(state),
-			positionList: getPositionListState(state),
-			graphId: getGraphIdState(state),
-			dataList: getDataListState(state),
-			dragElement: getDragElementState(state),
-			update: getUpdateState(state)
-		}),
-		shallowEqual // Shallow comparison for better performance
-	)
+	const { zoomLevel, panPosition, pageOffset, positionList, graphId, dataList, dragElement, update, loaded } =
+		useAppSelector(
+			(state) => ({
+				zoomLevel: getZoomLevelState(state),
+				panPosition: getPanPositionState(state),
+				pageOffset: getPageOffsetState(state),
+				positionList: getPositionListState(state),
+				graphId: getGraphIdState(state),
+				dataList: getDataListState(state),
+				dragElement: getDragElementState(state),
+				update: getUpdateState(state),
+				loaded: getLoadedState(state)
+			}),
+			shallowEqual // Shallow comparison for better performance
+		)
 
 	const [staticNodes, setStaticNodes] = useState<string[]>([])
 	const [dynamicNodes, setDynamicNodes] = useState<string[]>([])
 	const [dynamicLines, setDynamicLines] = useState<LineModel[]>([])
 
-	const timerRef = useRef<NodeJS.Timeout>(undefined)
 	const updateRef = useRef<NodeJS.Timeout>(undefined)
 	const rafRef = useRef<number | null>(null)
 
@@ -115,9 +117,9 @@ const LineBox = () => {
 	}, [staticNodes, dynamicNodes, getDataList])
 
 	useEffect(() => {
-		if (dragElement) return
-		timerRef.current = setTimeout(updateAllLines, 300)
-	}, [dragElement, zoomLevel, update, updateAllLines])
+		if (!loaded || !dataList) return
+		updateAllLines()
+	}, [zoomLevel, update, loaded, dataList, updateAllLines])
 
 	useEffect(() => {
 		if (!dragElement) return

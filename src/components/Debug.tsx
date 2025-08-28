@@ -110,10 +110,11 @@ const Debug = () => {
 			document.getElementById(graphId)?.querySelectorAll<SVGElement>('[data-node-group] [data-node-visible]') ?? []
 		)
 
-		const center = elementGroupCenter(group, panPosition, zoomLevel)
+		const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
+		const center = elementGroupCenter(group, offset, zoomLevel)
 
 		setCenter(center)
-	}, [graphId, panPosition, zoomLevel])
+	}, [graphId, panPosition, pageOffset, zoomLevel])
 
 	useEffect(() => {
 		if (testNodes.length === 0) return

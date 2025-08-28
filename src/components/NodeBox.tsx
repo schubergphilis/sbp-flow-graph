@@ -12,6 +12,7 @@ import {
 	getUpdateState,
 	getZoomLevelState,
 	setDataListState,
+	setLoadedState,
 	setPositionListState
 } from '@store/SettingsSlice'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -132,6 +133,7 @@ const NodeBox = memo(
 
 				setIsPositioned(true)
 				positioningRef.current = false
+				dispatch(setLoadedState())
 			}, 16) // ~60fps
 		}, [
 			dispatch,
