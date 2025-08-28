@@ -113,6 +113,7 @@ const Pan = memo(({ children, refresh }: Props) => {
 	}, [dispatch, refresh, dataList])
 
 	useLayoutEffect(() => {
+		if (!refresh) return
 		dispatch(setUpdateState())
 	}, [dispatch, refresh])
 

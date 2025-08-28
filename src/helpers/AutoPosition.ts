@@ -12,10 +12,11 @@ export const AutoPosition = (
 	zoomLevel: number = 1,
 	spacing: number = 125
 ): NodeModel[] => {
-	const viewport = getWindowDimensions() as unknown as OffsetModel
+	const viewport = document.getElementById(graphId) as HTMLElement
+	const viewportSize = viewport?.getBoundingClientRect() ?? { width: 0, height: 0 }
 	const center: PositionModel = {
-		x: Math.round(viewport.width / 2),
-		y: Math.round(viewport.height / 2)
+		x: Math.round(viewportSize.width / 2),
+		y: Math.round(viewportSize.height / 2)
 	}
 
 	const adjustList = [...nodeList]
@@ -145,18 +146,6 @@ const calculateRadius = (
 	const radius = Math.round(circumference / (2 * Math.PI))
 
 	return radius
-}
-
-const getWindowDimensions = (): { width: number; height: number } => {
-	const hasWindow = typeof window !== 'undefined'
-
-	const width = hasWindow ? window.innerWidth : 0
-	const height = hasWindow ? window.innerHeight : 0
-
-	return {
-		width,
-		height
-	}
 }
 
 const getChildList = (node: SVGElement): SVGElement[] => {

@@ -88,8 +88,9 @@ const Container = styled.div<{ $isDebug: boolean }>`
 				width: 0.5em;
 				height: 0.5em;
 				position: absolute;
-				left: 50vw;
-				top: 50vh;
+				z-index: 1;
+				top: calc(50% - 0.25em);
+				left: calc(50% - 0.25em);
 				background-color: red;
 				border-radius: 50%;
 			}

@@ -15,14 +15,14 @@ export interface SettingsState {
 	positionList?: NodeModel[]
 	dataList?: ProcessModel[]
 	showInfo: boolean
-	update: number
+	update?: number
+	loaded?: number
 	graphId?: string
 }
 
 // Initial state
 const initialState: SettingsState = {
 	zoomLevel: 1,
-	update: 1,
 	showInfo: false,
 	pageOffset: { x: 0, y: 0 }
 }
@@ -121,6 +121,9 @@ export const settingsSlice = createSlice({
 		},
 		setUpdateState(state) {
 			state.update = (state.update || 0) + 1
+		},
+		setLoadedState(state) {
+			state.loaded = (state.loaded || 0) + 1
 		}
 	}
 })
@@ -157,6 +160,8 @@ export const getDataListState = (state: AppState): ProcessModel[] | undefined =>
 
 export const getUpdateState = (state: AppState): number => state.settings.update
 
+export const getLoadedState = (state: AppState): number => state.settings.loaded
+
 export const getShowInfoState = (state: AppState): boolean => state.settings.showInfo
 
 export const getGraphIdState = (state: AppState): string => state.settings.graphId ?? 'flowGraph'
@@ -175,7 +180,8 @@ export const {
 	setVisibleState,
 	setShowInfoState,
 	setGraphIdState,
-	setUpdateState
+	setUpdateState,
+	setLoadedState
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
