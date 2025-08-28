@@ -1,7 +1,14 @@
 import { elementGroupCenter } from '@helpers/Helpers'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
+import NodeModel from '@models/NodeModel'
 import { CssColorType } from '@schubergphilis/sbp-frontend-style'
-import { getGraphIdState, getLoadedState, getZoomLevelState, setPanPositionState } from '@store/SettingsSlice'
+import {
+	getGraphIdState,
+	getLoadedState,
+	getPositionListState,
+	getZoomLevelState,
+	setPanPositionState
+} from '@store/SettingsSlice'
 import { useCallback, useEffect } from 'react'
 import CenterIcon from './icons/CenterIcon'
 import { ActionButton } from './ZoomTools'
@@ -15,6 +22,8 @@ const CenterTool = ({ autoCenter, color }: Props) => {
 	const dispatch = useAppDispatch()
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const graphId = useAppSelector<string>(getGraphIdState)
+	const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
+
 	const loaded = useAppSelector<number | undefined>(getLoadedState)
 
 	const handleClick = useCallback(() => {
@@ -52,9 +61,10 @@ const CenterTool = ({ autoCenter, color }: Props) => {
 	}, [graphId, zoomLevel, dispatch])
 
 	useEffect(() => {
-		if (!loaded || !autoCenter) return
+		if (!positionList || !loaded || !autoCenter) return
 		setTimeout(handleClick, 1)
-	}, [loaded, autoCenter, handleClick])
+		//
+	}, [positionList, loaded, autoCenter, handleClick])
 
 	return (
 		<ActionButton onClick={handleClick} title="Center canvas" $color={color}>
