@@ -55,5 +55,6 @@ export const lightStyle: DefaultStyleWithCustomVars = {
 	inputColorActive: 'rgb(30, 128, 237)',
 	inputColorBg: 'rgb(255, 255, 255)',
 	inputPlaceholder: 'rgba(22, 12, 23, .5)',
-	navigationColorBg: 'rgba(232, 242, 253, .90)'
+	navigationColorBg: 'rgba(232, 242, 253, .90)',
+	zoomToolColor: 'rgb(0,0,0)'
 }
