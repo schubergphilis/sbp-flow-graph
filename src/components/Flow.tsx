@@ -40,10 +40,11 @@ const Flow = ({
 	id = 'flowGraph',
 	autoCenter = false,
 	zoomSmall = false,
-	zoomColor
+	zoomColor,
+	...props
 }: Props) => {
 	return (
-		<Container id={id} data-container $isDebug={isDebug}>
+		<Container id={id} data-container $isDebug={isDebug} {...props}>
 			<StateProvider id={id}>
 				<GraphId id={id}>
 					<Pan refresh={refresh}>

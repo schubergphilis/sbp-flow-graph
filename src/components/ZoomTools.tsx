@@ -142,6 +142,7 @@ const Right = styled(Left)``
 
 export const ActionButton = styled.button<{ $isSelected?: boolean; $color?: CssColorType }>`
 	border-radius: 0.5em;
+	color: ${({ theme }) => theme.style.zoomToolColor};
 	background-color: ${({ $isSelected, $color, theme }) =>
 		$isSelected ? theme.style.colorPrimary : $color ? $color : theme.style.colorSecondary};
 	height: 3em;
