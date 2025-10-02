@@ -143,7 +143,7 @@ const FlowNode = memo(
 		)
 	},
 	(prevProps, nextProps) => {
-		return prevProps.data.id === nextProps.data.id && prevProps.data.isVisible === nextProps.data.isVisible
+		return prevProps.data === nextProps.data
 	}
 )
 
