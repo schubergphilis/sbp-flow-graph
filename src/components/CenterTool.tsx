@@ -10,8 +10,8 @@ import {
 	setPanPositionState
 } from '@store/SettingsSlice'
 import { useCallback, useEffect } from 'react'
+import { ActionButton } from './ActionButton'
 import CenterIcon from './icons/CenterIcon'
-import { ActionButton } from './ZoomTools'
 
 interface Props {
 	autoCenter?: boolean
