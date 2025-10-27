@@ -63,7 +63,6 @@ const CenterTool = ({ autoCenter, color }: Props) => {
 	useEffect(() => {
 		if (!positionList || !loaded || !autoCenter) return
 		setTimeout(handleClick, 1)
-		//
 	}, [positionList, loaded, autoCenter, handleClick])
 
 	return (

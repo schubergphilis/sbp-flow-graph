@@ -58,7 +58,11 @@ export const settingsSlice = createSlice({
 				return changedItem ? changedItem : { ...item, isVisible: false }
 			})
 
-			state.positionList = list.length > 0 ? list : payload
+			// Add new nodes to the positionList
+			const newNodes = payload.filter((item) => !list.some(({ id }) => item.id === id))
+
+			const all = [...list, ...newNodes]
+			state.positionList = all.length > 0 ? all : payload
 		},
 		setPositionState(state, { payload }: PayloadAction<NodeModel>) {
 			const positionList: NodeModel[] = [...current(state.positionList ?? [])]
