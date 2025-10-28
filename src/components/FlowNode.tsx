@@ -68,7 +68,7 @@ const FlowNode = memo(
 				data-node-children={hasChildren}
 				data-node-children-visible={root ? true : hasChildernVisible(id)}
 				data-node-visible={isVisible ? true : undefined}
-				transform={'translate(-100000, -100000)'}>
+				transform={'translate(-10000, -10000)'}>
 				{type === 'circle' ? (
 					<g transform={`translate(${boxSize / 2}, ${value / 2})`}>
 						<circle
@@ -221,7 +221,7 @@ const Container = styled.g`
 		}
 	}
 
-	&[transform='translate(-100000, -100000)'] {
+	&[transform='translate(-10000, -10000)'] {
 		fill-opacity: 0;
 		stroke-opacity: 0;
 	}
