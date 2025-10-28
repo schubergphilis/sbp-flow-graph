@@ -56,11 +56,14 @@ const NodeBox = memo(
 			if (!dataList) return []
 
 			const rootId = dataList.find(({ root }) => root)?.id ?? ''
-			const positionMap = new Map(positionList?.map((pos) => [pos.id, pos]) || [])
 
 			return dataList.map((item) => {
-				const position = positionMap.get(item.id)
-				const isVisible = position?.isVisible ?? (item.id === rootId || item.parent === rootId)
+				const position = positionList?.find(({ id }) => id === item.id)
+
+				const child = dataList.find(({ parent }) => parent && parent === item.parent)
+				const isChildrenVisible = positionList?.find(({ id }) => id === child?.id)?.isVisible
+
+				const isVisible = position?.isVisible ?? isChildrenVisible ?? (item.id === rootId || item.parent === rootId)
 				const hasChildren = dataList.some(({ parent }) => parent === item.id)
 				const childStatus = dataList.find(
 					({ parent, status }) => parent === item.id && status !== 'Success' && status !== 'Unknown'
@@ -138,10 +141,8 @@ const NodeBox = memo(
 		}, [
 			dispatch,
 			graphId,
-			pageOffset.x,
-			pageOffset.y,
-			panPosition?.x,
-			panPosition?.y,
+			pageOffset,
+			panPosition,
 			positionList,
 			processedDataList,
 			selectedElement,
