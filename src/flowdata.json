@@ -176,7 +176,7 @@
 			"parent": "5eefc5da-40d2-5afc-af3a-e7b6c2730b0d",
 			"info": "50",
 			"infoTooltip": "Okta exerts 0 weight on Geldmaat \\r\\n \n\t\t\t(Geldmaat has a threshold of 75).\\r\\n\\r\\nWarning (50x0.5): 25\\r\\nError (50x1.0): 50\\r\\nCritical (50x1.5): 75",
-			"badge": 140,
+			"badge": 0,
 			"tooltip": "Okta: Operational/OK \\r\\n Open incidents: 140 \\r\\n Weight threshold: 75",
 			"status": "Success"
 		},
@@ -468,7 +468,7 @@
 		{
 			"id": "a32bc135-f0cb-5fb9-87b5-010f19af76ed",
 			"referenceId": "a32bc135-f0cb-5fb9-87b5-010f19af76ed",
-			"name": "SNOW",
+			"name": "Service now also known as SNOW",
 			"value": 100,
 			"root": false,
 			"type": "rect",
@@ -476,7 +476,7 @@
 			"parent": "5eefc5da-40d2-5afc-af3a-e7b6c2730b0d",
 			"info": "20",
 			"infoTooltip": "SNOW exerts 0 weight on Geldmaat \\r\\n \n\t\t\t(Geldmaat has a threshold of 75).\\r\\n\\r\\nWarning (20x0.5): 10\\r\\nError (20x1.0): 20\\r\\nCritical (20x1.5): 30",
-			"badge": 37,
+			"badge": 0,
 			"tooltip": "SNOW: Operational/OK \\r\\n Open incidents: 37 \\r\\n Weight threshold: 75",
 			"status": "Success"
 		},
