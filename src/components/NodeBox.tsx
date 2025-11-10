@@ -48,7 +48,6 @@ const NodeBox = memo(
 
 		const [isPositioned, setIsPositioned] = useState<boolean>(false)
 
-		const timerRef = useRef<NodeJS.Timeout>(undefined)
 		const positioningRef = useRef<boolean>(false)
 
 		// Memoize data processing with better dependency tracking
@@ -127,22 +126,20 @@ const NodeBox = memo(
 				y: (panPosition?.y ?? 0) + pageOffset.y
 			}
 
-			setTimeout(() => {
-				const list = AutoPosition(graphId, selectedElement, processedDataList, positionList, offset, zoomLevel, spacing)
+			const list = AutoPosition(graphId, selectedElement, processedDataList, positionList, offset, zoomLevel, spacing)
 
-				if (list.length > 0) {
-					dispatch(setPositionListState(list))
-				}
+			if (list.length > 0) {
+				dispatch(setPositionListState(list))
+			}
 
-				setIsPositioned(true)
-				positioningRef.current = false
-				dispatch(setLoadedState())
-			}, 16) // ~60fps
+			setIsPositioned(true)
+			positioningRef.current = false
+			dispatch(setLoadedState())
 		}, [
 			dispatch,
+			panPosition,
 			graphId,
 			pageOffset,
-			panPosition,
 			positionList,
 			processedDataList,
 			selectedElement,
@@ -156,14 +153,7 @@ const NodeBox = memo(
 
 			positioningRef.current = true
 
-			timerRef.current = setTimeout(schedulePositioning, 1)
-
-			return () => {
-				if (timerRef.current) {
-					clearTimeout(timerRef.current)
-				}
-				positioningRef.current = false
-			}
+			schedulePositioning()
 		}, [isPositioned, processedDataList?.length, schedulePositioning])
 
 		// Reset positioning state efficiently
