@@ -1,9 +1,9 @@
 import { StatusType } from '@datatypes/StatusType'
-import PositionModel from './PositionModel'
+import OffsetModel from './OffsetModel'
 
 export default interface LineModel {
-	start: PositionModel
-	end: PositionModel
+	start: OffsetModel
+	end: OffsetModel
 	id: string
 	parentId: string
 	info?: string

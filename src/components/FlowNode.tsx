@@ -1,9 +1,18 @@
+import { getNodePosition } from '@helpers/AutoPosition'
 import { generatePolygoinPoints } from '@helpers/Helpers'
 import { useAppSelector } from '@hooks/ReduxStore'
 import NodeModel from '@models/NodeModel'
+import OffsetModel from '@models/OffsetModel'
+import PositionModel from '@models/PositionModel'
 import ProcessModel from '@models/ProcessModel'
-import { getDataListState, getGraphIdState, getPositionListState } from '@store/SettingsSlice'
-import { memo, useCallback } from 'react'
+import {
+	getDataListState,
+	getGraphIdState,
+	getPageOffsetState,
+	getPositionListState,
+	getZoomLevelState
+} from '@store/SettingsSlice'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import FlowNodeBadge from './FlowNodeBadge'
 import FlowNodeIcon from './FlowNodeIcon'
@@ -36,12 +45,15 @@ const FlowNode = memo(
 		},
 		iconSelector
 	}: Props) => {
-		const textLength = Math.max((name?.length || 1) * 11, 75)
-		const boxSize = Math.max(textLength, value)
+		const ref = useRef<SVGGElement>(null)
 
 		const graphId = useAppSelector<string>(getGraphIdState)
 		const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 		const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
+		const zoomLevel = useAppSelector<number>(getZoomLevelState)
+		const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
+
+		const [size, setSize] = useState<OffsetModel>({ width: 0, height: 0, x: 0, y: 0 })
 
 		const hasChildernVisible = useCallback(
 			(id: string) => {
@@ -54,8 +66,16 @@ const FlowNode = memo(
 			[dataList, positionList]
 		)
 
+		useEffect(() => {
+			if (!ref.current || !ref.current.hasAttribute('data-node-visible')) return
+
+			const pos = getNodePosition(ref.current, { x: 0, y: 0 }, zoomLevel)
+			setSize({ width: pos.width, height: pos.height, x: 0, y: 0 })
+		}, [pageOffset, zoomLevel, badge, isVisible])
+
 		return (
 			<Container
+				ref={ref}
 				id={`X${graphId}_${id}`}
 				data-node-reference={`X${graphId}_${referenceId}`}
 				data-node
@@ -68,17 +88,14 @@ const FlowNode = memo(
 				data-node-children={hasChildren}
 				data-node-children-visible={root ? true : hasChildernVisible(id)}
 				data-node-visible={isVisible ? true : undefined}
+				data-node-badge={badge ? badge : undefined}
 				transform={'translate(-10000, -10000)'}>
+				{/* This Rect is needed to devine the correct size of a Node (otherwise it will pick the actual node */}
+				<rect width={size.width} height={Math.max(size.height - (badge ? 20 : 0), 0)} fill="transparent" />
+
 				{type === 'circle' ? (
-					<g transform={`translate(${boxSize / 2}, ${value / 2})`}>
-						<circle
-							data-node-status={status}
-							// fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
-							r={value / 2}
-							cx="0"
-							cy="0"
-							style={{ filter: 'url(#dropshadow)' }}
-						/>
+					<g transform={`translate(${size.width / 2}, ${value / 2})`}>
+						<circle data-node-status={status} r={value / 2} cx="0" cy="0" style={{ filter: 'url(#dropshadow)' }} />
 						<circle
 							data-child-status={childStatus}
 							strokeWidth={value / 10}
@@ -91,7 +108,7 @@ const FlowNode = memo(
 						/>
 					</g>
 				) : type === 'polygon' ? (
-					<g transform={`translate(${boxSize / 2 - value / 2}, 0)`}>
+					<g transform={`translate(${size.width / 2 - value / 2}, 0)`}>
 						<polygon
 							data-node-status={status}
 							points={generatePolygoinPoints(value)}
@@ -108,10 +125,9 @@ const FlowNode = memo(
 						/>
 					</g>
 				) : (
-					<g transform={`translate(${boxSize / 2 - value / 2}, 0)`}>
+					<g transform={`translate(${size.width / 2 - value / 2}, 0)`}>
 						<rect
 							data-node-status={status}
-							// fill={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
 							width={value}
 							height={value}
 							x="0"
@@ -133,12 +149,12 @@ const FlowNode = memo(
 					</g>
 				)}
 				{icon && iconSelector && (
-					<FlowNodeIcon boxHeight={value} boxWidth={boxSize}>
+					<FlowNodeIcon boxWidth={size.width} nodeSize={value}>
 						{iconSelector(icon)}
 					</FlowNodeIcon>
 				)}
-				<FlowNodeName name={name} boxHeight={value} boxWidth={boxSize} />
-				{badge > 0 && <FlowNodeBadge badge={badge} type={type} nodeSize={value} boxWidth={boxSize} />}
+				{badge > 0 && <FlowNodeBadge badge={badge} nodeSize={value} boxWidth={size.width} />}
+				<FlowNodeName name={name} boxHeight={value} boxWidth={size.width} />
 			</Container>
 		)
 	},
@@ -151,7 +167,6 @@ const Container = styled.g`
 	& > g > circle,
 	& > g > rect,
 	& > g > polygon {
-		transform-origin: top left;
 		pointer-events: auto !important;
 	}
 

@@ -3,15 +3,15 @@ import styled from 'styled-components'
 
 interface Props {
 	children?: ReactNode
+	nodeSize: number
 	boxWidth: number
-	boxHeight: number
 }
 
-const FlowNodeIcon = ({ children, boxWidth, boxHeight }: Props) => {
-	const offset = Math.max(boxHeight / 4, 5)
+const FlowNodeIcon = ({ children, boxWidth, nodeSize }: Props) => {
+	const offset = Math.max(nodeSize / 2, 5)
 	return (
-		<Container transform={`translate(${boxWidth / 2 - boxHeight / 2} , 0)`}>
-			<svg x={offset} y={offset} width={boxHeight - offset * 2} height={boxHeight - offset * 2}>
+		<Container transform={`translate(${boxWidth / 2 - offset / 2} , ${nodeSize / 2 - offset / 2})`}>
+			<svg x={0} y={0} width={offset} height={offset}>
 				{children}
 			</svg>
 		</Container>

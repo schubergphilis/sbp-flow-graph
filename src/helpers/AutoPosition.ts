@@ -41,7 +41,7 @@ export const AutoPosition = (
 		// Overwrite position for rootNode to the center of the page
 		const pos: PositionModel = savedPos ? { x: savedPos.x, y: savedPos.y } : isRoot ? center : { x: size.x, y: size.y }
 
-		setNodePosition(node, box, pos)
+		setNodePosition(node, pos)
 
 		if (
 			node.hasAttribute('data-node-visible') &&
@@ -91,7 +91,6 @@ export const getNodePosition = (
 	zoomLevel: number = 1
 ): OffsetModel => {
 	const pos = node?.getBoundingClientRect() ?? { width: 0, height: 0, x: 0, y: 0 }
-
 	const size = Number(node?.getAttribute('data-node-size') ?? 0)
 
 	if (pos.width === 0) console.warn('Node has no width, check if it is rendered correctly:', node)
@@ -103,8 +102,8 @@ export const getNodePosition = (
 	return {
 		width: Math.round(width / zoomLevel),
 		height: Math.round(height / zoomLevel),
-		x: Math.round((pos.x + pos.width / 2 - offset.x) / zoomLevel),
-		y: Math.round((pos.y + pos.height / 2 - offset.y) / zoomLevel)
+		x: Math.round((pos.x - offset.x) / zoomLevel),
+		y: Math.round((pos.y - offset.y) / zoomLevel)
 	}
 }
 
@@ -114,13 +113,9 @@ export const getTargetOffset = (target: SVGElement | HTMLDivElement | null): Off
 	return { x: Number(pos[0]), y: Number(pos[1]), width: size, height: size }
 }
 
-const setNodePosition = (node: SVGElement, box: OffsetModel, pos: PositionModel) => {
+const setNodePosition = (node: SVGElement, pos: PositionModel) => {
 	node.setAttribute('data-pos', `${pos.x},${pos.y}`)
-
-	node.setAttribute(
-		'transform',
-		`translate(${Math.round(pos.x - box.width / 2)}, ${Math.round(pos.y - box.height / 2)})`
-	)
+	node.setAttribute('transform', `translate(${pos.x}, ${pos.y})`)
 }
 
 const calculateRadius = (
@@ -170,7 +165,6 @@ const determenChildPositions = (
 	for (let i = 0; i < childList.length; i++) {
 		const child = childList[i]
 		const index = i
-		const box = getNodePosition(child, offset, zoomLevel)
 
 		const angle = ((2 * Math.PI) / total) * index
 
@@ -182,6 +176,6 @@ const determenChildPositions = (
 		const savedPos: PositionModel =
 			childPos.x !== 0 && childPos.y !== 0 ? { x: childPos.x, y: childPos.y } : { x: posX, y: posY }
 
-		setNodePosition(child, box, savedPos)
+		setNodePosition(child, savedPos)
 	}
 }

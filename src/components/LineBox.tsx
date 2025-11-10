@@ -59,7 +59,7 @@ const LineBox = () => {
 
 				if (!node || node.hasAttribute('data-node-root')) continue
 
-				const element = node.querySelector('circle, rect, polygon') as SVGElement
+				const element = node.querySelector('[data-node-status]') as SVGElement
 
 				lineList.push({
 					start: getNodePosition(element, offset, zoomLevel),
