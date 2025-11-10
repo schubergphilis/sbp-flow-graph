@@ -65,6 +65,15 @@ const Line = memo(
 
 const Container = styled.g`
 	pointer-events: none;
+
+	& > path {
+		/* Enable GPU acceleration */
+		transform: translateZ(0);
+
+		/* Optimize compositing */
+		isolation: isolate;
+	}
+
 	& text {
 		user-select: none;
 	}

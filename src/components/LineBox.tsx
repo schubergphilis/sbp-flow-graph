@@ -157,12 +157,6 @@ const LineBox = () => {
 	)
 }
 
-const Container = styled.g`
-	/* Enable GPU acceleration */
-	transform: translateZ(0);
-
-	/* Optimize compositing */
-	isolation: isolate;
-`
+const Container = styled.g``
 
 export default LineBox
