@@ -5,16 +5,20 @@ interface Props {
 	boxWidth: number
 	minSize?: number
 }
-const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 75, tooltip }: Props) => {
-	const textLength = Math.max((name?.length || 1) * 11, minSize)
+const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 100, tooltip }: Props) => {
+	const cleanName = name?.replace(/[\s\W]/gim, '')
+	const lineList = name?.replace(/(?<=(.){20})\s/gim, '||').split('||') ?? [name ?? '']
 
+	const longest = lineList?.reduce((longest, current) => (current.length > longest.length ? current : longest))
+	const textLength = Math.max((longest?.length || 1) * 9, minSize)
+	const textHeight = Math.max((lineList?.length || 1) * 22, 30)
 	return (
 		<g transform={`translate(${boxWidth / 2}, 0)`}>
 			<g transform={`translate(0, ${boxHeight + 30})`}>
 				<rect
 					data-node-tooltip={tooltip ?? undefined}
 					width={textLength}
-					height="30"
+					height={textHeight}
 					fill="#fff"
 					x={-textLength / 2}
 					y={-16}
@@ -23,7 +27,11 @@ const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 75, tooltip }: Prop
 					style={{ filter: 'url(#dropshadow)' }}
 				/>
 				<text dominantBaseline="middle" textAnchor="middle">
-					{name}
+					{lineList?.map((line, index) => (
+						<tspan x="0" dy={index === 0 ? '0' : '1.2em'} key={`nodename_${cleanName}_${index})}`}>
+							{line}
+						</tspan>
+					))}
 				</text>
 			</g>
 		</g>

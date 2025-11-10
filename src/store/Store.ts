@@ -12,7 +12,8 @@ export const createAppStore = (storeId: string) => {
 		'settings/isClusterDrag',
 		'settings/dataList',
 		'settings/update',
-		'settings/selectedElement'
+		'settings/selectedElement',
+		'settings/loaded'
 		// 'settings/positionList'
 	]
 

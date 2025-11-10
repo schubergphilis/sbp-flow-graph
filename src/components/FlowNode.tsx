@@ -148,10 +148,6 @@ const FlowNode = memo(
 )
 
 const Container = styled.g`
-	transition:
-		fill-opacity 0.25s ease-in-out,
-		stroke-opacity 0.25s ease-in-out;
-
 	& > g > circle,
 	& > g > rect,
 	& > g > polygon {
