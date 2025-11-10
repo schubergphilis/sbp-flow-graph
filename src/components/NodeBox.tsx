@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import { useDidMountEffect } from '@hooks/UseDidMountEffect'
 import ProcessModel from '@models/ProcessModel'
 import {
+	deleteSelectedElementState,
 	getDataListState,
 	getGraphIdState,
 	getPageOffsetState,
@@ -161,6 +162,10 @@ const NodeBox = memo(
 			setIsPositioned(false)
 			positioningRef.current = false
 		}, [update, data])
+
+		useDidMountEffect(() => {
+			dispatch(deleteSelectedElementState())
+		}, [data])
 
 		return (
 			<Container data-node-group>

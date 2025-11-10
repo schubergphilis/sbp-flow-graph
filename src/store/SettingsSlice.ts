@@ -128,6 +128,9 @@ export const settingsSlice = createSlice({
 		},
 		setLoadedState(state) {
 			state.loaded = (state.loaded || 0) + 1
+		},
+		deleteSelectedElementState(state) {
+			state.selectedElement = undefined
 		}
 	}
 })
@@ -185,7 +188,8 @@ export const {
 	setShowInfoState,
 	setGraphIdState,
 	setUpdateState,
-	setLoadedState
+	setLoadedState,
+	deleteSelectedElementState
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

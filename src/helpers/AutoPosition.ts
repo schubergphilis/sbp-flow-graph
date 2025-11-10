@@ -19,8 +19,10 @@ export const AutoPosition = (
 		y: Math.round(viewportSize.height / 2)
 	}
 
-	const adjustList = [...nodeList].sort((a) => (a.root ? -1 : 0)).filter(({ isVisible }) => isVisible)
-	// .filter(({ parent, id }) => (selectedElement ? parent === selectedElement || id === selectedElement : true))
+	const adjustList = [...nodeList]
+		.sort((a) => (a.root ? -1 : 0))
+		.filter(({ isVisible }) => isVisible)
+		.filter(({ parent, id }) => (selectedElement ? parent === selectedElement || id === selectedElement : true))
 
 	for (let i = 0; i < adjustList.length; i++) {
 		const { id } = adjustList[i]
