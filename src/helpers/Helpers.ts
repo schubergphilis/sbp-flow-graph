@@ -39,8 +39,8 @@ export const generatePolygoinPoints = (size: number) => {
 	const points = []
 	const angle = (2 * Math.PI) / 8 // 8 sides for octagon
 	for (let i = 0; i < 8; i++) {
-		const x = size / 2 + (size / 2) * Math.cos(i * angle)
-		const y = size / 2 + (size / 2) * Math.sin(i * angle)
+		const x = Math.round(size / 2 + (size / 2) * Math.cos(i * angle))
+		const y = Math.round(size / 2 + (size / 2) * Math.sin(i * angle))
 		points.push(`${x},${y}`)
 	}
 	return points.join(' ')
@@ -84,17 +84,17 @@ export const calculateLinePath = (data: LineModel): LinePathModel => {
 	const endCos = Math.cos(endAngle)
 	const endSin = Math.sin(endAngle)
 
-	const startX = start.x + startSize * startCos
-	const startY = start.y + startSize * startSin
-	const endX = end.x + endSize * endCos
-	const endY = end.y + endSize * endSin
+	const startX = Math.round(start.x + startSize * startCos)
+	const startY = Math.round(start.y + startSize * startSin)
+	const endX = Math.round(end.x + endSize * endCos)
+	const endY = Math.round(end.y + endSize * endSin)
 
-	const midX = (startX + endX) * 0.5 // Faster than division
-	const midY = (startY + endY) * 0.5
-	const firstX = (startX + midX) * 0.5
-	const firstY = (startY + midY) * 0.5
-	const lastX = (endX + midX) * 0.5
-	const lastY = (endY + midY) * 0.5
+	const midX = Math.round((startX + endX) * 0.5)
+	const midY = Math.round((startY + endY) * 0.5)
+	const firstX = Math.round((startX + midX) * 0.5)
+	const firstY = Math.round((startY + midY) * 0.5)
+	const lastX = Math.round((endX + midX) * 0.5)
+	const lastY = Math.round((endY + midY) * 0.5)
 
 	return {
 		pathData: `M${start.x} ${start.y} ${firstX} ${firstY} ${midX} ${midY} ${lastX} ${lastY} L${end.x} ${end.y}`,

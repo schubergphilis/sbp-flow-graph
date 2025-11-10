@@ -82,7 +82,7 @@ export const getParentNodePosition = (
 	offset: PositionModel = { x: 0, y: 0 },
 	zoomLevel: number = 1
 ): OffsetModel => {
-	const parent = getParentNode(node)?.querySelector<SVGElement>('circle, rect, polygon') ?? null
+	const parent = getParentNode(node)?.querySelector<SVGElement>('[data-node-status]') ?? null
 	if (parent === null) console.warn('No parent node found for:', node)
 	return getNodePosition(parent, offset, zoomLevel)
 }

@@ -164,6 +164,10 @@ const FlowNode = memo(
 )
 
 const Container = styled.g`
+	/* Optimize compositing */
+	isolation: isolate;
+	transform-style: preserve-3d;
+
 	& > g > circle,
 	& > g > rect,
 	& > g > polygon {
