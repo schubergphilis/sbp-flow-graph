@@ -64,7 +64,11 @@ export const elementGroupCenter = (
 }
 
 export const calculateLinePath = (data: LineModel): LinePathModel => {
-	const { start, end, startSize, endSize } = data
+	const { startSize, endSize } = data
+
+	// Grab center of the selected Node
+	const start: PositionModel = { x: data.start.x + data.start.width / 2, y: data.start.y + data.start.height / 2 }
+	const end: PositionModel = { x: data.end.x + data.end.width / 2, y: data.end.y + data.end.height / 2 }
 
 	// Calculate deltas once
 	const deltaX = end.x - start.x

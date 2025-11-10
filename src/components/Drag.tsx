@@ -26,6 +26,7 @@ const Drag = memo(({ children }: Props) => {
 	const graphId = useAppSelector<string>(getGraphIdState)
 	const dragElement = useAppSelector<string | undefined>(getDragElementState)
 
+	const [startDragging, setStartDragging] = useState<boolean>(false)
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 	const [targetId, setTargetId] = useState<string>()
 
@@ -67,7 +68,7 @@ const Drag = memo(({ children }: Props) => {
 
 			mouseOffsetRef.current = { x: ev.nativeEvent.offsetX, y: ev.nativeEvent.offsetY }
 
-			setIsDragging(true)
+			setStartDragging(true)
 			setTargetId(cleanId)
 			dispatch(setClusterDragState(!ev.metaKey))
 		},
@@ -101,22 +102,18 @@ const Drag = memo(({ children }: Props) => {
 
 				if (!targetListRef.current) return
 
+				setIsDragging(true)
+
 				for (let i = 0; i < targetListRef.current.length; i++) {
 					const target = targetListRef.current[i]
-					const box = getNodePosition(target, offset, zoomLevel)
 					const boxOffset = getTargetOffset(target)
 
 					// Don't set position on nodes that aren't opened yet (need autoPosition first)
 					if (boxOffset.x === 0 && boxOffset.y === 0) continue
 
-					const center: PositionModel = {
-						x: boxOffset.x - box.width / 2,
-						y: boxOffset.y - box.height / 2
-					}
-
 					const pos: PositionModel = {
-						x: Math.round(center.x + mouse.x),
-						y: Math.round(center.y + mouse.y)
+						x: Math.round(boxOffset.x + mouse.x),
+						y: Math.round(boxOffset.y + mouse.y)
 					}
 
 					target.setAttribute('transform', `translate(${pos.x}, ${pos.y})`)
@@ -130,24 +127,31 @@ const Drag = memo(({ children }: Props) => {
 	const handleMoveEnd = useCallback(() => {
 		dispatch(setDragElementState(undefined))
 		dispatch(setClusterDragState(false))
+		setStartDragging(false)
 
-		setIsDragging(false)
 		setTargetId(undefined)
 		targetRef.current = null
+
+		if (!isDragging) return
+
+		setIsDragging(false)
 
 		if (!targetListRef.current) return
 
 		for (let i = 0; i < targetListRef.current.length; i++) {
 			const target = targetListRef.current[i]
-			const id = (target.id ?? '').match(/(?<=_)([\w-]+)/gim)?.[0] ?? ''
 
-			const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
-			const pos = getNodePosition(target, offset, zoomLevel)
 			const isVisible = target.getAttribute('data-node-visible') === 'true'
 			const initialPos = getTargetOffset(target)
 
 			// Don't set position on nodes that aren't opened yet (need autoPosition first)
 			if (!isVisible && initialPos.x === 0 && initialPos.y === 0) continue
+
+			const element = target.querySelector('rect') as SVGElement
+			const id = (target.id ?? '').match(/(?<=_)([\w-]+)/gim)?.[0] ?? ''
+
+			const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
+			const pos = getNodePosition(element, offset, zoomLevel)
 
 			target.setAttribute('data-pos', `${pos.x},${pos.y}`)
 
@@ -158,10 +162,10 @@ const Drag = memo(({ children }: Props) => {
 
 		ref.current?.removeEventListener('mousemove', handleMove)
 		ref.current?.removeEventListener('mouseup', handleMoveEnd)
-	}, [dispatch, handleMove, pageOffset, panPosition, zoomLevel])
+	}, [dispatch, handleMove, pageOffset, panPosition, zoomLevel, isDragging])
 
 	useLayoutEffect(() => {
-		if (!isDragging) return
+		if (!startDragging) return
 
 		ref.current = document.getElementById(graphId) as HTMLDivElement
 		ref.current?.addEventListener('mousemove', handleMove)
@@ -171,7 +175,7 @@ const Drag = memo(({ children }: Props) => {
 			ref.current?.removeEventListener('mousemove', handleMove)
 			ref.current?.removeEventListener('mouseup', handleMoveEnd)
 		}
-	}, [isDragging, handleMove, handleMoveEnd, graphId])
+	}, [startDragging, handleMove, handleMoveEnd, graphId])
 
 	return (
 		<Container data-drag onMouseDown={handleMouseDown}>

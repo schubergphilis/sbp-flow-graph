@@ -64,8 +64,6 @@ const Line = memo(
 )
 
 const Container = styled.g`
-	transition: stroke-opacity 0.25s ease-in-out;
-
 	pointer-events: none;
 	& text {
 		user-select: none;

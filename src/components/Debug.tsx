@@ -1,4 +1,4 @@
-import { getNodePosition } from '@helpers/AutoPosition'
+import { getNodePosition, getTargetOffset } from '@helpers/AutoPosition'
 import { elementGroupCenter } from '@helpers/Helpers'
 import { useAppSelector } from '@hooks/ReduxStore'
 import NodeModel from '@models/NodeModel'
@@ -38,37 +38,48 @@ const Debug = () => {
 			return nodes.map((node, index) => {
 				const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
 
-				const pos = getNodePosition(node, offset, zoomLevel)
+				const size = getNodePosition(node, offset, zoomLevel)
+				const pos = getTargetOffset(node)
 
 				return (
 					<g key={`debug_${node.id}_${index}`}>
-						<text x={pos.x} y={pos.y - pos.height / 1.75} textAnchor="middle" dominantBaseline="central">
-							{pos.x}x{pos.y} | {pos.width}x{pos.height}
-						</text>
+						<g transform={`translate(${pos.x + size.width / 2}, ${pos.y - size.height / 2})`}>
+							<text textAnchor="middle" dominantBaseline="central">
+								<tspan x="0" dy="1.2em">
+									transform {pos.x}x{pos.y}
+								</tspan>
+								<tspan x="0" dy="1.2em">
+									center {pos.x - size.width / 2}x{pos.y - size.height / 2}
+								</tspan>
+								<tspan x="0" dy="1.2em">
+									offset {offset.x}x{offset.y}
+								</tspan>
+								<tspan x="0" dy="1.2em">
+									size {size.width}x{size.height}
+								</tspan>
+							</text>
+						</g>
+						<circle cx={pos.x} cy={pos.y} r={5} fill="orange" />
+
+						<circle cx={pos.x + size.width / 2} cy={pos.y + size.height / 2} r={5} fill="purple" />
 						<rect
-							width={pos.width}
-							height={pos.height}
-							x={pos.x - pos.width / 2}
-							y={pos.y - pos.height / 2}
+							width={size.width}
+							height={size.height}
+							x={pos.x}
+							y={pos.y}
 							stroke={`hsla(${Math.random() * 360}, 50%, 50%, 90%)`}
 							fill="transparent"
 						/>
+
 						<path
-							d={`M${pos.x - pos.width / 2} ${pos.y - pos.height / 2} L${pos.x + pos.width / 2} ${pos.y + pos.height / 2}`}
-							stroke={`hsla(${Math.random() * 360}, 70%, 50%, 90%)`}
-							strokeWidth={1}
-							strokeDasharray={4}
-							fill="none"
-						/>
-						<path
-							d={`M${pos.x - pos.width / 2} ${pos.y} L${pos.x + pos.width / 2} ${pos.y}`}
+							d={`M${pos.x} ${pos.y + size.height / 2} L${pos.x + size.width} ${pos.y + size.height / 2}`}
 							stroke={`hsl(${Math.random() * 360}, 0%, 0%)`}
 							strokeWidth={1}
 							strokeDasharray={4}
 							fill="none"
 						/>
 						<path
-							d={`M${pos.x} ${pos.y - pos.height / 2} L${pos.x} ${pos.y + pos.height / 2}`}
+							d={`M${pos.x + size.width / 2} ${pos.y} L${pos.x + size.width / 2} ${pos.y + size.height}`}
 							stroke={`hsl(${Math.random() * 360}, 0%, 0%)`}
 							strokeWidth={1}
 							strokeDasharray={4}
@@ -83,8 +94,9 @@ const Debug = () => {
 
 	const updateSelectedLines = useCallback(() => {
 		// console.log('-----Interval')
-
-		const regex = isClusterDrag ? '[data-node]' : `#X${graphId}_${dragElement}`
+		const regex = isClusterDrag
+			? `[data-node][data-node-parent="X${graphId}_${dragElement}"], #X${graphId}_${dragElement}`
+			: `#X${graphId}_${dragElement}`
 
 		const nodes = [...(document.getElementById(graphId)?.querySelectorAll<SVGElement>(regex) ?? [])]
 

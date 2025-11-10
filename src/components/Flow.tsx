@@ -102,10 +102,10 @@ const SvgCanvast = styled.svg<{ $isDebug: boolean }>`
 	width: 100%;
 	height: 100%;
 	overflow: visible;
-	${({ $isDebug }) => $isDebug && 'background-color: #ff000040'}
+	${({ $isDebug }) => $isDebug && 'background-color: #ff000040;'}
 
 	/* Optimize text rendering */
-  	text-rendering: optimizeSpeed;
+	text-rendering: optimizeSpeed;
 
 	/* Optimize shape rendering */
 	shape-rendering: optimizeSpeed;
