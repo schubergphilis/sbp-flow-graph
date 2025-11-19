@@ -65,30 +65,24 @@ export const elementGroupCenter = (
 
 export const calculateLinePath = (data: LineModel): LinePathModel => {
 	const { startSize, endSize } = data
-
 	// Grab center of the selected Node
 	const start: PositionModel = { x: data.start.x + data.start.width / 2, y: data.start.y + data.start.height / 2 }
 	const end: PositionModel = { x: data.end.x + data.end.width / 2, y: data.end.y + data.end.height / 2 }
-
 	// Calculate deltas once
 	const deltaX = end.x - start.x
 	const deltaY = end.y - start.y
-
 	// Use faster approximation for small distances or cache angles
 	const startAngle = Math.atan2(deltaY, deltaX)
 	const endAngle = startAngle + Math.PI // Opposite direction
-
 	// Pre-calculate trigonometric values
 	const startCos = Math.cos(startAngle)
 	const startSin = Math.sin(startAngle)
 	const endCos = Math.cos(endAngle)
 	const endSin = Math.sin(endAngle)
-
 	const startX = Math.round(start.x + startSize * startCos)
 	const startY = Math.round(start.y + startSize * startSin)
 	const endX = Math.round(end.x + endSize * endCos)
 	const endY = Math.round(end.y + endSize * endSin)
-
 	const midX = Math.round((startX + endX) * 0.5)
 	const midY = Math.round((startY + endY) * 0.5)
 	const firstX = Math.round((startX + midX) * 0.5)
@@ -96,10 +90,24 @@ export const calculateLinePath = (data: LineModel): LinePathModel => {
 	const lastX = Math.round((endX + midX) * 0.5)
 	const lastY = Math.round((endY + midY) * 0.5)
 
+	// Calculate relative coordinates for the 3 middle points
+	const relFirst = { x: firstX - startX, y: firstY - startY }
+	const relMid = { x: midX - firstX, y: midY - firstY }
+	const relLast = { x: lastX - midX, y: lastY - midY }
+
 	return {
-		pathData: `M${start.x} ${start.y} ${firstX} ${firstY} ${midX} ${midY} ${lastX} ${lastY} L${end.x} ${end.y}`,
+		pathData: `M${startX} ${startY} l${relFirst.x} ${relFirst.y} ${relMid.x} ${relMid.y} ${relLast.x} ${relLast.y} L${endX} ${endY}`,
 		midX,
 		midY,
 		textLength: (data.info?.length || 1) * 11
 	}
+}
+
+export const debugSpeed = <T>(name: string, test: any): T => {
+	const start = new Date().getTime()
+	console.log('---start', name)
+	const response = test()
+	const end = new Date().getTime()
+	console.log('---end', name, end, end - start)
+	return response
 }

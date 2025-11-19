@@ -1,48 +1,30 @@
 import { StatusType } from '@datatypes/StatusType'
 import { getNodePosition, getParentNode, getParentNodePosition } from '@helpers/AutoPosition'
 import { useAppSelector } from '@hooks/ReduxStore'
+import { useDidMountEffect } from '@hooks/UseDidMountEffect'
 import LineModel from '@models/LineModel'
 import PositionModel from '@models/PositionModel'
+import ProcessModel from '@models/ProcessModel'
 import {
-	getDataListState,
-	getDragElementState,
 	getGraphIdState,
-	getLoadedState,
 	getPageOffsetState,
 	getPanPositionState,
-	getPositionListState,
-	getUpdateState,
+	getProcessedDataListState,
 	getZoomLevelState
 } from '@store/SettingsSlice'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { shallowEqual } from 'react-redux'
+import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import Line from './Line'
 
 const LineBox = () => {
-	// Memoize selectors to prevent unnecessary re-renders
-	const { zoomLevel, panPosition, pageOffset, positionList, graphId, dataList, dragElement, update, loaded } =
-		useAppSelector(
-			(state) => ({
-				zoomLevel: getZoomLevelState(state),
-				panPosition: getPanPositionState(state),
-				pageOffset: getPageOffsetState(state),
-				positionList: getPositionListState(state),
-				graphId: getGraphIdState(state),
-				dataList: getDataListState(state),
-				dragElement: getDragElementState(state),
-				update: getUpdateState(state),
-				loaded: getLoadedState(state)
-			}),
-			shallowEqual // Shallow comparison for better performance
-		)
+	const graphId = useAppSelector<string>(getGraphIdState)
+	const processedDataList = useAppSelector<ProcessModel[] | undefined>(getProcessedDataListState)
+	const zoomLevel = useAppSelector<number>(getZoomLevelState)
+	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
+	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 
-	const [staticNodes, setStaticNodes] = useState<string[]>([])
-	const [dynamicNodes, setDynamicNodes] = useState<string[]>([])
-	const [dynamicLines, setDynamicLines] = useState<LineModel[]>([])
-
-	const updateRef = useRef<NodeJS.Timeout>(undefined)
-	const rafRef = useRef<number | null>(null)
+	const [lines, setLines] = useState<LineModel[]>()
+	const [isPositioned, setIsPositioned] = useState<boolean>(false)
 
 	const getDataList = useCallback(
 		(list: string[]): LineModel[] => {
@@ -74,84 +56,33 @@ const LineBox = () => {
 				})
 			}
 
+			setIsPositioned(true)
+
 			return lineList
 		},
-		[graphId, pageOffset, panPosition, zoomLevel]
+		[graphId, pageOffset.x, pageOffset.y, panPosition?.x, panPosition?.y, zoomLevel]
 	)
 
-	const updateAllLines = useCallback(() => {
-		const rootId = dataList?.find(({ root }) => root)?.id ?? ''
-		const visibleNodes =
-			dataList
-				?.filter((item) => positionList?.find(({ id }) => id === item.id && id !== rootId)?.isVisible)
-				.map(({ id }) => id) ?? []
+	const setStaticLines = useCallback(() => {
+		if (!processedDataList) return
+		const list = getDataList(processedDataList?.map(({ id }) => id) ?? [])
+		setLines(list)
+	}, [getDataList, processedDataList])
 
-		setStaticNodes(visibleNodes)
-	}, [dataList, positionList])
-
-	const setSelectedLines = useCallback(() => {
-		const selectedNodes =
-			dataList
-				?.filter(
-					({ id, parent }) =>
-						positionList?.find((item) => id === item.id)?.isVisible && (parent === dragElement || id === dragElement)
-				)
-				.map(({ id }) => id) ?? []
-
-		setDynamicNodes(selectedNodes)
-	}, [dataList, dragElement, positionList])
-
-	const updateDynamicLines = useCallback(() => {
-		if (!dragElement) return
-		if (rafRef.current) cancelAnimationFrame(rafRef.current)
-
-		rafRef.current = requestAnimationFrame(() => {
-			const lines = getDataList(dynamicNodes)
-			setDynamicLines(lines)
-		})
-	}, [dragElement, dynamicNodes, getDataList])
-
-	const staticLines = useMemo(() => {
-		const list = staticNodes.filter((id) => !dynamicNodes.includes(id))
-		return getDataList(list)
-	}, [staticNodes, dynamicNodes, getDataList])
+	useDidMountEffect(() => {
+		if (!processedDataList) return
+		setIsPositioned(false)
+	}, [processedDataList])
 
 	useEffect(() => {
-		if (!loaded || !dataList) return
-		updateAllLines()
-	}, [zoomLevel, update, loaded, dataList, updateAllLines])
-
-	useEffect(() => {
-		if (!dragElement) return
-
-		updateRef.current = setInterval(updateDynamicLines, 20)
-
-		return () => {
-			clearInterval(updateRef.current)
-		}
-	}, [dragElement, updateDynamicLines])
-
-	useEffect(() => {
-		if (!dragElement) return
-		setSelectedLines()
-	}, [dragElement, setSelectedLines])
-
-	useEffect(() => {
-		if (dragElement) return
-
-		clearInterval(updateRef.current)
-		cancelAnimationFrame(rafRef.current ?? 0)
-		setDynamicNodes([])
-		setDynamicLines([])
-	}, [dragElement, updateAllLines])
+		if (isPositioned) return
+		setTimeout(setStaticLines, 1)
+	}, [isPositioned, setStaticLines])
 
 	return (
 		<Container>
-			{staticLines.map((data) => (
+			{lines?.map((data) => (
 				<Line key={`line_${graphId}_${data.id}`} data={data} />
-			))}
-			{dynamicLines?.map((data) => (
-				<Line key={`line_dragged_${graphId}_${data.id}`} data={data} dragged />
 			))}
 		</Container>
 	)

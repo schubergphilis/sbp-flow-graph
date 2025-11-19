@@ -51,12 +51,17 @@ const Tooltip = memo(({ children }: Props) => {
 	useEffect(() => {
 		if (!element) return
 
-		const xoffset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
+		const xoffset: PositionModel = {
+			x: (panPosition?.x ?? 0) + pageOffset.x,
+			y: (panPosition?.y ?? 0) + pageOffset.y
+		}
 
 		const offset = getNodePosition(element, xoffset, zoomLevel)
 		const size = getNodePosition(tooltipRef.current, xoffset, zoomLevel)
 
-		setPosition({ x: offset.x - size.width / 2, y: offset.y - size.height - offset.height / 1.25 })
+		const start: PositionModel = { x: offset.x + offset.width / 2, y: offset.y + offset.height / 2 }
+
+		setPosition({ x: start.x - size.width / 2, y: start.y - size.height - offset.height / 1.25 })
 	}, [element, panPosition, zoomLevel, pageOffset])
 
 	useEffect(() => {

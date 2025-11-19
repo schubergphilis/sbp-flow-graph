@@ -2,7 +2,7 @@ import { calculateLinePath } from '@helpers/Helpers'
 import { useAppSelector } from '@hooks/ReduxStore'
 import LineModel from '@models/LineModel'
 import { getShowInfoState } from '@store/SettingsSlice'
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import FlowNodeName from './FlowNodeName'
 
@@ -17,15 +17,8 @@ const Line = memo(
 
 		const elementPathRef = useRef<SVGPathElement>(null)
 
-		const [isLoaded, setIsLoaded] = useState<number>(dragged ? 1 : 0)
+		const { pathData, midX, midY, textLength } = useMemo(() => calculateLinePath(data), [data])
 
-		const pathCalculations = useMemo(() => calculateLinePath(data), [data])
-
-		const { pathData, midX, midY, textLength } = pathCalculations
-
-		useEffect(() => {
-			setTimeout(() => setIsLoaded(1), 10)
-		}, [])
 		return (
 			<Container data-line-status={data.status}>
 				<path
@@ -35,14 +28,13 @@ const Line = memo(
 					strokeDasharray={4}
 					markerMid="url(#arrow)"
 					fill="none"
-					strokeOpacity={isLoaded}
+					data-line-id={data.id ? data.id : undefined}
+					data-line-parent={data.parentId ? data.parentId : undefined}
 				/>
 
-				{showInfo && data.info && (
-					<g transform={`translate(${midX - textLength / 2}, ${midY})`}>
-						<FlowNodeName name={data.info} boxHeight={-30} boxWidth={textLength} minSize={30} tooltip={data.tooltip} />
-					</g>
-				)}
+				<g transform={`translate(${midX - textLength / 2}, ${midY})`} opacity={showInfo ? 1 : 0}>
+					<FlowNodeName name={data.info} boxHeight={-30} boxWidth={textLength} minSize={30} tooltip={data.tooltip} />
+				</g>
 			</Container>
 		)
 	},
@@ -56,8 +48,6 @@ const Line = memo(
 			prev.start.y === next.start.y &&
 			prev.end.x === next.end.x &&
 			prev.end.y === next.end.y &&
-			prev.startSize === next.startSize &&
-			prev.endSize === next.endSize &&
 			prev.status === next.status
 		)
 	}

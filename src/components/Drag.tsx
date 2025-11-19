@@ -1,5 +1,7 @@
-import { getNodePosition, getTargetOffset } from '@helpers/AutoPosition'
+import { getNodePosition, getParentNode, getParentNodePosition, getTargetOffset } from '@helpers/AutoPosition'
+import { calculateLinePath } from '@helpers/Helpers'
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
+import LineModel from '@models/LineModel'
 import PositionModel from '@models/PositionModel'
 import {
 	getDragElementState,
@@ -29,10 +31,12 @@ const Drag = memo(({ children }: Props) => {
 	const [startDragging, setStartDragging] = useState<boolean>(false)
 	const [isDragging, setIsDragging] = useState<boolean>(false)
 	const [targetId, setTargetId] = useState<string>()
+	const [isFocused, setIsFocused] = useState<boolean>(false)
 
 	const ref = useRef<HTMLDivElement>(null)
 	const targetRef = useRef<SVGGElement | null>(null)
 	const targetListRef = useRef<SVGGElement[] | null>(null)
+	const lineListRef = useRef<SVGPathElement[] | null>(null)
 	const mouseOffsetRef = useRef<PositionModel>({ x: 0, y: 0 })
 	const rafRef = useRef<number | null>(null)
 
@@ -54,6 +58,8 @@ const Drag = memo(({ children }: Props) => {
 
 			let targets: SVGGElement[] = []
 
+			setIsFocused(ev.metaKey)
+
 			if (ev.metaKey) {
 				targets = [target]
 			} else {
@@ -63,6 +69,12 @@ const Drag = memo(({ children }: Props) => {
 						?.querySelectorAll<SVGGElement>(`[data-node-parent=${id}]:not([data-node-children-visible]),#${id}`) ?? []
 				)
 			}
+
+			lineListRef.current = Array.from(
+				document
+					.getElementById(graphId)
+					?.querySelectorAll<SVGPathElement>(`[data-line-id=${id}],[data-line-parent=${id}]`) ?? []
+			)
 
 			targetListRef.current = targets
 
@@ -82,7 +94,7 @@ const Drag = memo(({ children }: Props) => {
 
 			if (!(ev.buttons & 1)) {
 				// Left button was released, stop dragging
-				handleMoveEnd()
+				handleMoveEnd(ev)
 				return
 			}
 
@@ -96,8 +108,8 @@ const Drag = memo(({ children }: Props) => {
 
 			rafRef.current = requestAnimationFrame(() => {
 				const mouse: PositionModel = {
-					x: (ev.clientX - offset.x) / zoomLevel - mouseOffsetRef.current.x,
-					y: (ev.clientY - offset.y) / zoomLevel - mouseOffsetRef.current.y
+					x: Math.round((ev.clientX - offset.x) / zoomLevel - mouseOffsetRef.current.x),
+					y: Math.round((ev.clientY - offset.y) / zoomLevel - mouseOffsetRef.current.y)
 				}
 
 				if (!targetListRef.current) return
@@ -108,9 +120,6 @@ const Drag = memo(({ children }: Props) => {
 					const target = targetListRef.current[i]
 					const boxOffset = getTargetOffset(target)
 
-					// Don't set position on nodes that aren't opened yet (need autoPosition first)
-					if (boxOffset.x === 0 && boxOffset.y === 0) continue
-
 					const pos: PositionModel = {
 						x: Math.round(boxOffset.x + mouse.x),
 						y: Math.round(boxOffset.y + mouse.y)
@@ -118,51 +127,93 @@ const Drag = memo(({ children }: Props) => {
 
 					target.setAttribute('transform', `translate(${pos.x}, ${pos.y})`)
 				}
+
+				// update lines
+				lineListRef.current?.forEach((item) => {
+					const id = item.getAttribute('data-line-id') ?? ''
+					const node = document.getElementById(id) as SVGGElement | null
+
+					if (!node || node.hasAttribute('data-node-root')) return
+
+					const element = node.querySelector('[data-node-status]') as SVGElement
+
+					const data: LineModel = {
+						start: getNodePosition(element, offset, zoomLevel),
+						end: getParentNodePosition(node, offset, zoomLevel),
+						info: node.getAttribute('data-node-info') as string,
+						startSize: Number(node.getAttribute('data-node-size') ?? 0),
+						endSize: Number(getParentNode(node)?.getAttribute('data-node-size') ?? 0)
+					}
+
+					const { pathData, midX, midY, textLength } = calculateLinePath(data)
+					item.setAttribute('d', pathData)
+					item.nextElementSibling?.setAttribute('transform', `translate(${midX - textLength / 2}, ${midY})`)
+				})
 			})
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[panPosition, pageOffset, dragElement, targetId, dispatch, zoomLevel]
+		[dispatch, dragElement, pageOffset.x, pageOffset.y, panPosition?.x, panPosition?.y, targetId, zoomLevel]
 	)
 
-	const handleMoveEnd = useCallback(() => {
-		dispatch(setDragElementState(undefined))
-		dispatch(setClusterDragState(false))
-		setStartDragging(false)
+	const handleMoveEnd = useCallback(
+		(ev: MouseEvent) => {
+			dispatch(setDragElementState(undefined))
+			dispatch(setClusterDragState(false))
+			setStartDragging(false)
 
-		setTargetId(undefined)
-		targetRef.current = null
+			const cleanId = targetId ?? ''
 
-		if (!isDragging) return
+			setTargetId(undefined)
 
-		setIsDragging(false)
+			targetRef.current = null
 
-		if (!targetListRef.current) return
+			if (!isDragging) return
 
-		for (let i = 0; i < targetListRef.current.length; i++) {
-			const target = targetListRef.current[i]
+			setIsDragging(false)
 
-			const isVisible = target.getAttribute('data-node-visible') === 'true'
-			const initialPos = getTargetOffset(target)
-
-			// Don't set position on nodes that aren't opened yet (need autoPosition first)
-			if (!isVisible && initialPos.x === 0 && initialPos.y === 0) continue
-
-			const element = target.querySelector('rect') as SVGElement
-			const id = (target.id ?? '').match(/(?<=_)([\w-]+)/gim)?.[0] ?? ''
+			if (!targetListRef.current) return
 
 			const offset = { x: (panPosition?.x ?? 0) + pageOffset.x, y: (panPosition?.y ?? 0) + pageOffset.y }
-			const pos = getNodePosition(element, offset, zoomLevel)
 
-			target.setAttribute('data-pos', `${pos.x},${pos.y}`)
+			const mouse: PositionModel = {
+				x: Math.round((ev.clientX - offset.x) / zoomLevel - mouseOffsetRef.current.x),
+				y: Math.round((ev.clientY - offset.y) / zoomLevel - mouseOffsetRef.current.y)
+			}
 
-			dispatch(setPositionState({ id: id, x: pos.x, y: pos.y, isVisible: isVisible }))
-		}
+			// Save position of all affected nodes (also the invisible nodes)
+			dispatch(setPositionState({ id: cleanId, x: mouse.x, y: mouse.y, isFocused: isFocused }))
 
-		targetListRef.current = null
+			for (let i = 0; i < targetListRef.current.length; i++) {
+				const target = targetListRef.current[i]
 
-		ref.current?.removeEventListener('mousemove', handleMove)
-		ref.current?.removeEventListener('mouseup', handleMoveEnd)
-	}, [dispatch, handleMove, pageOffset, panPosition, zoomLevel, isDragging])
+				const element = target.querySelector('rect') as SVGElement
+
+				const pos = getNodePosition(element, offset, zoomLevel)
+
+				target.setAttribute('data-pos', `${pos.x},${pos.y}`)
+			}
+
+			targetListRef.current = null
+			lineListRef.current = null
+
+			setIsFocused(false)
+
+			ref.current?.removeEventListener('mousemove', handleMove)
+			ref.current?.removeEventListener('mouseup', handleMoveEnd)
+		},
+		[
+			dispatch,
+			handleMove,
+			isDragging,
+			pageOffset.x,
+			pageOffset.y,
+			panPosition?.x,
+			panPosition?.y,
+			zoomLevel,
+			targetId,
+			isFocused
+		]
+	)
 
 	useLayoutEffect(() => {
 		if (!startDragging) return

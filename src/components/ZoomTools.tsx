@@ -26,7 +26,6 @@ const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 	const maxZoom: number = 3
 	const step: number = 0.2
 	const zoomLevels: number[] = generateSteps(minZoom, maxZoom, step)
-	const selectedElement = ''
 
 	const dispatch = useAppDispatch()
 
@@ -67,9 +66,18 @@ const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 		[handleZoomLevel, zoomLevel]
 	)
 
-	const handleShowInfo = useCallback(() => {
-		dispatch(setShowInfoState(!showInfo))
-	}, [dispatch, showInfo])
+	const handleShowInfo = useCallback(
+		(ev: React.MouseEvent<HTMLButtonElement>) => {
+			if (ev.altKey || ev.shiftKey) {
+				localStorage.removeItem(`${graphId}State`)
+				location.reload()
+				return
+			}
+
+			dispatch(setShowInfoState(!showInfo))
+		},
+		[dispatch, showInfo, graphId]
+	)
 
 	useEffect(() => {
 		document.getElementById(graphId)?.addEventListener('wheel', handleScroll)
@@ -86,7 +94,7 @@ const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 			</Left>
 			<Center>
 				<ActionButton
-					disabled={maxZoom === zoomLevel || selectedElement !== ''}
+					disabled={maxZoom === zoomLevel}
 					title="Zoom in"
 					type="button"
 					onClick={(ev) => setZoom(ev, 1)}
@@ -95,7 +103,7 @@ const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 				</ActionButton>
 				<CenterTool autoCenter={autoCenter} color={zoomColor} />
 				<ActionButton
-					disabled={minZoom === zoomLevel || selectedElement !== ''}
+					disabled={minZoom === zoomLevel}
 					type="button"
 					title="Zoom out"
 					onClick={(ev) => setZoom(ev, -1)}
