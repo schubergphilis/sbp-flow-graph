@@ -62,7 +62,7 @@ const FlowNode = memo(
 				return dataList?.find(
 					(data) =>
 						data.parent === id &&
-						(positionList?.find((item) => item.id === data.id && visibilityList?.includes(id)) ?? false)
+						(positionList?.find((item) => item.id === data.id && visibilityList?.includes(item.id)) ?? false)
 				)
 					? true
 					: undefined

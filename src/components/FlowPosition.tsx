@@ -21,7 +21,7 @@ import {
 	setPositionListState,
 	setProcessedDataListState
 } from '@store/SettingsSlice'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 interface Props {
 	data?: ProcessModel[]
@@ -46,6 +46,8 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 
 	const [isPositioned, setIsPositioned] = useState<boolean>(false)
 
+	const prevDataListRef = useRef<ProcessModel[] | undefined>(undefined)
+
 	const createOptimizedDataList = useCallback(
 		(data: ProcessModel[]) => {
 			const parentMap = new Map<string, ProcessModel[]>()
@@ -64,9 +66,16 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 				const hasChildren = children.length > 0
 				const childStatus = children.find(({ status }) => status !== 'Success' && status !== 'Unknown')?.status
 
+				const isNewNode = prevDataListRef.current ? !prevDataListRef.current.find(({ id }) => id === item.id) : false
 				const isChildrenVisible = visibilityList?.includes(children[0]?.id ?? '')
+				const isParentVisible = item.parent ? visibilityList?.includes(item.parent) : false
 				const isSelfVisible = visibilityList?.includes(item.id)
-				const isVisible = isSelfVisible || isChildrenVisible || item.id === rootId || item.parent === rootId
+				const isVisible =
+					isSelfVisible ||
+					isChildrenVisible ||
+					(isParentVisible && isNewNode) ||
+					item.id === rootId ||
+					item.parent === rootId
 
 				return {
 					...item,
@@ -84,9 +93,8 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 	// Memoize data processing with better dependency tracking
 	const getProcessedDataList = useMemo((): ProcessModel[] => {
 		if (!dataList) return []
-
-		const result = dataList.filter(({ isVisible }) => isVisible)
-		return result
+		prevDataListRef.current = dataList
+		return dataList.filter(({ isVisible }) => isVisible)
 	}, [dataList])
 
 	const schedulePositioning = useCallback(() => {
