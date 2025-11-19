@@ -16,7 +16,11 @@ import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import Line from './Line'
 
-const LineBox = () => {
+interface Props {
+	refresh?: number
+}
+
+const LineBox = ({ refresh }: Props) => {
 	const graphId = useAppSelector<string>(getGraphIdState)
 	const processedDataList = useAppSelector<ProcessModel[] | undefined>(getProcessedDataListState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
@@ -72,7 +76,7 @@ const LineBox = () => {
 	useDidMountEffect(() => {
 		if (!processedDataList) return
 		setIsPositioned(false)
-	}, [processedDataList])
+	}, [processedDataList, refresh])
 
 	useEffect(() => {
 		if (isPositioned) return

@@ -8,7 +8,7 @@ import {
 	setPanPositionState,
 	setUpdateState
 } from '@store/SettingsSlice'
-import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 interface Props {
@@ -98,7 +98,7 @@ const Pan = memo(({ children, refresh }: Props) => {
 		dispatch(setPanPositionState(positionRef.current))
 	}, [dispatch, handleMove])
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const container = elementGraphRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
 		dispatch(setPageOffsetState({ x: Math.round(container.x), y: Math.round(container.y) }))
 	}, [dispatch, refresh])

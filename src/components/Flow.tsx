@@ -58,7 +58,7 @@ const Flow = ({
 											<SVGMarker />
 											<SVGInnerShadow />
 											<SVGStripes />
-											<LineBox />
+											<LineBox refresh={refresh} />
 											<NodeBox iconSelector={iconSelector} />
 											{isDebug && <Debug />}
 										</SvgCanvast>
