@@ -66,9 +66,18 @@ const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 		[handleZoomLevel, zoomLevel]
 	)
 
-	const handleShowInfo = useCallback(() => {
-		dispatch(setShowInfoState(!showInfo))
-	}, [dispatch, showInfo])
+	const handleShowInfo = useCallback(
+		(ev: React.MouseEvent<HTMLButtonElement>) => {
+			if (ev.altKey || ev.shiftKey) {
+				localStorage.removeItem(`${graphId}State`)
+				location.reload()
+				return
+			}
+
+			dispatch(setShowInfoState(!showInfo))
+		},
+		[dispatch, showInfo, graphId]
+	)
 
 	useEffect(() => {
 		document.getElementById(graphId)?.addEventListener('wheel', handleScroll)
