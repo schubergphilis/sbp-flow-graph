@@ -11,6 +11,7 @@ import ZoomTools from '@components/ZoomTools'
 import ProcessModel from '@models/ProcessModel'
 import { CssColorType } from '@schubergphilis/sbp-frontend-style'
 import styled from 'styled-components'
+import FlowPosition from './FlowPosition'
 import GraphId from './GraphId'
 import LineBox from './LineBox'
 import SVGInnerShadow from './SVGInnerShadow'
@@ -51,15 +52,17 @@ const Flow = ({
 						<Drag>
 							<Tooltip>
 								<Click onNodeClick={onNodeClick}>
-									<SvgCanvast $isDebug={isDebug}>
-										<SVGShadow />
-										<SVGMarker />
-										<SVGInnerShadow />
-										<SVGStripes />
-										<LineBox />
-										<NodeBox data={data} iconSelector={iconSelector} spacing={spacing} />
-										{isDebug && <Debug />}
-									</SvgCanvast>
+									<FlowPosition data={data} spacing={spacing}>
+										<SvgCanvast $isDebug={isDebug}>
+											<SVGShadow />
+											<SVGMarker />
+											<SVGInnerShadow />
+											<SVGStripes />
+											<LineBox />
+											<NodeBox iconSelector={iconSelector} />
+											{isDebug && <Debug />}
+										</SvgCanvast>
+									</FlowPosition>
 								</Click>
 							</Tooltip>
 						</Drag>

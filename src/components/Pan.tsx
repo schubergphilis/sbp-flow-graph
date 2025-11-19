@@ -1,8 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@hooks/ReduxStore'
 import PositionModel from '@models/PositionModel'
-import ProcessModel from '@models/ProcessModel'
 import {
-	getDataListState,
 	getGraphIdState,
 	getPanPositionState,
 	getZoomLevelState,
@@ -23,7 +21,6 @@ const Pan = memo(({ children, refresh }: Props) => {
 	const graphId = useAppSelector<string>(getGraphIdState)
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
-	const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 
 	const [isPanning, setIsPanning] = useState<boolean>(false)
 
@@ -54,10 +51,6 @@ const Pan = memo(({ children, refresh }: Props) => {
 		const offset = elementPanRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
 		offsetBoxRef.current = offset
 		offsetMouseRef.current = { x: ev.clientX, y: ev.clientY }
-
-		// Add will-change for optimization
-		if (!elementPanRef.current) return
-		elementPanRef.current.style.willChange = 'transform'
 	}, [])
 
 	const handleMove = useCallback(
@@ -97,9 +90,7 @@ const Pan = memo(({ children, refresh }: Props) => {
 	const handleMoveEnd = useCallback(() => {
 		setIsPanning(false)
 
-		// Remove will-change to save memory
 		if (!elementPanRef.current) return
-		elementPanRef.current.style.willChange = 'auto'
 
 		elementGraphRef.current?.removeEventListener('mousemove', handleMove)
 		elementGraphRef.current?.removeEventListener('mouseup', handleMoveEnd)
@@ -110,7 +101,7 @@ const Pan = memo(({ children, refresh }: Props) => {
 	useLayoutEffect(() => {
 		const container = elementGraphRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 }
 		dispatch(setPageOffsetState({ x: Math.round(container.x), y: Math.round(container.y) }))
-	}, [dispatch, refresh, dataList])
+	}, [dispatch, refresh])
 
 	useLayoutEffect(() => {
 		if (!refresh) return

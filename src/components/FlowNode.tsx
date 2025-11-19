@@ -10,6 +10,7 @@ import {
 	getGraphIdState,
 	getPageOffsetState,
 	getPositionListState,
+	getVisibilityListState,
 	getZoomLevelState
 } from '@store/SettingsSlice'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
@@ -50,6 +51,7 @@ const FlowNode = memo(
 		const graphId = useAppSelector<string>(getGraphIdState)
 		const dataList = useAppSelector<ProcessModel[] | undefined>(getDataListState)
 		const positionList = useAppSelector<NodeModel[] | undefined>(getPositionListState)
+		const visibilityList = useAppSelector<string[] | undefined>(getVisibilityListState)
 		const zoomLevel = useAppSelector<number>(getZoomLevelState)
 		const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 
@@ -58,12 +60,14 @@ const FlowNode = memo(
 		const hasChildernVisible = useCallback(
 			(id: string) => {
 				return dataList?.find(
-					(data) => data.parent === id && (positionList?.find((item) => item.id === data.id && item.isVisible) ?? false)
+					(data) =>
+						data.parent === id &&
+						(positionList?.find((item) => item.id === data.id && visibilityList?.includes(id)) ?? false)
 				)
 					? true
 					: undefined
 			},
-			[dataList, positionList]
+			[dataList, positionList, visibilityList]
 		)
 
 		useEffect(() => {

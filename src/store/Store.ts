@@ -11,6 +11,7 @@ export const createAppStore = (storeId: string) => {
 		'settings/dragElement',
 		'settings/isClusterDrag',
 		'settings/dataList',
+		'settings/processedDataList',
 		'settings/update',
 		'settings/selectedElement',
 		'settings/loaded'

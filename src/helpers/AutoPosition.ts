@@ -21,7 +21,6 @@ export const AutoPosition = (
 
 	const adjustList = [...nodeList]
 		.sort((a) => (a.root ? -1 : 0))
-		.filter(({ isVisible }) => isVisible)
 		.filter(({ parent, id }) => (selectedElement ? parent === selectedElement || id === selectedElement : true))
 
 	for (let i = 0; i < adjustList.length; i++) {
