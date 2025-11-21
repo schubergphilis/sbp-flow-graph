@@ -16,6 +16,7 @@ const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 100, tooltip }: Pro
 
 	const cleanName = useMemo(() => name?.replace(/[\s\W]/gim, ''), [name])
 	const lineList = useMemo(() => name?.replace(/(?<=(.){20})\s/gim, '||').split('||') ?? [name ?? ''], [name])
+
 	const minZoomLevel = useMemo(() => {
 		return showResponsiveText ? Math.min(zoomLevel, 1) : 1
 	}, [zoomLevel, showResponsiveText])
