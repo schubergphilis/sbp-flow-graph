@@ -75,7 +75,9 @@ const FlowNode = memo(
 
 			const pos = getNodePosition(ref.current, { x: 0, y: 0 }, zoomLevel)
 			setSize({ width: pos.width, height: pos.height, x: 0, y: 0 })
-		}, [pageOffset, zoomLevel, badge, isVisible])
+
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		}, [pageOffset, badge, isVisible])
 
 		return (
 			<Container
