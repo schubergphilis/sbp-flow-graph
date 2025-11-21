@@ -10,6 +10,7 @@ import {
 	getPageOffsetState,
 	getPanPositionState,
 	getProcessedDataListState,
+	getUpdateState,
 	getZoomLevelState
 } from '@store/SettingsSlice'
 import { useCallback, useEffect, useState } from 'react'
@@ -26,6 +27,7 @@ const LineBox = ({ refresh }: Props) => {
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const pageOffset = useAppSelector<PositionModel>(getPageOffsetState)
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
+	const update = useAppSelector<number>(getUpdateState)
 
 	const [lines, setLines] = useState<LineModel[]>()
 	const [isPositioned, setIsPositioned] = useState<boolean>(false)
@@ -75,8 +77,8 @@ const LineBox = ({ refresh }: Props) => {
 
 	useDidMountEffect(() => {
 		if (!processedDataList) return
-		setIsPositioned(false)
-	}, [processedDataList, refresh])
+		setTimeout(() => setIsPositioned(false), 0)
+	}, [processedDataList, refresh, update])
 
 	useEffect(() => {
 		if (isPositioned) return
