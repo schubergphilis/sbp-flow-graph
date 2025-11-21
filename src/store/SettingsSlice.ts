@@ -18,6 +18,7 @@ export interface SettingsState {
 	dataList?: ProcessModel[]
 	processedDataList?: ProcessModel[]
 	showInfo: boolean
+	showResponsiveText?: boolean
 	update?: number
 	loaded?: number
 	graphId?: string
@@ -27,6 +28,7 @@ export interface SettingsState {
 const initialState: SettingsState = {
 	zoomLevel: 1,
 	showInfo: false,
+	showResponsiveText: false,
 	pageOffset: { x: 0, y: 0 }
 }
 
@@ -145,6 +147,9 @@ export const settingsSlice = createSlice({
 		},
 		deleteSelectedElementState(state) {
 			state.selectedElement = undefined
+		},
+		setShowResponsiveTextState(state, { payload }: PayloadAction<boolean>) {
+			state.showResponsiveText = payload
 		}
 	}
 })
@@ -188,6 +193,8 @@ export const getLoadedState = (state: AppState): number => state.settings.loaded
 
 export const getShowInfoState = (state: AppState): boolean => state.settings.showInfo
 
+export const getShowResponsiveTextState = (state: AppState): boolean => state.settings.showResponsiveText
+
 export const getGraphIdState = (state: AppState): string => state.settings.graphId ?? 'flowGraph'
 
 export const getSelectedElementState = (state: AppState): string | undefined => state.settings.selectedElement
@@ -208,7 +215,8 @@ export const {
 	setGraphIdState,
 	setUpdateState,
 	setLoadedState,
-	deleteSelectedElementState
+	deleteSelectedElementState,
+	setShowResponsiveTextState
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

@@ -4,8 +4,10 @@ import { CssColorType } from '@schubergphilis/sbp-frontend-style'
 import {
 	getGraphIdState,
 	getShowInfoState,
+	getShowResponsiveTextState,
 	getZoomLevelState,
 	setShowInfoState,
+	setShowResponsiveTextState,
 	setZoomLevelState
 } from '@store/SettingsSlice'
 import { useCallback, useEffect } from 'react'
@@ -13,6 +15,7 @@ import styled from 'styled-components'
 import { ActionButton } from './ActionButton'
 import CenterTool from './CenterTool'
 import AddIcon from './icons/AddIcon'
+import FormatSizeIcon from './icons/FormatSizeIcon'
 import InfoIcon from './icons/InfoIcon'
 import RemoveIcon from './icons/RemoveIcon'
 
@@ -31,7 +34,12 @@ const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 
 	const zoomLevel = useAppSelector<number>(getZoomLevelState)
 	const showInfo = useAppSelector<boolean>(getShowInfoState)
+	const showResponsiveText = useAppSelector<boolean>(getShowResponsiveTextState)
 	const graphId = useAppSelector<string>(getGraphIdState)
+
+	const handelTextSize = useCallback(() => {
+		dispatch(setShowResponsiveTextState(!showResponsiveText))
+	}, [dispatch, showResponsiveText])
 
 	const handleZoomLevel = useCallback(
 		(level: number, delta: number) => {
@@ -89,64 +97,118 @@ const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 
 	return (
 		<Container $zoomSmall={zoomSmall}>
-			<Left>
-				<Level>level: {Math.round(zoomLevel * 100) / 100}</Level>
-			</Left>
-			<Center>
-				<ActionButton
-					disabled={maxZoom === zoomLevel}
-					title="Zoom in"
-					type="button"
-					onClick={(ev) => setZoom(ev, 1)}
-					$color={zoomColor}>
-					<AddIcon />
-				</ActionButton>
-				<CenterTool autoCenter={autoCenter} color={zoomColor} />
-				<ActionButton
-					disabled={minZoom === zoomLevel}
-					type="button"
-					title="Zoom out"
-					onClick={(ev) => setZoom(ev, -1)}
-					$color={zoomColor}>
-					<RemoveIcon />
-				</ActionButton>
-			</Center>
-			<Right>
-				<ActionButton
-					$isSelected={showInfo}
-					onClick={handleShowInfo}
-					title="Show importance weights"
-					$color={zoomColor}>
-					<InfoIcon />
-				</ActionButton>
-			</Right>
+			<Level>
+				<span>{Math.round(zoomLevel * 100) / 100}</span>
+			</Level>
+
+			<ZoomInButton
+				disabled={maxZoom === zoomLevel}
+				title="Zoom in"
+				type="button"
+				onClick={(ev) => setZoom(ev, 1)}
+				$color={zoomColor}>
+				<AddIcon />
+			</ZoomInButton>
+			<CenterTool autoCenter={autoCenter} color={zoomColor} />
+			<ZoomOutButton
+				disabled={minZoom === zoomLevel}
+				type="button"
+				title="Zoom out"
+				onClick={(ev) => setZoom(ev, -1)}
+				$color={zoomColor}>
+				<RemoveIcon />
+			</ZoomOutButton>
+
+			<InfoButton $isSelected={showInfo} onClick={handleShowInfo} title="Show importance weights" $color={zoomColor}>
+				<InfoIcon />
+			</InfoButton>
+
+			<ResponsiveButton
+				$isSelected={showResponsiveText}
+				onClick={handelTextSize}
+				title="Toggle text sizes"
+				$color={zoomColor}>
+				<FormatSizeIcon />
+			</ResponsiveButton>
 		</Container>
 	)
 }
 
 const Container = styled.div<{ $zoomSmall: boolean }>`
-	position: absolute;
+	position: fixed;
 	bottom: 0;
 	right: 0;
-	display: flex;
-	//flex-direction: column;
-	justify-content: space-between;
-	align-items: center;
-	gap: 0.5em;
-	z-index: 1;
-	margin: 2em;
-	min-width: 4em;
+	margin: 0em;
+	z-index: 10;
 	font-size: ${({ $zoomSmall }) => ($zoomSmall ? '0.75em' : '1em')};
-`
-const Level = styled.div`
-	font-size: 0.75em;
-`
-const Left = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 0.5em;
-`
-const Center = styled(Left)``
-const Right = styled(Left)``
 
+	color: ${({ theme }) => theme.style.zoomToolColor};
+	background: radial-gradient(${({ theme }) => theme.style.colorBg} 30%, transparent 75%);
+	transform: scale3d(0.5, 0.5, 0.5);
+	transition: 0.3s transform ease-in-out 1s;
+
+	&:hover {
+		transform: scale3d(1, 1, 1);
+
+		transition: 0.3s transform ease-in-out;
+	}
+
+	display: grid;
+	grid-template-rows: repeat(3, minMax(4em, 1fr));
+	grid-template-columns: repeat(3, minMax(4em, 1fr));
+	grid-template-areas:
+		'nothing selector info'
+		'zoomOut level zoomIn'
+		'fff responsive center';
+
+	pointer-events: all;
+`
+
+const Level = styled.div`
+	grid-area: level;
+	justify-self: center;
+	align-self: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 4em;
+	height: 4em;
+	border-radius: 50%;
+	background-color: ${({ theme }) => theme.style.colorSecondary};
+
+	z-index: 1;
+
+	padding: 0.5em;
+	pointer-events: none;
+	cursor: default;
+`
+
+const ZoomInButton = styled(ActionButton)`
+	grid-area: zoomIn;
+	font-size: 0.75em;
+	border-radius: 50%;
+	justify-self: center;
+	align-self: center;
+`
+const ZoomOutButton = styled(ActionButton)`
+	grid-area: zoomOut;
+	font-size: 0.75em;
+	border-radius: 50%;
+	justify-self: center;
+	align-self: center;
+`
+const InfoButton = styled(ActionButton)`
+	grid-area: info;
+	font-size: 0.75em;
+	border-radius: 50%;
+	justify-self: start;
+	align-self: end;
+`
+const ResponsiveButton = styled(ActionButton)`
+	grid-area: responsive;
+	font-size: 0.75em;
+	border-radius: 50%;
+	justify-self: center;
+	align-self: center;
+`
 export default ZoomTools

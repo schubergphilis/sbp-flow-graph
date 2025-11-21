@@ -10,6 +10,7 @@ import {
 	setPanPositionState
 } from '@store/SettingsSlice'
 import { useCallback, useEffect } from 'react'
+import styled from 'styled-components'
 import { ActionButton } from './ActionButton'
 import CenterIcon from './icons/CenterIcon'
 
@@ -66,10 +67,18 @@ const CenterTool = ({ autoCenter, color }: Props) => {
 	}, [positionList, loaded, autoCenter, handleClick])
 
 	return (
-		<ActionButton onClick={handleClick} title="Center canvas" $color={color}>
+		<CenterButton onClick={handleClick} title="Center canvas" $color={color}>
 			<CenterIcon />
-		</ActionButton>
+		</CenterButton>
 	)
 }
+
+const CenterButton = styled(ActionButton)`
+	grid-area: center;
+	justify-self: start;
+	align-self: top;
+	border-radius: 50%;
+	font-size: 0.75em;
+`
 
 export default CenterTool
