@@ -49,7 +49,7 @@ const Click = ({ children, onNodeClick }: Props) => {
 			clickTimeout.current = setTimeout(() => {
 				dispatch(setVisibleState(id))
 				updateChildNodeVisible(id, element)
-			}, 300)
+			}, 400)
 		},
 		[dispatch, dragElement, updateChildNodeVisible]
 	)
