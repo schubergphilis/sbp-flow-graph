@@ -161,7 +161,7 @@ const Container = styled.div<{ $zoomSmall: boolean }>`
 		'zoomOut level zoomIn'
 		'fff responsive center';
 
-	pointer-events: all;
+	pointer-events: all !important;
 `
 
 const Level = styled.div`
