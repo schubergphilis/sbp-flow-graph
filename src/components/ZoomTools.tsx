@@ -135,7 +135,7 @@ const ZoomTools = ({ autoCenter, zoomSmall = false, zoomColor }: Props) => {
 }
 
 const Container = styled.div<{ $zoomSmall: boolean }>`
-	position: fixed;
+	position: absolute;
 	bottom: 0;
 	right: 0;
 	margin: 0em;
@@ -146,6 +146,7 @@ const Container = styled.div<{ $zoomSmall: boolean }>`
 	background: radial-gradient(${({ theme }) => theme.style.colorBg} 30%, transparent 75%);
 	transform: scale3d(0.5, 0.5, 0.5);
 	transition: 0.3s transform ease-in-out 1s;
+	transform-origin: bottom right;
 
 	&:hover {
 		transform: scale3d(1, 1, 1);
