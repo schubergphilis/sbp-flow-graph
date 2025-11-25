@@ -1591,10 +1591,10 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.52.3.tgz#3f55b6e8fe809a7d29959d6bc686cce1804581f0"
   integrity sha512-zGIbEVVXVtauFgl3MRwGWEN36P5ZGenHRMgNw88X5wEhEBpq0XrMEZwOn07+ICrwM17XO5xfMZqh0OldCH5VTA==
 
-"@schubergphilis/sbp-frontend-style@^1.7.1-3":
-  version "1.7.1-3"
-  resolved "https://npm.pkg.github.com/download/@schubergphilis/sbp-frontend-style/1.7.1-3/55b11f3a2d7e18771319346d9b37fb126e9bc352#55b11f3a2d7e18771319346d9b37fb126e9bc352"
-  integrity sha512-BBrOf72ALDZxXQwHqbgL5g4A+3OdrJ9gLMyPplH96AyGTPXEZZ9X9eNR6coGEqzTv4yY6KC9zVKy+5xbM1gzfA==
+"@schubergphilis/sbp-frontend-style@^1.8.0":
+  version "1.8.0"
+  resolved "https://npm.pkg.github.com/download/@schubergphilis/sbp-frontend-style/1.8.0/fc48c5152f975632fb200eb932d95664fb8c2044#fc48c5152f975632fb200eb932d95664fb8c2044"
+  integrity sha512-2vMHPo7uTz/v7kFTS/xKdZkMUZ+XyQa14W/oSo5hNl8WrkwAxIbGaGuSxb2ByfV/XKu6w3s8m7lIeUuJ2SJLcQ==
   dependencies:
     styled-components "^6.1.19"
 
