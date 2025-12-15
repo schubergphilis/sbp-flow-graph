@@ -30,7 +30,7 @@
 	},
 	"dependencies": {
 		"@schubergphilis/sbp-frontend-style": "^1.8.0",
-		"@types/styled-components": "^5.1.34"
+		"lodash.debounce": "^4.0.8"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -43,9 +43,11 @@
 		"@rollup/plugin-node-resolve": "^16.0.1",
 		"@rollup/plugin-sucrase": "^5.0.2",
 		"@rollup/plugin-typescript": "^11.1.6",
+		"@types/lodash.debounce": "^4.0.9",
 		"@types/node": "^24.6.2",
 		"@types/react": "^19.2.0",
 		"@types/react-dom": "^19.2.0",
+		"@types/styled-components": "^5.1.34",
 		"@typescript-eslint/eslint-plugin": "^8.45.0",
 		"@typescript-eslint/parser": "^8.45.0",
 		"@vitejs/plugin-react-swc": "^4.1.0",
@@ -57,8 +59,8 @@
 		"globals": "^16.4.0",
 		"prettier": "^3.6.2",
 		"prettier-plugin-organize-imports": "^4.3.0",
-		"react": "^19.2.0",
-		"react-dom": "^19.2.0",
+		"react": "^19.2.1",
+		"react-dom": "^19.2.1",
 		"react-redux": "^9.2.0",
 		"rollup": "^4.52.3",
 		"rollup-plugin-delete": "^3.0.1",
@@ -69,7 +71,7 @@
 		"rollup-plugin-typescript": "^1.0.1",
 		"standard-version": "^9.5.0",
 		"typescript": "^5.9.2",
-		"vite": "^7.1.8",
+		"vite": "^7.2.6",
 		"vite-tsconfig-paths": "^5.1.4"
 	},
 	"packageManager": "yarn@1.22.22"

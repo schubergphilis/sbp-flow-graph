@@ -5,16 +5,15 @@ import { memo, useLayoutEffect } from 'react'
 
 interface Props {
 	id: string
-	children: JSX.Element | JSX.Element[]
 }
-const GraphId = memo(({ children, id }: Props) => {
+const GraphId = memo(({ id }: Props) => {
 	const dispatch = useAppDispatch()
 
 	useLayoutEffect(() => {
 		dispatch(setGraphIdState(id))
 	}, [dispatch, id])
 
-	return <>{children}</>
+	return null
 })
 
 export default GraphId
