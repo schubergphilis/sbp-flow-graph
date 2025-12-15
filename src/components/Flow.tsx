@@ -11,6 +11,7 @@ import ZoomTools from '@components/ZoomTools'
 import ProcessModel from '@models/ProcessModel'
 import { CssColorType } from '@schubergphilis/sbp-frontend-style'
 import styled from 'styled-components'
+import ChangeEvent from './ChangeEvent'
 import FlowPosition from './FlowPosition'
 import GraphId from './GraphId'
 import LineBox from './LineBox'
@@ -24,6 +25,7 @@ interface Props {
 	spacing?: number
 	onNodeClick?: (id: string) => void
 	iconSelector?: (name: string) => JSX.Element
+	onChange?: VoidFunction
 	refresh?: number
 	autoCenter?: boolean
 	zoomSmall?: boolean
@@ -37,6 +39,7 @@ const Flow = ({
 	spacing,
 	onNodeClick,
 	iconSelector,
+	onChange,
 	refresh,
 	id = 'flowGraph',
 	autoCenter = false,
@@ -47,28 +50,28 @@ const Flow = ({
 	return (
 		<Container id={id} data-container $isDebug={isDebug} {...props}>
 			<StateProvider id={id}>
-				<GraphId id={id}>
-					<Pan refresh={refresh}>
-						<Drag>
-							<Tooltip>
-								<Click onNodeClick={onNodeClick}>
-									<FlowPosition data={data} spacing={spacing}>
-										<SvgCanvast $isDebug={isDebug}>
-											<SVGShadow />
-											<SVGMarker />
-											<SVGInnerShadow />
-											<SVGStripes />
-											<LineBox refresh={refresh} />
-											<NodeBox iconSelector={iconSelector} />
-											{isDebug && <Debug />}
-										</SvgCanvast>
-									</FlowPosition>
-								</Click>
-							</Tooltip>
-						</Drag>
-					</Pan>
-					<ZoomTools autoCenter={autoCenter} zoomSmall={zoomSmall} zoomColor={zoomColor} />
-				</GraphId>
+				<ChangeEvent onChange={onChange} />
+				<GraphId id={id} />
+				<Pan refresh={refresh}>
+					<Drag>
+						<Tooltip>
+							<Click onNodeClick={onNodeClick}>
+								<FlowPosition data={data} spacing={spacing}>
+									<SvgCanvast $isDebug={isDebug}>
+										<SVGShadow />
+										<SVGMarker />
+										<SVGInnerShadow />
+										<SVGStripes />
+										<LineBox refresh={refresh} />
+										<NodeBox iconSelector={iconSelector} />
+										{isDebug && <Debug />}
+									</SvgCanvast>
+								</FlowPosition>
+							</Click>
+						</Tooltip>
+					</Drag>
+				</Pan>
+				<ZoomTools autoCenter={autoCenter} zoomSmall={zoomSmall} zoomColor={zoomColor} />
 			</StateProvider>
 		</Container>
 	)
