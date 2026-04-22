@@ -21,11 +21,14 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           always-auth: true
           scope: '@schubergphilis'
           registry-url: 'https://npm.pkg.github.com'
@@ -40,25 +43,25 @@ jobs:
           GMTDI_TOKEN: ${{ secrets.GMTDI_TOKEN }}
 
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GMTDI_TOKEN }}
 
       - name: Run Tests
-        run: yarn lint
+        run: pnpm lint
 
       - name: Build project
-        run: yarn build
+        run: pnpm build
         env:
           GENERATE_SOURCEMAP: 'false'
 
       - name: Set version
-        run: yarn version --patch --no-git-tag-version
+        run: pnpm version --patch --no-git-tag-version
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package project
-        run: yarn pack && yarn publish
+        run: pnpm pack && pnpm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

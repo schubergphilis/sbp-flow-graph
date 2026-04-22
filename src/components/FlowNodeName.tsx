@@ -1,6 +1,6 @@
 import { useAppSelector } from '@hooks/ReduxStore'
 import { getShowResponsiveTextState, getZoomLevelState } from '@store/SettingsSlice'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import styled from 'styled-components'
 
 interface Props {
@@ -21,15 +21,13 @@ const FlowNodeName = ({ name, boxWidth, boxHeight, minSize = 100, tooltip }: Pro
 		return showResponsiveText ? Math.min(zoomLevel, 1) : 1
 	}, [zoomLevel, showResponsiveText])
 
-	const [size, setSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 })
-
-	useEffect(() => {
+	const size = useMemo(() => {
 		const longest = lineList?.reduce((longest, current) => (current.length > longest.length ? current : longest))
 		const width = Math.max((longest?.length || 1) * 9, minSize) * (1 / minZoomLevel)
 		const height = Math.max((lineList?.length || 1) * 22, 30) * (1 / minZoomLevel)
 
-		setSize({ width: width, height: height })
-	}, [lineList, minSize, name, minZoomLevel])
+		return { width, height }
+	}, [lineList, minSize, minZoomLevel])
 
 	return (
 		<g transform={`translate(${boxWidth / 2}, ${boxHeight + 24 * (1 / minZoomLevel)})`}>

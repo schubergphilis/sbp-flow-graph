@@ -4,7 +4,7 @@ import typescript from '@rollup/plugin-typescript'
 import del from 'rollup-plugin-delete'
 import dts from 'rollup-plugin-dts'
 import external from 'rollup-plugin-peer-deps-external'
-import { terser } from 'rollup-plugin-terser'
+import terser from '@rollup/plugin-terser'
 import tsConfigPaths from 'rollup-plugin-tsconfig-paths'
 import packageJson from './package.json' with { type: 'json' }
 
