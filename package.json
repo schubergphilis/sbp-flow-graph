@@ -1,7 +1,7 @@
 {
 	"name": "@schubergphilis/sbp-flow-graph",
 	"private": false,
-	"version": "0.0.79",
+	"version": "0.0.80",
 	"license": "MIT",
 	"description": "Flow diagrams based on Force directed bubbles for ReactJS projects.",
 	"type": "module",
@@ -43,8 +43,8 @@
 		"@rollup/plugin-commonjs": "^29.0.2",
 		"@rollup/plugin-node-resolve": "^16.0.3",
 		"@rollup/plugin-sucrase": "^5.1.0",
-		"@rollup/plugin-typescript": "^12.3.0",
 		"@rollup/plugin-terser": "^1.0.0",
+		"@rollup/plugin-typescript": "^12.3.0",
 		"@types/lodash.debounce": "^4.0.9",
 		"@types/node": "^25.6.0",
 		"@types/react": "^19.2.14",
