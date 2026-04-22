@@ -1,11 +1,9 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
-		"declaration": true,
-		"declarationDir": "./types",
+		"noEmit": false,
 		"sourceMap": false,
-		"outDir": "dist",
-		"emitDeclarationOnly": true,
-		"rootDir": "./"
+		"allowImportingTsExtensions": false,
+		"ignoreDeprecations": "6.0"
 	}
 }

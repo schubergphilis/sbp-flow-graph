@@ -9,28 +9,50 @@ import tsConfigPaths from 'rollup-plugin-tsconfig-paths'
 import packageJson from './package.json' with { type: 'json' }
 
 export default [
+	// CJS build without declarations
 	{
 		input: './src/build.ts',
-		output: [
-			{
-				file: packageJson.exports.require,
-				format: 'cjs',
-				sourcemap: false,
-				name: 'react-ts-lib'
-			},
-			{
-				file: packageJson.exports.import,
-				format: 'esm',
-				sourcemap: false
-			}
-		],
+		output: {
+			file: packageJson.exports.require,
+			format: 'cjs',
+			sourcemap: false,
+			name: 'react-ts-lib'
+		},
 		plugins: [
 			tsConfigPaths(),
 			external(),
 			resolve(),
 			commonjs(),
 			typescript({
-				tsconfig: './tsconfig.build.json'
+				tsconfig: './tsconfig.build.json',
+				compilerOptions: {
+					outDir: 'dist/cjs'
+				}
+			}),
+			terser()
+		],
+		external: ['react', 'react-dom', 'styled-components', 'react-redux']
+	},
+	// ESM build with declarations
+	{
+		input: './src/build.ts',
+		output: {
+			file: packageJson.exports.import,
+			format: 'esm',
+			sourcemap: false
+		},
+		plugins: [
+			tsConfigPaths(),
+			external(),
+			resolve(),
+			commonjs(),
+			typescript({
+				tsconfig: './tsconfig.build.json',
+				compilerOptions: {
+					declaration: true,
+					declarationDir: 'dist/esm/types',
+					outDir: 'dist/esm'
+				}
 			}),
 			terser()
 		],
