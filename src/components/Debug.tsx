@@ -13,7 +13,7 @@ import {
 	getZoomLevelState,
 	isClusterDragState
 } from '@store/SettingsSlice'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 const Debug = () => {
@@ -27,7 +27,7 @@ const Debug = () => {
 
 	const [testNodes, setTestNodes] = useState<JSX.Element[]>([])
 	const [selectedNodes, setSelectedNodes] = useState<JSX.Element[]>()
-	const [isDragging, setIsDragging] = useState<boolean>(false)
+	const isDragging = dragElement !== undefined
 	const [center, setCenter] = useState<OffsetModel | undefined>()
 
 	// const timerRef = useRef<NodeJS.Timeout>(undefined)
@@ -133,27 +133,25 @@ const Debug = () => {
 		setTimeout(calculateCenter, 20)
 	}, [calculateCenter, testNodes])
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (!positionList) return
-		updateAllLines()
+		requestAnimationFrame(() => updateAllLines())
 	}, [positionList, updateAllLines])
 
-	useEffect(() => {
-		setIsDragging(dragElement !== undefined)
-	}, [dragElement])
-
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (isDragging) {
-			updateAllLines()
+			requestAnimationFrame(() => updateAllLines())
 			updateRef.current = setInterval(updateSelectedLines, 20)
 		}
 		return () => clearInterval(updateRef.current)
 	}, [isDragging, updateAllLines, updateSelectedLines])
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (isDragging) return
-		updateAllLines()
-		setSelectedNodes(undefined)
+		requestAnimationFrame(() => {
+			updateAllLines()
+			setSelectedNodes(undefined)
+		})
 	}, [isDragging, updateAllLines])
 
 	return (

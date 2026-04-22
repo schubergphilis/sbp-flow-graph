@@ -56,19 +56,15 @@ const Drag = memo(({ children }: Props) => {
 			const id = target.id
 			const cleanId = (id ?? '').match(/(?<=_)([\w-]+)/gim)?.[0] ?? ''
 
-			let targets: SVGGElement[] = []
-
 			setIsFocused(ev.metaKey)
 
-			if (ev.metaKey) {
-				targets = [target]
-			} else {
-				targets = Array.from(
-					document
-						.getElementById(graphId)
-						?.querySelectorAll<SVGGElement>(`[data-node-parent=${id}]:not([data-node-children-visible]),#${id}`) ?? []
-				)
-			}
+			const targets: SVGGElement[] = ev.metaKey
+				? [target]
+				: Array.from(
+						document
+							.getElementById(graphId)
+							?.querySelectorAll<SVGGElement>(`[data-node-parent=${id}]:not([data-node-children-visible]),#${id}`) ?? []
+					)
 
 			lineListRef.current = Array.from(
 				document

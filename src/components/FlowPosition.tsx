@@ -21,7 +21,7 @@ import {
 	setPositionListState,
 	setProcessedDataListState
 } from '@store/SettingsSlice'
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 
 interface Props {
 	data?: ProcessModel[]
@@ -44,7 +44,7 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const selectedElement = useAppSelector<string | undefined>(getSelectedElementState)
 
-	const [isPositioned, setIsPositioned] = useState<boolean>(false)
+	const isPositionedRef = useRef<boolean>(false)
 
 	const prevDataListRef = useRef<ProcessModel[] | undefined>(undefined)
 
@@ -93,8 +93,12 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 	// Memoize data processing with better dependency tracking
 	const getProcessedDataList = useMemo((): ProcessModel[] => {
 		if (!dataList) return []
-		prevDataListRef.current = dataList
 		return dataList.filter(({ isVisible }) => isVisible)
+	}, [dataList])
+
+	// Track previous dataList for comparison
+	useEffect(() => {
+		prevDataListRef.current = dataList
 	}, [dataList])
 
 	const schedulePositioning = useCallback(() => {
@@ -109,7 +113,7 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 			dispatch(setPositionListState(list))
 		}
 
-		setIsPositioned(true)
+		isPositionedRef.current = true
 		dispatch(setLoadedState())
 	}, [
 		dispatch,
@@ -126,14 +130,14 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 	])
 
 	// Optimized positioning with better scheduling
-	useEffect(() => {
-		if (isPositioned || !processedDataList?.length) return
-		schedulePositioning()
-	}, [isPositioned, processedDataList, schedulePositioning])
+	useLayoutEffect(() => {
+		if (isPositionedRef.current || !processedDataList?.length) return
+		requestAnimationFrame(() => schedulePositioning())
+	}, [processedDataList, schedulePositioning])
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (getProcessedDataList.length === 0) return
-		dispatch(setProcessedDataListState(getProcessedDataList))
+		requestAnimationFrame(() => dispatch(setProcessedDataListState(getProcessedDataList)))
 	}, [dispatch, getProcessedDataList])
 
 	useEffect(() => {
@@ -151,7 +155,7 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 	}, [data])
 
 	useEffect(() => {
-		setIsPositioned(false)
+		isPositionedRef.current = false
 	}, [data, processedDataList])
 
 	return <>{children}</>
