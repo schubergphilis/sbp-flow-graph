@@ -44,9 +44,8 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 	const panPosition = useAppSelector<PositionModel | undefined>(getPanPositionState)
 	const selectedElement = useAppSelector<string | undefined>(getSelectedElementState)
 
-	const isPositionedRef = useRef<boolean>(false)
-
 	const prevDataListRef = useRef<ProcessModel[] | undefined>(undefined)
+	const prevProcessedListRef = useRef<ProcessModel[] | undefined>(undefined)
 
 	const createOptimizedDataList = useCallback(
 		(data: ProcessModel[]) => {
@@ -113,7 +112,6 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 			dispatch(setPositionListState(list))
 		}
 
-		isPositionedRef.current = true
 		dispatch(setLoadedState())
 	}, [
 		dispatch,
@@ -131,7 +129,17 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 
 	// Optimized positioning with better scheduling
 	useLayoutEffect(() => {
-		if (isPositionedRef.current || !processedDataList?.length) return
+		if (!processedDataList?.length) return
+
+		// Check if processedDataList actually changed
+		const hasChanged =
+			!prevProcessedListRef.current ||
+			prevProcessedListRef.current.length !== processedDataList.length ||
+			prevProcessedListRef.current.some((item, idx) => item.id !== processedDataList[idx]?.id)
+
+		if (!hasChanged) return
+
+		prevProcessedListRef.current = processedDataList
 		requestAnimationFrame(() => schedulePositioning())
 	}, [processedDataList, schedulePositioning])
 
@@ -153,10 +161,6 @@ const FlowPosition = ({ data, children, spacing }: Props) => {
 		if (!data) return
 		dispatch(deleteSelectedElementState())
 	}, [data])
-
-	useEffect(() => {
-		isPositionedRef.current = false
-	}, [data, processedDataList])
 
 	return <>{children}</>
 }
